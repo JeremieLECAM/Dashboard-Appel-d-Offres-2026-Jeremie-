@@ -1,0 +1,1359 @@
+
+<!doctype html>
+<html lang="fr" xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <title> AO France 2026 (Jeremie) </title>
+ 
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon.png?v=2">
+<link rel="shortcut icon" href="./favicon.ico?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="./favicon-180x180.png?v=2">
+
+
+  <script>
+    (function () {
+      const PLOTLY_LOCAL = "plotly-2.27.0.min.js";
+      const PLOTLY_CDN   = "https://cdn.plot.ly/plotly-2.27.0.min.js";
+
+      function setEnvWarning(html, kind) {
+        const el = document.getElementById('envWarning');
+        if (!el) return;
+        el.style.display = 'block';
+        el.className = 'envwarn ' + (kind || '');
+        el.innerHTML = html;
+      }
+
+      function loadScript(src, onload, onerror) {
+        const s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        s.onload = onload;
+        s.onerror = onerror;
+        document.head.appendChild(s);
+      }
+
+      // Expose un petit état global (debug)
+      window.__PLOTLY_LOAD_SOURCE__ = null;
+
+      // Essai local d'abord
+      loadScript(
+        PLOTLY_LOCAL,
+        () => {
+          window.__PLOTLY_LOAD_SOURCE__ = "local";
+          console.log("✅ Plotly chargé (LOCAL) :", PLOTLY_LOCAL);
+        },
+        () => {
+          console.warn("⚠ Plotly local introuvable :", PLOTLY_LOCAL, "→ fallback CDN");
+          loadScript(
+            PLOTLY_CDN,
+            () => {
+              window.__PLOTLY_LOAD_SOURCE__ = "cdn";
+              console.log("✅ Plotly chargé (CDN) :", PLOTLY_CDN);
+            },
+            () => {
+              // Si CDN bloqué : message clair (pas d'écran blanc)
+              window.__PLOTLY_LOAD_SOURCE__ = "failed";
+              document.body.innerHTML = `
+                <div style="padding:20px;font-family:Segoe UI, Arial, sans-serif">
+                  <h2 style="margin:0 0 10px 0;">Erreur de chargement</h2>
+                  <p style="margin:0 0 8px 0;">
+                    Le graphique n’a pas pu se charger : <b>Plotly est bloqué</b> (réseau/proxy) ou indisponible.
+                  </p>
+                  <p style="margin:0 0 8px 0;">
+                    ✅ Solution recommandée : placez le fichier <b>plotly-2.27.0.min.js</b> dans le même dossier que ce HTML
+                    (version offline), puis ré-ouvrez le fichier.
+                  </p>
+                  <p style="margin:0;">
+                    Autre solution : ouvrir le fichier depuis un réseau non restreint.
+                  </p>
+                </div>
+              `;
+            }
+          );
+        }
+      );
+    })();
+  </script>
+
+  <style>
+    body{font-family:Segoe UI, Arial, sans-serif; margin:0; background:#f7f7fb;}
+    .wrap{display:grid; grid-template-columns:180px 1fr; gap:12px; padding:12px; height:100vh; box-sizing:border-box; align-items:stretch;}
+    .panel{background:white; border-radius:16px; padding:10px; box-shadow:0 8px 24px rgba(0,0,0,.08); overflow:auto;}
+    .title{font-size:11px; font-weight:700; margin:0 0 6px 0;}
+    .panel-logo{
+  display:block;
+  width:100%;
+  max-width:90px;
+  height:auto;
+  margin:0 auto 10px auto;
+  border-radius:18px;
+}
+    .sub{font-size:10px; color:#666; margin:0 0 10px 0; line-height:1.35;}
+    #search{width:100%; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:11px; box-sizing:border-box;}
+    .item{
+      padding:5px 10px;
+      border-radius:3px;
+      cursor:pointer;
+      margin-top:4px;
+      border:0.5px solid transparent;
+      font-size:9px;
+      line-height:1.25;
+    }
+    #filters{
+  font-size:9px;
+  line-height:1;
+  margin-bottom:6px;
+}
+
+#filters b{
+  font-size:9px;
+}
+
+#filters label{
+  display:block;
+  margin:0;
+  padding:0;
+  font-size:9px;
+  line-height:1;
+}
+
+#filters input[type="number"]{
+  font-size:9px;
+  padding:2px 4px;
+  height:13px;
+}
+    .badge{display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; margin-left:6px; color:white;}
+    .b-red{background:#E53935;}
+    .b-blue{background:#1E88E5;}
+    .b-green{background:#43A047;}
+    .small{font-size:10px; color:#333;}
+
+    /* ✅ Police filtre Owner taille 9 */
+    #ownerFilterSection{font-size:9px; line-height:1.15;}
+    #ownerFilterSection b{font-size:9px;}
+    #ownerFilters label{font-size:9px; margin:1px 0; display:block;}
+
+#ownerBulkActions{
+  margin-top:4px;
+  margin-bottom:4px;
+}
+
+.owner-mini-btn{
+  border:1px solid rgba(0,0,0,.12);
+  background:#f7f7f7;
+  color:#222;
+  padding:3px 6px;
+  border-radius:8px;
+  font-size:9px;
+  line-height:1.1;
+  cursor:pointer;
+}
+
+.owner-mini-btn:hover{
+  background:#ffffff;
+}
+
+    #chartPanel{
+      background:white;
+      border-radius:16px;
+      box-shadow:0 8px 24px rgba(0,0,0,.08);
+      position:relative;
+      overflow:hidden;
+      height:calc(100vh - 24px);
+      display:flex;
+      flex-direction:column;
+    }
+    #chartWrap{flex:1; min-height:0; position:relative;}
+    #chart{width:100%; height:100%;}
+
+    #fsBtn{
+      position:absolute; top:10px; right:10px; z-index:30;
+      border:1px solid rgba(0,0,0,.12);
+      background:rgba(255,255,255,.92);
+      backdrop-filter: blur(6px);
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:12px;
+      cursor:pointer;
+      box-shadow:0 6px 16px rgba(0,0,0,.10);
+    }
+    #fsBtn:hover{background:#ffffff;}
+
+    #bottomBar{
+      background:#fff;
+      padding:8px 10px 12px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      border-top:1px solid rgba(0,0,0,.06);
+    }
+    #labelBtn{
+      border:1px solid rgba(0,0,0,.12);
+      background:rgba(255,255,255,.95);
+      padding:8px 14px;
+      border-radius:12px;
+      font-size:12px;
+      cursor:pointer;
+      box-shadow:0 6px 16px rgba(0,0,0,.10);
+    }
+    #labelBtn:hover{background:#ffffff;}
+
+    #chartPanel:fullscreen{border-radius:0; width:100vw; height:100vh;}
+    #chartPanel:fullscreen #fsBtn{top:14px; right:14px;}
+
+    .legend{font-size:12px; color:#444; margin-top:10px; line-height:1.5;}
+
+    /* ✅ Bandeau d'alerte environnement (preview Teams/Outlook/SharePoint, plotly bloqué, etc.) */
+    .envwarn{
+      display:none;
+      position:fixed;
+      left:12px;
+      right:12px;
+      top:10px;
+      z-index:9999;
+      padding:10px 12px;
+      border-radius:12px;
+      background:#fff7e6;
+      border:1px solid rgba(255,165,0,.35);
+      color:#5a3b00;
+      box-shadow:0 10px 26px rgba(0,0,0,.10);
+      font-size:12px;
+      line-height:1.35;
+    }
+    .envwarn.info{background:#eef6ff; border-color:rgba(30,136,229,.30); color:#063a63;}
+    .envwarn.error{background:#fff0f0; border-color:rgba(229,57,53,.30); color:#6b0d0d;}
+    .envwarn b{font-weight:700;}
+    .envwarn .closebtn{
+      float:right;
+      cursor:pointer;
+      padding:0 6px;
+      border-radius:10px;
+      border:1px solid rgba(0,0,0,.12);
+      background:#fff;
+      margin-left:10px;
+    }
+
+/* ✅ Décale la barre d'outils Plotly pour éviter le bouton Plein écran */
+#chart .modebar{
+  right: 120px !important;   /* décale la toolbar vers la gauche */
+  top: 10px !important;
+}
+
+#chart .modebar-btn{
+  margin-left: 2px;
+}
+  </style>
+
+<!--[if gte mso 9]><xml>
+<mso:CustomDocumentProperties>
+<mso:_dlc_DocId msdt:dt="string">SPEEXX-1335365678-194060</mso:_dlc_DocId>
+<mso:_dlc_DocIdItemGuid msdt:dt="string">7591349f-1e84-4880-811c-28f101fabfbc</mso:_dlc_DocIdItemGuid>
+<mso:_dlc_DocIdUrl msdt:dt="string">https://speexx.sharepoint.com/_layouts/15/DocIdRedir.aspx?ID=SPEEXX-1335365678-194060, SPEEXX-1335365678-194060</mso:_dlc_DocIdUrl>
+</mso:CustomDocumentProperties>
+</xml><![endif]-->
+</head>
+
+<body>
+  <!-- Bandeau env (auto) -->
+  <div id="envWarning" class="envwarn" style="display:none;">
+    <span class="closebtn" onclick="document.getElementById('envWarning').style.display='none'">✕</span>
+    <span id="envWarningText"></span>
+  </div>
+
+  <div class="wrap">
+    <div class="panel">
+      <img src="./favicon-180x180.png" alt="AO Appel d'Offres" class="panel-logo"
+      </p>
+
+      <div id="filters" style="margin-bottom:10px;font-size:11px;">
+        <div style="margin-bottom:6px;">
+  <b>Catégorie</b><br>
+  <label style="color:#E53935;"><input type="checkbox" class="f-cat" value="CAC 40" checked> CAC 40</label>
+  <label style="color:#1E88E5;"><input type="checkbox" class="f-cat" value="Entreprise privée" checked> Entreprise privée</label>
+  <label style="color:#43A047;"><input type="checkbox" class="f-cat" value="Ecoles / Public / UE" checked> Public / Ecoles</label>
+</div>
+
+        <div style="margin-bottom:6px;">
+          <b>Produit</b><br>
+          <label><input type="checkbox" class="f-prod" value="Langues" checked> Langues</label>
+          <label><input type="checkbox" class="f-prod" value="Coaching" checked> Coaching</label>
+        </div>
+
+        <div style="margin-bottom:6px;">
+  <b>Année</b><br>
+  <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
+    <input id="yearMin" type="number" value="2012" style="width:58px;">
+    <span>–</span>
+    <input id="yearMax" type="number" value="2027" style="width:58px;">
+  </div>
+</div>
+
+        <!-- ✅ Filtre Owner -->
+        <div id="ownerFilterSection" style="margin-bottom:6px;">
+  <div id="ownerToggle" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+    <b>Owner / BDR</b>
+    <span id="ownerArrow">▼</span>
+  </div>
+
+  <div id="ownerBulkActions" style="margin-top:4px; display:flex; gap:4px; flex-wrap:wrap;">
+    <button type="button" id="ownerSelectAllBtn" class="owner-mini-btn">Tout sélectionner</button>
+    <button type="button" id="ownerDeselectAllBtn" class="owner-mini-btn">Tout désélectionner</button>
+  </div>
+
+  <div id="ownerFilters" style="margin-top:4px;"></div>
+</div>
+      </div>
+
+      <input id="search" placeholder="Rechercher… (ex: Air Liquide)" />
+
+      <div id="listSection">
+        <div id="listToggle" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+          <b style="font-size:11px;">Liste des entreprises</b>
+          <span id="listArrow">▼</span>
+        </div>
+
+        <div id="list"></div>
+      </div>
+
+      <div class="legend">
+        <b>Légende</b><br/>
+        1) <span class="badge b-red">Rouge</span> CAC 40<br/>
+        2) <span class="badge b-blue">Bleu</span> Entreprise privée<br/>
+        3) <span class="badge b-green">Vert</span> Écoles supérieures / Public / Européen
+      </div>
+    </div>
+
+    <div id="chartPanel">
+      <div id="chartWrap">
+        <button id="fsBtn" title="Plein écran">⛶ Plein écran</button>
+        <div id="chart"></div>
+      </div>
+      <div id="bottomBar">
+        <button id="labelBtn" title="Afficher / Masquer les noms">👁️ Afficher les noms</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  /* ============================================================
+     ✅ Protections "partage"
+     - Si la page est ouverte dans une preview iframe (Teams/Outlook/SharePoint),
+       certaines politiques peuvent bloquer le JS ou le fullscreen.
+     ============================================================ */
+  (function envChecks(){
+    const envWarning = document.getElementById('envWarning');
+    const setEnvWarning = (html, kind) => {
+      envWarning.style.display = 'block';
+      envWarning.className = 'envwarn ' + (kind || '');
+      document.getElementById('envWarningText').innerHTML = html;
+    };
+
+    // Ouverture en iframe / preview
+    try {
+      if (window.self !== window.top) {
+        setEnvWarning(
+          "⚠️ <b>Ouverture en mode aperçu (iframe)</b> : certaines fonctions peuvent être bloquées. " +
+          "👉 Recommandé : <b>télécharger le fichier .html</b> puis l’ouvrir dans <b>Chrome/Edge</b>.",
+          "info"
+        );
+      }
+    } catch(e){
+      // accès à window.top peut être bloqué → on affiche pareil
+      setEnvWarning(
+        "⚠️ <b>Ouverture en mode aperçu</b> : certaines fonctions peuvent être bloquées. " +
+        "👉 Recommandé : <b>télécharger le fichier .html</b> puis l’ouvrir dans <b>Chrome/Edge</b>.",
+        "info"
+      );
+    }
+  })();
+
+  // ============================================================
+  // ✅ Etat Plotly (évite tout crash tant que Plotly n'est pas prêt)
+  // ============================================================
+  let plotlyReady = false;
+  function canUsePlotly() { return (typeof Plotly !== "undefined") && plotlyReady; }
+
+  function showHardError(html){
+    const envWarning = document.getElementById('envWarning');
+    envWarning.style.display = 'block';
+    envWarning.className = 'envwarn error';
+    document.getElementById('envWarningText').innerHTML = html;
+  }
+
+  function safeResize(){
+    if (canUsePlotly()) {
+      try { Plotly.Plots.resize('chart'); } catch(e) {}
+    }
+  }
+
+  const data = [
+  { id: 1, name: "Aéroport International de Genève", year: 2024, product: "Langues", revenue: 20000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 2, name: "Aéroports de Paris - ADP", year: 2023, product: "Langues", revenue: 2703, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 3, name: "Air Liquide SA", year: 2025, product: "Langues", revenue: 240000, y: 5, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 4, name: "Airbus SE", year: 2019, product: "Langues", revenue: 66000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 5, name: "Alstom University", year: 2012, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Stéphanie Rousseau", owner_missing: false },
+  { id: 6, name: "ArianeGroup France", year: 2023, product: "Langues", revenue: 45000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
+  { id: 7, name: "Axian group", year: 2024, product: "Langues", revenue: 53592, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
+  { id: 8, name: "Banque de France", year: 2024, product: "Langues", revenue: 33500, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 9, name: "BCL - Banque Centrale du Luxembourg", year: 2016, product: "Langues", revenue: 42500, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 10, name: "BNP Paribas SA", year: 2025, product: "Langues", revenue: 201000, y: 5, cat: "CAC 40", color: "#E53935", outline: "", owner: "Clément Le Roux", owner_missing: false },
+  { id: 11, name: "BNP Paribas SA", year: 2025, product: "Coaching", revenue: 201000, y: 5, cat: "CAC 40", color: "#E53935", outline: "", owner: "Clément Le Roux", owner_missing: false },
+  { id: 12, name: "Bobst Group SA", year: 2024, product: "Langues", revenue: 13507, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 13, name: "Bouygues Construction S.A", year: 2024, product: "Langues", revenue: 79000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
+  { id: 14, name: "Bpost", year: 2025, product: "Langues", revenue: 93000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
+  { id: 15, name: "CACEIS", year: 2023, product: "Langues", revenue: 37500, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
+  { id: 16, name: "Capgemini SE", year: 2024, product: "Langues", revenue: 148000, y: 4, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
+  { id: 17, name: "Cargolux Airlines", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 18, name: "Carrefour France", year: 2024, product: "Langues", revenue: 0, y: 1, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 19, name: "CGI France SAS", year: 2021, product: "Langues", revenue: 120000, y: 4, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
+  { id: 20, name: "CMA CGM S.A.", year: 2022, product: "Langues", revenue: 30000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
+  { id: 21, name: "CMA CGM S.A.", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
+  { id: 22, name: "CNP Assurances SA", year: 2025, product: "Coaching", revenue: 86400, y: -2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 23, name: "Cofidis S.A", year: 2022, product: "Langues", revenue: 12000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 24, name: "Continental Automotive France", year: 2023, product: "Langues", revenue: 17500, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Stéphanie Rousseau", owner_missing: false },
+  { id: 25, name: "Covéa Mutual Insurance Group Company", year: 2020, product: "Langues", revenue: 85000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 26, name: "Danone SA", year: 2022, product: "Langues", revenue: 100000, y: 4, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
+  { id: 27, name: "Dassault Systemes SE", year: 2024, product: "Langues", revenue: 74500, y: 3, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
+  { id: 28, name: "Deloitte France", year: 2024, product: "Langues", revenue: 53000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
+  { id: 29, name: "DEVOTEAM G CLOUD", year: 2020, product: "Langues", revenue: 47000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
+  { id: 30, name: "ELECTRICITE DE FRANCE", year: 2021, product: "Langues", revenue: 90000, y: 3, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 31, name: "EM Lyon", year: 2021, product: "Langues", revenue: 35000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 32, name: "EM NORMANDIE", year: 2024, product: "Langues", revenue: 20000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 33, name: "ENGIE SA", year: 2026, product: "Langues", revenue: 42500, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
+  { id: 34, name: "Europcar France", year: 2019, product: "Langues", revenue: 36100, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
+  { id: 35, name: "Eviden FRANCE", year: 2025, product: "Coaching", revenue: 70000, y: -2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Thierry Le Boeuf", owner_missing: false },
+  { id: 36, name: "Ferrero France", year: 2020, product: "Langues", revenue: 23700, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
+  { id: 37, name: "Generali France", year: 2017, product: "Langues", revenue: 62242.72, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
+  { id: 38, name: "Groupama Holding", year: 2020, product: "Langues", revenue: 42500, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 39, name: "Groupe AFNOR", year: 2022, product: "Langues", revenue: 4500, y: 1, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 40, name: "Groupe Air France KLM", year: 2014, product: "Langues", revenue: 297500, y: 5, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 41, name: "Groupe BPCE", year: 2024, product: "Langues", revenue: 21700, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 42, name: "Groupe Limagrain Holding SA", year: 2022, product: "Langues", revenue: 50000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
+  { id: 43, name: "Groupe Rocher", year: 2021, product: "Langues", revenue: 46000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 44, name: "Groupe Roquette", year: 2021, product: "Langues", revenue: 5000, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Stéphanie Rousseau", owner_missing: false },
+  { id: 45, name: "Groupe Roquette", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Stéphanie Rousseau", owner_missing: false },
+  { id: 46, name: "Groupe SEB", year: 2020, product: "Langues", revenue: 50000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
+  { id: 47, name: "Groupe SNCF ", year: 2024, product: "Coaching", revenue: 84000, y: -2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Julie Pirroni", owner_missing: false },
+  { id: 48, name: "Groupe SNCF ", year: 2026, product: "Coaching", revenue: 50000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Julie Pirroni", owner_missing: false },
+  { id: 49, name: "Groupe SNCF ", year: 2022, product: "Langues", revenue: 30000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Julie Pirroni", owner_missing: false },
+  { id: 50, name: "Ipsen S.A.", year: 2025, product: "Langues", revenue: 60000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
+  { id: 51, name: "JCDecaux SA", year: 2022, product: "Langues", revenue: 15000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 52, name: "Kedge", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 53, name: "Kering SA", year: 2026, product: "Langues", revenue: 30000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 54, name: "Kingfisher France", year: 2022, product: "Langues", revenue: 3000, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 55, name: "La Poste S.A.", year: 2023, product: "Langues", revenue: 30000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 56, name: "L'Oréal SA", year: 2024, product: "Langues", revenue: 39600, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Clément Le Roux", owner_missing: false },
+  { id: 57, name: "M.P.F. Michelin", year: 2021, product: "Langues", revenue: 160000, y: 4, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 58, name: "Majorel Africa", year: 2023, product: "Langues", revenue: 65000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 59, name: "Manpower France", year: 2016, product: "Langues", revenue: 30000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
+  { id: 60, name: "Mars Food France", year: 2020, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 61, name: "MBDA Group", year: 2020, product: "Langues", revenue: 148750, y: 4, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 62, name: "Naval Group SA", year: 2021, product: "Langues", revenue: 60000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
+  { id: 63, name: "NEOMA BUSINESS SCHOOL", year: 2022, product: "Langues", revenue: 18500, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 64, name: "OPMobility SE", year: 2027, product: "Coaching", revenue: 36000, y: -3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
+  { id: 65, name: "OPMobility SE", year: 2026, product: "Langues", revenue: 18000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
+  { id: 66, name: "Orange SA", year: 2022, product: "Langues", revenue: 30000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 67, name: "RADIALL", year: 2027, product: "Langues", revenue: 110000, y: 4, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
+  { id: 68, name: "RATP Pro", year: 2021, product: "Langues", revenue: 15000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 69, name: "Safran SA", year: 2025, product: "Langues", revenue: 63750, y: 3, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
+  { id: 70, name: "Sanofi SA", year: 2025, product: "Langues", revenue: 10000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Clément Le Roux", owner_missing: false },
+  { id: 71, name: "Schneider Electric SE", year: 2025, product: "Langues", revenue: 203000, y: 5, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
+  { id: 72, name: "SNCB Holding S.a.", year: 2026, product: "Langues", revenue: 233000, y: 5, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Sarah Kureemun", owner_missing: false },
+  { id: 73, name: "Société Générale", year: 2021, product: "Langues", revenue: 176000, y: 4, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
+  { id: 74, name: "Solvay SA", year: 2026, product: "Coaching", revenue: 20000, y: -4, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
+  { id: 75, name: "Solvay SA", year: 2025, product: "Langues", revenue: 17000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
+  { id: 76, name: "Sonepar S.A.", year: 2025, product: "Langues", revenue: 204065, y: 5, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 77, name: "Sopra Steria Group SA", year: 2024, product: "Langues", revenue: 50000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 78, name: "Spie SA", year: 2022, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 79, name: "Teleperformance Limited", year: 2023, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
+  { id: 80, name: "Teleperformance Limited", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "CAC 40", color: "#E53935", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
+  { id: 81, name: "Thales SA", year: 2024, product: "Langues", revenue: 95000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
+  { id: 82, name: "TNT France", year: 2017, product: "Langues", revenue: 185000, y: 4, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 83, name: "TotalEnergies SE", year: 2023, product: "Langues", revenue: 30000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 84, name: "Unilabs SA", year: 2023, product: "Langues", revenue: 36480, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 85, name: "Veepee France", year: 2021, product: "Langues", revenue: 57480, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+  { id: 86, name: "Verisure France", year: 2023, product: "Langues", revenue: 30000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
+  { id: 87, name: "Vinci Construction France", year: 2022, product: "Langues", revenue: 36000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
+  { id: 88, name: "Xpo Logistics Europe SA", year: 2022, product: "Coaching", revenue: 0, y: -5, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+];
+
+  // ✅ Normalisation owner/owner_missing
+  for (const d of data) {
+    if (!('owner' in d)) d.owner = null;
+    if (!('owner_missing' in d)) d.owner_missing = (d.owner == null || String(d.owner).trim() === '');
+  }
+
+  // ✅ Ajout 2028 car présent dans data (sans changer tes inputs)
+  const years = [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028];
+
+  /* =====================================================================================
+     ✅ OPTION 1 : PALIERS Y DISCRETS + POSITIONNEMENT AUTOMATIQUE DES BULLES (revenue -> y)
+  ====================================================================================== */
+  const USE_AUTO_Y = true;
+
+  const Y_BANDS_LANGUES = [
+    { max: 10000,   y: 1, label: 'Langues ≤ 10k€' },
+    { max: 50000,   y: 2, label: 'Langues 10–50k€' },
+    { max: 100000,  y: 3, label: 'Langues 50–100k€' },
+    { max: 200000,  y: 4, label: 'Langues 100–200k€' },
+    { max: 1000000, y: 5, label: 'Langues > 200k€' }
+  ];
+
+  const Y_BANDS_COACHING = [
+    { max: 10000,   y: -5, label: 'Coaching ≤ 10k€' },
+    { max: 30000,   y: -4, label: 'Coaching 10–30k€' },
+    { max: 50000,   y: -3, label: 'Coaching 30–50k€' },
+    { max: 100000,  y: -2, label: 'Coaching 50–100k€' },
+    { max: 1000000, y: -1, label: 'Coaching > 100k€' }
+  ];
+
+  function computeYFromRevenue(revenue, product){
+    const r = Number(revenue);
+    const val = Number.isFinite(r) ? r : 0;
+    const bands = (String(product).toLowerCase() === 'coaching') ? Y_BANDS_COACHING : Y_BANDS_LANGUES;
+    for (const b of bands) if (val <= b.max) return b.y;
+    return bands[bands.length - 1].y;
+  }
+
+  function buildYAxisTicks(){
+    const all = [...Y_BANDS_COACHING, ...Y_BANDS_LANGUES].slice().sort((a,b)=>a.y-b.y);
+    const vals = all.map(b=>b.y);
+    const texts = all.map(b=>b.label);
+    return { vals, texts, minY: Math.min(...vals), maxY: Math.max(...vals) };
+  }
+
+  if (USE_AUTO_Y) {
+    for (const d of data) d.y = computeYFromRevenue(d.revenue, d.product);
+  }
+
+  const { vals: yTickVals, texts: yTickText, minY, maxY } = buildYAxisTicks();
+  /* ===================================================================================== */
+
+  function catBadge(cat){
+    if(cat==='CAC 40') return 'b-red';
+    if(cat==='Entreprise privée') return 'b-blue';
+    return 'b-green';
+  }
+
+  function bubbleSizeByCat(cat){
+    if (cat === 'CAC 40') return 27;
+    if (cat === 'Entreprise privée') return 15;
+    return 9;
+  }
+
+  function ownerLabel(d){
+    const o = (d && d.owner != null && String(d.owner).trim() !== '') ? String(d.owner).trim() : 'Owner / BDR manquant';
+    return o;
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  }
+
+  // ✅ UI filtre Owner (checkbox)
+  function renderOwnerFilters(){
+    const box = document.getElementById('ownerFilters');
+    const uniq = new Set();
+    for (const d of data) uniq.add(ownerLabel(d));
+    const owners = [...uniq].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'}));
+    box.innerHTML = owners.map(o => {
+      const v = escapeHtml(o);
+      return `<label><input type="checkbox" class="f-owner" value="${v}" checked> ${v}</label>`;
+    }).join('');
+  }
+
+  renderOwnerFilters();
+
+  let ownerOpen = true;
+
+  const ownerToggle = document.getElementById('ownerToggle');
+  const ownerFilters = document.getElementById('ownerFilters');
+  const ownerArrow = document.getElementById('ownerArrow');
+
+const ownerSelectAllBtn = document.getElementById('ownerSelectAllBtn');
+const ownerDeselectAllBtn = document.getElementById('ownerDeselectAllBtn');
+
+function setAllOwnerCheckboxes(checked){
+  document.querySelectorAll('.f-owner').forEach(cb => {
+    cb.checked = checked;
+  });
+  updateChart();
+}
+
+ownerSelectAllBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  setAllOwnerCheckboxes(true);
+});
+
+ownerDeselectAllBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  setAllOwnerCheckboxes(false);
+});
+
+
+  ownerToggle.addEventListener('click', () => {
+  ownerOpen = !ownerOpen;
+
+  if (ownerOpen) {
+    ownerFilters.style.display = 'block';
+    document.getElementById('ownerBulkActions').style.display = 'flex';
+    ownerArrow.textContent = '▼';
+  } else {
+    ownerFilters.style.display = 'none';
+    document.getElementById('ownerBulkActions').style.display = 'none';
+    ownerArrow.textContent = '▶';
+  }
+});
+
+  let listOpen = true;
+
+  const listToggle = document.getElementById('listToggle');
+  const listElContainer = document.getElementById('list');
+  const listArrow = document.getElementById('listArrow');
+
+  listToggle.addEventListener('click', () => {
+    listOpen = !listOpen;
+
+    if (listOpen) {
+      listElContainer.style.display = 'block';
+      listArrow.textContent = '▼';
+    } else {
+      listElContainer.style.display = 'none';
+      listArrow.textContent = '▶';
+    }
+  });
+
+  let showNames = false;
+
+  function applyNoOffset(points){
+  const DX = 0.18;
+
+  const groups = new Map();
+  for (const p of points) {
+    const key = `${p.year}|${p.y}|${p.color}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(p);
+  }
+
+  for (const group of groups.values()) {
+    const n = group.length;
+
+    if (n === 1) {
+      const p = group[0];
+      p.plotYear = p.year;
+      p.plotY    = p.y;
+
+      // valeurs par défaut du label
+      p.labelX   = p.plotYear;
+      p.labelY   = p.plotY;
+      p.textPos  = 'middle center';
+    } else {
+      const startX = -((n - 1) / 2) * DX;
+
+      for (let i = 0; i < n; i++) {
+        const p = group[i];
+        p.plotYear = p.year + (startX + i * DX);
+        p.plotY    = p.y;
+
+        // valeurs par défaut du label
+        p.labelX   = p.plotYear;
+        p.labelY   = p.plotY;
+        p.textPos  = 'middle center';
+      }
+    }
+  }
+}
+
+
+  // init global (sans plotly)
+  applyNoOffset(data);
+
+  function computeLabelFontSize(n){
+    if (n >= 140) return 7;
+    if (n >= 100) return 8;
+    if (n >= 70)  return 9;
+    return 10;
+  }
+
+
+function dataToPixelX(x, xRange, plotWidth){
+  return ((x - xRange[0]) / (xRange[1] - xRange[0])) * plotWidth;
+}
+
+function dataToPixelY(y, yRange, plotHeight){
+  return plotHeight - ((y - yRange[0]) / (yRange[1] - yRange[0])) * plotHeight;
+}
+
+function pixelToDataX(px, xRange, plotWidth){
+  return xRange[0] + (px / plotWidth) * (xRange[1] - xRange[0]);
+}
+
+function pixelToDataY(py, yRange, plotHeight){
+  return yRange[0] + ((plotHeight - py) / plotHeight) * (yRange[1] - yRange[0]);
+}
+
+function rectsOverlap(a, b, pad = 2){
+  return !(
+    a.right + pad < b.left ||
+    a.left  - pad > b.right ||
+    a.bottom + pad < b.top ||
+    a.top    - pad > b.bottom
+  );
+}
+
+function estimateLabelRect(point, fontSize, centerX, centerY){
+  const text = String(point.name || '');
+  const width = Math.max(28, Math.min(240, text.length * fontSize * 0.58));
+  const height = fontSize + 6;
+
+  return {
+    left: centerX - width / 2,
+    right: centerX + width / 2,
+    top: centerY - height / 2,
+    bottom: centerY + height / 2,
+    width,
+    height
+  };
+}
+
+function applySmartLabelPositions(points, fontSize, xRange, yRange){
+  const plotWidth = Math.max(320, graphDiv.clientWidth - layoutBase.margin.l - layoutBase.margin.r);
+  const plotHeight = Math.max(240, graphDiv.clientHeight - layoutBase.margin.t - layoutBase.margin.b);
+
+  const candidates = [
+    { dx:  0, dy: -14 },
+    { dx:  0, dy:   0 },
+    { dx:  0, dy:  14 },
+
+    { dx: 12, dy: -12 },
+    { dx:-12, dy: -12 },
+    { dx: 12, dy:   0 },
+    { dx:-12, dy:   0 },
+    { dx: 12, dy:  12 },
+    { dx:-12, dy:  12 },
+
+    { dx:  0, dy: -26 },
+    { dx:  0, dy:  26 },
+
+    { dx: 18, dy:  -8 },
+    { dx:-18, dy:  -8 },
+    { dx: 18, dy:   8 },
+    { dx:-18, dy:   8 }
+  ];
+
+  const ordered = points.slice().sort((a, b) => {
+    if (a.plotYear !== b.plotYear) return a.plotYear - b.plotYear;
+    if (a.plotY !== b.plotY) return a.plotY - b.plotY;
+    return String(a.name).localeCompare(String(b.name), 'fr', { sensitivity: 'base' });
+  });
+
+  const placedRects = [];
+
+  for (const p of ordered) {
+    const pointPx = dataToPixelX(p.plotYear, xRange, plotWidth);
+    const pointPy = dataToPixelY(p.plotY, yRange, plotHeight);
+
+    let chosen = null;
+
+    for (const c of candidates) {
+      const cx = pointPx + c.dx;
+      const cy = pointPy + c.dy;
+
+      const rect = estimateLabelRect(p, fontSize, cx, cy);
+      const overlaps = placedRects.some(r => rectsOverlap(rect, r, 2));
+
+      if (!overlaps) {
+        chosen = { cx, cy, rect };
+        break;
+      }
+    }
+
+    if (!chosen) {
+      for (let step = 1; step <= 4; step++) {
+        const extra = 26 + step * 10;
+
+        const fallbackPositions = [
+          { dx: 0, dy: -extra },
+          { dx: 0, dy:  extra },
+          { dx: 12, dy: -extra },
+          { dx:-12, dy: -extra },
+          { dx: 12, dy:  extra },
+          { dx:-12, dy:  extra }
+        ];
+
+        for (const c of fallbackPositions) {
+          const cx = pointPx + c.dx;
+          const cy = pointPy + c.dy;
+
+          const rect = estimateLabelRect(p, fontSize, cx, cy);
+          const overlaps = placedRects.some(r => rectsOverlap(rect, r, 2));
+
+          if (!overlaps) {
+            chosen = { cx, cy, rect };
+            break;
+          }
+        }
+
+        if (chosen) break;
+      }
+    }
+
+    if (!chosen) {
+      const rect = estimateLabelRect(p, fontSize, pointPx, pointPy);
+      chosen = { cx: pointPx, cy: pointPy, rect };
+    }
+
+    p.labelX = pixelToDataX(chosen.cx, xRange, plotWidth);
+    p.labelY = pixelToDataY(chosen.cy, yRange, plotHeight);
+    p.textPos = 'middle center';
+
+    placedRects.push(chosen.rect);
+  }
+}
+
+
+  function getFilterState(){
+    const q = document.getElementById('search').value.trim().toLowerCase();
+    const selectedCats = [...document.querySelectorAll('.f-cat:checked')].map(e=>e.value);
+    const selectedProds = [...document.querySelectorAll('.f-prod:checked')].map(e=>e.value);
+    const selectedOwners = [...document.querySelectorAll('.f-owner:checked')].map(e=>e.value);
+
+    let yearMin = parseInt(document.getElementById('yearMin').value,10);
+    let yearMax = parseInt(document.getElementById('yearMax').value,10);
+    if (Number.isNaN(yearMin)) yearMin = Math.min(...years);
+    if (Number.isNaN(yearMax)) yearMax = Math.max(...years);
+    if (yearMin > yearMax) { const t = yearMin; yearMin = yearMax; yearMax = t; }
+
+    return { q, selectedCats, selectedProds, selectedOwners, yearMin, yearMax };
+  }
+
+  function getFilteredPoints(){
+    const { q, selectedCats, selectedProds, selectedOwners, yearMin, yearMax } = getFilterState();
+    return data.filter(d =>
+      (!q || d.name.toLowerCase().includes(q)) &&
+      selectedCats.includes(d.cat) &&
+      selectedProds.includes(d.product) &&
+      selectedOwners.includes(ownerLabel(d)) &&
+      d.year >= yearMin &&
+      d.year <= yearMax
+    );
+  }
+
+  function renderListFromPoints(points, filterText=''){
+    const el = document.getElementById('list');
+    el.innerHTML = '';
+    const q = filterText.trim().toLowerCase();
+
+    (points || [])
+      .filter(d => (!q || d.name.toLowerCase().includes(q)))
+      .sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}))
+      .forEach(d=>{
+        const div=document.createElement('div');
+        div.className='item';
+        const own = ownerLabel(d);
+
+        div.innerHTML = `
+          <div>
+            <b>${escapeHtml(d.name)}</b>
+            <span class="badge ${catBadge(d.cat)}">${escapeHtml(d.cat)}</span>
+          </div>
+          <div class="small">
+            ${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(own)}
+          </div>
+        `;
+        div.onmouseenter=()=>highlight(d.id);
+        div.onclick=()=>highlight(d.id);
+        el.appendChild(div);
+      });
+  }
+
+  // ✅ Lecture robuste des ranges envoyées par plotly_relayout
+  function extractAxisRange(ev, axisName){
+    const k0 = `${axisName}.range[0]`;
+    const k1 = `${axisName}.range[1]`;
+    if (ev && ev[k0] != null && ev[k1] != null) return [Number(ev[k0]), Number(ev[k1])];
+
+    const k = `${axisName}.range`;
+    if (ev && Array.isArray(ev[k]) && ev[k].length === 2) return [Number(ev[k][0]), Number(ev[k][1])];
+
+    const ka = `${axisName}.autorange`;
+    if (ev && ev[ka]) return null;
+
+    return undefined;
+  }
+
+  function buildMarkerTrace(cat, ptsAll){
+    const pts = (ptsAll || data).filter(d=>d.cat===cat);
+    return {
+      type:'scatter',
+      mode:'markers',
+      name:cat,
+      showlegend:false,
+      legendgroup: cat,
+      x: pts.map(p=>p.plotYear),
+      y: pts.map(p=>p.plotY),
+      text: pts.map(p=>p.name),
+      customdata: pts.map(p => [p.product, p.revenue, p.year, ownerLabel(p)]),
+      hovertemplate:
+        '<b>%{text}</b><br>' +
+        'Année : %{customdata[2]}<br>' +
+        'Produit : %{customdata[0]}<br>' +
+        'Estimated revenue : %{customdata[1]:,.0f} €<br>' +
+        'Owner / BDR : %{customdata[3]}' +
+        '<extra></extra>',
+      marker: {
+        size: pts.map(p => bubbleSizeByCat(p.cat)),
+        color: pts.map(p=>p.color),
+        opacity: 1,
+        line: { width: 1, color: '#111111' }
+      }
+    };
+  }
+
+  function buildTextTrace(cat, ptsAll){
+    const ptsAllArr = (ptsAll || data);
+    const pts = ptsAllArr.filter(d=>d.cat===cat);
+    const fontSize = computeLabelFontSize(ptsAllArr.length);
+    return {
+      type:'scatter',
+      mode:'text',
+      name:cat + ' (labels)',
+      showlegend:false,
+      legendgroup: cat,
+      hoverinfo:'skip',
+      x: pts.map(p=>p.labelX ?? p.plotYear),
+      y:pts.map(p=>p.labelY??p.plotY),
+      text: pts.map(p=>p.name),
+      textposition: pts.map(p=>p.textPos),
+      textfont:{size:fontSize, color:'#111', family:'Segoe UI, Arial'},
+      cliponaxis:false,
+      visible: showNames
+    };
+  }
+
+  function isCategoryChecked(cat){
+    const cb = [...document.querySelectorAll('.f-cat')].find(el => el.value === cat);
+    return !!(cb && cb.checked);
+  }
+
+  function buildLegendProxy(name, color){
+    const active = isCategoryChecked(name);
+
+    return {
+      type:'scatter',
+      mode:'markers',
+      name,
+      legendgroup: name,
+      showlegend:true,
+      hoverinfo:'skip',
+      x:[null],
+      y:[null],
+      marker:{
+        size:12,
+        color:color,
+        opacity: active ? 1 : 0.25,
+        line:{ width:1, color:'#111111' }
+      }
+    };
+  }
+
+  function toggleCategoryCheckbox(cat){
+    const cb = [...document.querySelectorAll('.f-cat')].find(el => el.value === cat);
+    if (!cb) return false;
+
+    cb.checked = !cb.checked;
+    return true;
+  }
+
+
+  // Trace highlight (anneau)
+  const traceHi = {
+    type:'scatter',
+    mode:'markers',
+    showlegend:false,
+    x:[null],
+    y:[null],
+    hoverinfo:'skip',
+    marker:{ size:[46], color:['#ffffff'], opacity:0.0, line:{ color:'#111111', width:4 } }
+  };
+
+  const layoutBase = {
+    uirevision: 'keep',
+    margin:{l:110,r:30,t:40,b:45},
+    paper_bgcolor:'#ffffff',
+    plot_bgcolor:'#ffffff',
+    xaxis:{
+      title:'Année',
+      tickmode:'array',
+      tickvals: years,
+      ticktext: years.map(String)
+    },
+    yaxis:{
+      title:'Produit + Estimated €',
+      tickmode:'array',
+      tickvals: yTickVals,
+      ticktext: yTickText,
+      zeroline:true,
+      zerolinecolor:'#9e9e9e',
+      zerolinewidth:2,
+      gridwidth: 1.5,
+      gridcolor: 'rgba(0,0,0,0.08)',
+      range:[minY - 0.8, maxY + 0.8],
+      dtick:1,
+      automargin: true
+    },
+    legend:{
+      orientation:'h',
+      yanchor:'bottom',
+      y:1.02,
+      xanchor:'left',
+      x:-0.1,
+      font: {color:'#444'},
+      bgcolor: 'rgba(255,255,255,0)',
+      borderwidth: 0,
+      itemsizing: 'constant',
+      itemwidth: 60
+    },
+    annotations: [{
+      xref:'paper', yref:'paper',
+      x:0.01, y:0.99,
+      xanchor:'left', yanchor:'top',
+      text:'',
+      showarrow:false,
+      align:'left',
+      bgcolor:'rgba(255,255,255,0.96)',
+      bordercolor:'rgba(0,0,0,0.18)',
+      borderwidth:1,
+      borderpad:8,
+      font:{size:12, color:'#111', family:'Segoe UI, Arial'},
+      visible:false
+    }]
+  };
+
+  // Indices stables car ordre stable
+  const IDX_HI = 6;
+
+  // ✅ state zoom courant (pour filtrer la liste selon fenêtre visible)
+  let currentRanges = { xr: null, yr: null };
+
+  // ✅ dernier set affiché (utile pour highlight fiable)
+  let lastPts = [];
+  let lastPtsById = new Map();
+
+  function setInfoBox(html, visible){
+    if (!canUsePlotly()) return;
+    Plotly.relayout('chart', {
+      'annotations[0].text': html || '',
+      'annotations[0].visible': !!visible
+    });
+  }
+
+  function updateLastPts(pts){
+    lastPts = pts.slice();
+    lastPtsById = new Map(pts.map(p => [p.id, p]));
+  }
+
+  function updateListAccordingToView(){
+    const searchEl = document.getElementById('search');
+    const base = getFilteredPoints();
+
+    // s'assurer qu'on a plotYear/plotY sur base
+    applyNoOffset(base);
+
+    const xr = currentRanges.xr;
+    const yr = currentRanges.yr;
+
+    let visible = base;
+
+    if (xr || yr) {
+      const xMin = xr ? Math.min(xr[0], xr[1]) : null;
+      const xMax = xr ? Math.max(xr[0], xr[1]) : null;
+      const yMin = yr ? Math.min(yr[0], yr[1]) : null;
+      const yMax = yr ? Math.max(yr[0], yr[1]) : null;
+
+      visible = base.filter(p => {
+        const x = (p.plotYear ?? p.year);
+        const y = (p.plotY ?? p.y);
+
+        const inX = (xr == null) ? true : (x >= xMin && x <= xMax);
+        const inY = (yr == null) ? true : (y >= yMin && y <= yMax);
+        return inX && inY;
+      });
+    }
+
+    renderListFromPoints(visible, searchEl.value);
+  }
+
+  function highlight(id){
+    if (!canUsePlotly()) return;
+
+    // priorité au point réellement affiché (post-offset)
+    let d = lastPtsById.get(id);
+    if (!d) d = data.find(x => x.id === id);
+    if(!d) return;
+
+    const own = ownerLabel(d);
+    const html =
+      `<b>${escapeHtml(d.name)}</b><br>` +
+      `${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(own)}`;
+
+    Plotly.restyle('chart',
+      {
+        x: [[d.plotYear ?? d.year]],
+        y: [[d.plotY ?? d.y]],
+        'marker.color': [[d.color]],
+        'marker.size': [[46]],
+        'marker.opacity': [[0.98]],
+        'marker.line.color': [['#111111']],
+        'marker.line.width': [[4]]
+      },
+      [IDX_HI]
+    );
+
+    setInfoBox(html, true);
+  }
+
+  function clearHighlight(){
+    if (!canUsePlotly()) return;
+    Plotly.restyle('chart', {x:[null], y:[null], 'marker.opacity':[0.0]}, [IDX_HI]);
+    setInfoBox('', false);
+  }
+
+  function updateChart(){
+  if (!canUsePlotly()) return;
+
+  const pts = getFilteredPoints();
+
+  // 1) On place d'abord les bulles
+  applyNoOffset(pts);
+  updateLastPts(pts);
+
+  const { yearMin, yearMax } = getFilterState();
+
+  // 2) On détermine les ranges visibles du graphique
+  const xRangeForLabels = currentRanges.xr
+    ? [Math.min(currentRanges.xr[0], currentRanges.xr[1]), Math.max(currentRanges.xr[0], currentRanges.xr[1])]
+    : [yearMin - 1.6, yearMax + 1.6];
+
+  const yRangeForLabels = currentRanges.yr
+    ? [Math.min(currentRanges.yr[0], currentRanges.yr[1]), Math.max(currentRanges.yr[0], currentRanges.yr[1])]
+    : [minY - 0.8, maxY + 0.8];
+
+  // 3) Taille actuelle des labels
+  const fontSize = computeLabelFontSize(pts.length);
+
+  // 4) Positionnement intelligent des labels
+  applySmartLabelPositions(pts, fontSize, xRangeForLabels, yRangeForLabels);
+
+  const tMkGreen = buildMarkerTrace('Ecoles / Public / UE', pts);
+  const tMkRed   = buildMarkerTrace('CAC 40', pts);
+  const tMkBlue  = buildMarkerTrace('Entreprise privée', pts);
+
+  const tTxGreen = buildTextTrace('Ecoles / Public / UE', pts);
+  const tTxRed   = buildTextTrace('CAC 40', pts);
+  const tTxBlue  = buildTextTrace('Entreprise privée', pts);
+
+ const legGreen = buildLegendProxy('Ecoles / Public / UE', '#43A047');
+  const legRed   = buildLegendProxy('CAC 40', '#E53935');
+  const legBlue  = buildLegendProxy('Entreprise privée', '#1E88E5');
+
+
+  // ✅ si l'utilisateur est zoomé, on ne force pas le range x
+  const layoutDyn = {
+    ...layoutBase,
+    xaxis: {
+      ...layoutBase.xaxis,
+      ...(currentRanges.xr ? {} : { range: [yearMin - 1.6, yearMax + 1.6] })
+    }
+  };
+
+  Plotly.react(
+    'chart',
+    [
+      tMkGreen, legGreen,
+      tMkRed,   legRed,
+      tMkBlue,  legBlue,
+      traceHi,
+      tTxGreen, tTxRed, tTxBlue
+    ],
+    layoutDyn,
+    {displaylogo:false, responsive:true}
+  );
+
+  clearHighlight();
+  updateListAccordingToView();
+}
+
+  const graphDiv = document.getElementById('chart');
+
+  // ✅ Plein écran (sécurisé)
+  const chartPanel = document.getElementById('chartPanel');
+  const fsBtn = document.getElementById('fsBtn');
+
+  function setFsLabel(){
+    fsBtn.textContent = document.fullscreenElement ? '⤫ Quitter plein écran' : '⛶ Plein écran';
+  }
+
+  fsBtn.addEventListener('click', () => {
+    try {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else (chartPanel.requestFullscreen ? chartPanel.requestFullscreen() : (chartPanel.webkitRequestFullscreen && chartPanel.webkitRequestFullscreen()));
+    } catch(e) {
+      // si bloqué (preview), on ne casse rien
+    }
+  });
+
+  // ✅ Search + filtres
+  const searchEl = document.getElementById('search');
+  const listEl = document.getElementById('list');
+
+  searchEl.addEventListener('input', () => {
+    updateChart();
+  });
+
+  listEl.addEventListener('mouseleave', () => clearHighlight());
+
+  function wireFilterListeners(){
+    document
+      .querySelectorAll('.f-cat, .f-prod, .f-owner, #yearMin, #yearMax')
+      .forEach(el =>
+        el.addEventListener('change', () => {
+          updateChart();
+        })
+      );
+  }
+
+  wireFilterListeners();
+
+  // ✅ Toggle labels
+  const labelBtn = document.getElementById('labelBtn');
+
+  function setLabelBtn(){
+    labelBtn.textContent = showNames ? '🙈 Masquer les noms' : '👁️ Afficher les noms';
+  }
+
+  labelBtn.addEventListener('click', () => {
+    showNames = !showNames;
+    setLabelBtn();
+    updateChart();
+    safeResize();
+  });
+
+  setLabelBtn();
+
+  // ============================================================
+  // ✅ INIT Plotly ROBUSTE (attend Plotly + timeout + branchements)
+  // ============================================================
+  function waitForPlotlyAndInit() {
+    const START = Date.now();
+    const MAX_WAIT_MS = 12000; // timeout robuste
+
+    (function tick(){
+      if (typeof Plotly !== "undefined") {
+        // Plotly présent → on init
+        Plotly.newPlot('chart', [], layoutBase, {displaylogo:false, responsive:true})
+          .then(() => {
+            plotlyReady = true;
+
+            // Info source Plotly
+            const src = window.__PLOTLY_LOAD_SOURCE__ || "unknown";
+            if (src === "local") {
+              // Optionnel : message discret
+              console.log("ℹ Plotly source : LOCAL (offline)");
+            } else if (src === "cdn") {
+              console.log("ℹ Plotly source : CDN");
+            }
+
+            // ✅ Brancher les events Plotly UNIQUEMENT maintenant (sinon crash)
+            graphDiv.on('plotly_relayout', (ev) => {
+              const xr = extractAxisRange(ev, 'xaxis');
+              const yr = extractAxisRange(ev, 'yaxis');
+
+              // Reset (double-clic)
+              if ((ev && ev['xaxis.autorange']) || (ev && ev['yaxis.autorange'])) {
+                currentRanges = { xr: null, yr: null };
+                updateListAccordingToView();
+                return;
+              }
+
+              // Si pas d'info de range, on ignore
+              const hasRangeInfo = (xr !== undefined) || (yr !== undefined);
+              if (!hasRangeInfo) return;
+
+              // xr/yr peuvent être null (autorange)
+              currentRanges = {
+                xr: (xr === undefined ? currentRanges.xr : xr),
+                yr: (yr === undefined ? currentRanges.yr : yr)
+              };
+
+              updateListAccordingToView();
+            });
+
+graphDiv.on('plotly_legendclick', (ev) => {
+  const trace =
+    (ev && ev.data && typeof ev.curveNumber === 'number')
+      ? ev.data[ev.curveNumber]
+      : null;
+
+  const cat = trace ? (trace.legendgroup || trace.name) : null;
+  if (!cat) return false;
+
+  const changed = toggleCategoryCheckbox(cat);
+  if (!changed) return false;
+
+  clearHighlight();
+  updateChart();
+
+  // on bloque le comportement natif de Plotly
+  return false;
+});
+
+            graphDiv.on('plotly_legenddoubleclick', () => {
+              // ⛔ on bloque aussi le double-clic Plotly
+              // (qui isole normalement une seule catégorie)
+              return false;
+            });
+
+            // Fullscreen change → resize Plotly
+            document.addEventListener('fullscreenchange', () => {
+              setFsLabel();
+              safeResize();
+            });
+
+            window.addEventListener('resize', () => safeResize());
+            setFsLabel();
+
+            // ✅ first render
+            updateChart();
+          })
+          .catch((e) => {
+            showHardError(
+              "❌ <b>Erreur Plotly</b> : impossible d’initialiser le graphique.<br>" +
+              "Détail : <code>" + escapeHtml(String(e && e.message ? e.message : e)) + "</code>"
+            );
+          });
+        return;
+      }
+
+      // Timeout
+      if (Date.now() - START > MAX_WAIT_MS) {
+        showHardError(
+          "❌ <b>Plotly non chargé</b> après attente.<br>" +
+          "👉 Vérifie si le réseau/proxy bloque le CDN.<br>" +
+          "✅ Recommandé : placer <b>plotly-2.27.0.min.js</b> dans le même dossier (mode offline)."
+        );
+        return;
+      }
+
+      // retry
+      setTimeout(tick, 100);
+    })();
+  }
+
+  waitForPlotlyAndInit();
+
+</script>
+</body>
+</html>
