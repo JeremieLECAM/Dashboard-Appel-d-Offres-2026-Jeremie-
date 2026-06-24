@@ -1,1361 +1,585 @@
-
-<!doctype html>
-<html lang="fr" xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882">
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-
-  <title> AO France 2026 (Jeremie) </title>
- 
-<link rel="icon" type="image/png" sizes="32x32" href="./favicon.png?v=2">
-<link rel="shortcut icon" href="./favicon.ico?v=2">
-<link rel="apple-touch-icon" sizes="180x180" href="./favicon-180x180.png?v=2">
-
-
-  <script>
-    (function () {
-      const PLOTLY_LOCAL = "plotly-2.27.0.min.js";
-      const PLOTLY_CDN   = "https://cdn.plot.ly/plotly-2.27.0.min.js";
-
-      function setEnvWarning(html, kind) {
-        const el = document.getElementById('envWarning');
-        if (!el) return;
-        el.style.display = 'block';
-        el.className = 'envwarn ' + (kind || '');
-        el.innerHTML = html;
-      }
-
-      function loadScript(src, onload, onerror) {
-        const s = document.createElement('script');
-        s.src = src;
-        s.async = true;
-        s.onload = onload;
-        s.onerror = onerror;
-        document.head.appendChild(s);
-      }
-
-      // Expose un petit état global (debug)
-      window.__PLOTLY_LOAD_SOURCE__ = null;
-
-      // Essai local d'abord
-      loadScript(
-        PLOTLY_LOCAL,
-        () => {
-          window.__PLOTLY_LOAD_SOURCE__ = "local";
-          console.log("✅ Plotly chargé (LOCAL) :", PLOTLY_LOCAL);
-        },
-        () => {
-          console.warn("⚠ Plotly local introuvable :", PLOTLY_LOCAL, "→ fallback CDN");
-          loadScript(
-            PLOTLY_CDN,
-            () => {
-              window.__PLOTLY_LOAD_SOURCE__ = "cdn";
-              console.log("✅ Plotly chargé (CDN) :", PLOTLY_CDN);
-            },
-            () => {
-              // Si CDN bloqué : message clair (pas d'écran blanc)
-              window.__PLOTLY_LOAD_SOURCE__ = "failed";
-              document.body.innerHTML = `
-                <div style="padding:20px;font-family:Segoe UI, Arial, sans-serif">
-                  <h2 style="margin:0 0 10px 0;">Erreur de chargement</h2>
-                  <p style="margin:0 0 8px 0;">
-                    Le graphique n’a pas pu se charger : <b>Plotly est bloqué</b> (réseau/proxy) ou indisponible.
-                  </p>
-                  <p style="margin:0 0 8px 0;">
-                    ✅ Solution recommandée : placez le fichier <b>plotly-2.27.0.min.js</b> dans le même dossier que ce HTML
-                    (version offline), puis ré-ouvrez le fichier.
-                  </p>
-                  <p style="margin:0;">
-                    Autre solution : ouvrir le fichier depuis un réseau non restreint.
-                  </p>
-                </div>
-              `;
-            }
-          );
-        }
-      );
-    })();
-  </script>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard SQL - Speexx</title>
+  <link rel="icon" type="image/png" href="data:image/png;base64,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">
+  <link rel="shortcut icon" href="data:image/png;base64,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">
   <style>
-    body{font-family:Segoe UI, Arial, sans-serif; margin:0; background:#f7f7fb;}
-    .wrap{display:grid; grid-template-columns:180px 1fr; gap:12px; padding:12px; height:100vh; box-sizing:border-box; align-items:stretch;}
-    .panel{background:white; border-radius:16px; padding:10px; box-shadow:0 8px 24px rgba(0,0,0,.08); overflow:auto;}
-    .title{font-size:11px; font-weight:700; margin:0 0 6px 0;}
-    .panel-logo{
-  display:block;
-  width:100%;
-  max-width:90px;
-  height:auto;
-  margin:0 auto 10px auto;
-  border-radius:18px;
-}
-    .sub{font-size:10px; color:#666; margin:0 0 10px 0; line-height:1.35;}
-    #search{width:100%; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:11px; box-sizing:border-box;}
-    .item{
-      padding:5px 10px;
-      border-radius:3px;
-      cursor:pointer;
-      margin-top:4px;
-      border:0.5px solid transparent;
-      font-size:9px;
-      line-height:1.25;
+    :root {
+      --orange:#FF7900;
+      --white:#FFFFFF;
+      --black:#000000;
+      --line:#D6D6D6;
+      --muted:#666666;
+      --shadow:0 4px 12px rgba(0,0,0,.08);
+      --radius:10px;
+      --sql:#FF7900;
+      --nurture:#777777;
+      --rdv:#0d6efd;
+      --relance:#f39c12;
+      --chaud:#FF7900;
+      --ok:#2e7d32;
     }
-    #filters{
-  font-size:9px;
-  line-height:1;
-  margin-bottom:6px;
-}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{font-family:Inter,Segoe UI,Arial,sans-serif;background:#f3f3f3;color:#000;}
+    .app{max-width:1580px;margin:0 auto;padding:8px;}
+    .hero{background:#000;color:#fff;border-radius:14px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;box-shadow:var(--shadow);}
+    .hero-left{display:flex;align-items:center;gap:8px;min-width:0;}
+    .hero-logo{height:24px;max-width:140px;width:auto;display:block;object-fit:contain;}
+    h1{margin:0;font-size:.96rem;line-height:1.05;font-weight:900;}
+    .sub{margin-top:1px;color:rgba(255,255,255,.84);font-size:.66rem;line-height:1.05}
+    .top-actions{display:flex;gap:5px;flex-wrap:wrap}
+    .btn{border:1px solid var(--line);background:#fff;color:#000;padding:5px 7px;border-radius:7px;cursor:pointer;font-weight:800;font-size:.72rem;font-family:inherit;line-height:1.05;}
+    .btn:hover{transform:translateY(-1px)}
+    .btn.primary{background:var(--orange);color:#fff;border-color:var(--orange)}
+    .btn.dark{background:#000;color:#fff;border-color:#333}
+    .btn.soft{background:#fff;color:#000}
+    .btn.danger{background:#fff5f5;color:#b42318;border-color:#fecaca}
+    .btn.small{padding:4px 6px;font-size:.68rem}
+    .btn.icon{width:24px;height:24px;padding:0;display:inline-flex;align-items:center;justify-content:center;}
 
-#filters b{
-  font-size:9px;
-}
+    .tabs{display:flex;gap:4px;margin-top:6px;padding-left:2px;flex-wrap:wrap}
+    .tab-btn{border:none;background:#fff;color:#555;padding:7px 9px;border-radius:9px 9px 0 0;font-weight:900;cursor:pointer;box-shadow:var(--shadow);font-size:.74rem;}
+    .tab-btn.active{color:#000;position:relative}
+    .tab-btn.active::after{content:"";position:absolute;left:8px;right:8px;bottom:0;height:3px;background:var(--orange);border-radius:999px 999px 0 0}
+    .panel{background:#fff;border-radius:0 12px 12px 12px;min-height:72vh;border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden;}
+    .tab-content{display:none;padding:8px}
+    .tab-content.active{display:block}
 
-#filters label{
-  display:block;
-  margin:0;
-  padding:0;
-  font-size:9px;
-  line-height:1;
-}
+    .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:6px}
+    .kpi{background:#fff;border:1px solid var(--line);border-radius:9px;padding:6px 8px;}
+    .kpi .label{font-size:.62rem;color:var(--muted);font-weight:900;line-height:1.0}
+    .kpi .value{font-size:.96rem;font-weight:900;margin-top:1px;line-height:1.0}
+    .kpi .mini{font-size:.61rem;color:var(--muted);margin-top:1px;line-height:1.05}
 
-#filters input[type="number"]{
-  font-size:9px;
-  padding:2px 4px;
-  height:13px;
-}
-    .badge{display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; margin-left:6px; color:white;}
-    .b-red{background:#E53935;}
-    .b-blue{background:#1E88E5;}
-    .b-green{background:#43A047;}
-    .small{font-size:10px; color:#333;}
+    .layout-main{display:grid;grid-template-columns:212px minmax(0,1fr);gap:6px;align-items:start}
+    .layout-cal{display:grid;grid-template-columns:300px minmax(0,1fr);gap:6px;align-items:start}
+    .layout-forecast{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-items:start}
+    .stack{display:grid;gap:6px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+    .card-head{padding:7px 8px 5px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:6px;flex-wrap:wrap;}
+    .card-title{margin:0;font-size:.77rem;font-weight:900;}
+    .card-sub{margin:1px 0 0;color:var(--muted);font-size:.63rem;line-height:1.05}
+    .card-body{padding:7px 8px 8px}
+    .badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:2px 6px;font-size:.6rem;font-weight:900;border:1px solid var(--line);background:#fff;color:#555;}
+    .actions{display:grid;gap:6px}
+    .action-tile{padding:8px;border:1px solid var(--line);border-radius:9px;background:#fff;}
+    .action-tile h4{margin:0 0 3px;font-size:.72rem}
+    .action-tile p{margin:0 0 6px;color:var(--muted);font-size:.62rem;line-height:1.08}
+    .summary-list{display:grid;gap:5px}
+    .summary-item{display:flex;justify-content:space-between;gap:6px;align-items:center;padding:5px 0;border-bottom:1px dashed #e5e5e5;font-size:.65rem}
+    .summary-item:last-child{border-bottom:none}
+    .summary-key{color:var(--muted)}
+    .mini-note{background:#fafafa;border:1px dashed #d9d9d9;border-radius:8px;padding:6px;color:var(--muted);font-size:.61rem;line-height:1.08}
+    .chips{display:flex;gap:4px;flex-wrap:wrap}
+    .chip{display:inline-flex;align-items:center;gap:4px;background:#fff7f0;color:#b35d00;border:1px solid #ffd8b0;border-radius:999px;padding:2px 5px;font-size:.58rem;font-weight:800}
+    .chip.muted{background:#fafafa;color:#666;border-color:#ddd}
 
-    /* ✅ Police filtre Owner taille 9 */
-    #ownerFilterSection{font-size:9px; line-height:1.15;}
-    #ownerFilterSection b{font-size:9px;}
-    #ownerFilters label{font-size:9px; margin:1px 0; display:block;}
+    .table-card .card-body{padding-bottom:0}
+    .toolbar-row{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap}
+    .selection-banner{display:none;justify-content:space-between;align-items:center;gap:6px;background:#fff7f0;border:1px solid #ffd8b0;color:#8c4a00;border-radius:8px;padding:6px 8px;margin-bottom:6px;font-weight:900;font-size:.64rem}
+    .selection-banner.show{display:flex}
+    .table-wrap{overflow:auto;max-height:80vh;border-top:1px solid var(--line)}
+    table{width:100%;border-collapse:separate;border-spacing:0;min-width:1200px}
+    thead th{position:sticky;top:0;background:#fff;z-index:3;text-align:left;font-size:.66rem;padding:6px 5px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:top}
+    tbody td{padding:5px 5px;border-bottom:1px solid #efefef;font-size:.7rem;background:#fff;vertical-align:top;line-height:1.05}
+    tbody tr{cursor:pointer}
+    tbody tr:hover td{background:#fffbf7}
+    tbody tr.selected td{background:#fff7f0}
+    .cell-checkbox{display:flex;align-items:center;justify-content:center}
+    .row-check{width:13px;height:13px;cursor:pointer;accent-color:var(--orange)}
+    .th-wrap{display:flex;align-items:center;justify-content:space-between;gap:4px;position:relative}
+    .th-label{display:flex;align-items:center;gap:4px;font-weight:900}
+    .filter-btn{border:1px solid var(--line);background:#fafafa;color:#666;width:20px;height:20px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:.62rem;font-weight:900}
+    .filter-btn.active{background:#000;color:#fff;border-color:#000}
+    .filter-pop{position:absolute;top:24px;right:0;width:224px;background:#fff;border:1px solid var(--line);border-radius:9px;box-shadow:0 12px 24px rgba(0,0,0,.14);padding:7px;display:none;z-index:20}
+    .filter-pop.show{display:block}
+    .filter-pop h5{margin:0 0 5px;font-size:.68rem;font-weight:900}
+    .stack-mini{display:grid;gap:5px}
+    .tiny-row{display:grid;grid-template-columns:74px 1fr;gap:5px}
+    .tiny,.input,select,textarea{font:inherit}
+    .tiny{width:100%;border:1px solid var(--line);border-radius:6px;padding:4px 5px;font-size:.66rem;background:#fff;color:#000}
+    .input,select,textarea{width:100%;border:1px solid var(--line);border-radius:7px;padding:5px 6px;background:#fff;color:#000;font-size:.69rem}
+    .input:focus,select:focus,textarea:focus,.tiny:focus{outline:none;border-color:rgba(255,121,0,.5);box-shadow:0 0 0 2px rgba(255,121,0,.12)}
+    textarea{min-height:54px;resize:vertical}
+    label{display:block;font-size:.67rem;font-weight:900;margin-bottom:3px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+    .field-inline{display:grid;grid-template-columns:88px 1fr;gap:6px;align-items:end}
+    .check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+    .check{display:flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;border-radius:7px;padding:5px 6px;font-size:.67rem;font-weight:800}
+    .check.compact{padding:2px 0;border:none;background:transparent}
+    .pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 6px;font-size:.61rem;font-weight:900;border:1px solid transparent;white-space:nowrap}
+    .status-sql{background:rgba(46,125,50,.12);color:#2e7d32;border-color:rgba(46,125,50,.22)}
+    .status-nurture{background:rgba(46,125,50,.12);color:#2e7d32;border-color:rgba(46,125,50,.22)}
+    .status-rdv{background:rgba(13,110,253,.1);color:#0d6efd;border-color:rgba(13,110,253,.18)}
+    .status-relance{background:rgba(243,156,18,.14);color:#c77700;border-color:rgba(243,156,18,.22)}
+    .status-chaud{background:rgba(255,121,0,.12);color:#b35d00;border-color:rgba(255,121,0,.25)}
+    .subtle{color:var(--muted)}
+    .small{font-size:.63rem}
 
-#ownerBulkActions{
-  margin-top:4px;
-  margin-bottom:4px;
-}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.38);display:none;align-items:center;justify-content:center;z-index:90;padding:10px}
+    .overlay.show{display:flex}
+    .modal{background:#fff;border-radius:14px;border:1px solid var(--line);box-shadow:0 18px 40px rgba(0,0,0,.22);width:min(620px,100%);max-height:92vh;overflow:auto}
+    .modal-head{padding:8px 10px 6px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+    .modal-title{margin:0;font-size:.83rem;font-weight:900}
+    .modal-sub{margin:2px 0 0;color:var(--muted);font-size:.64rem;line-height:1.05}
+    .close-btn{border:1px solid var(--line);background:#fff;width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:.84rem;font-weight:900}
+    .modal-body{padding:8px 10px 10px}
 
-.owner-mini-btn{
-  border:1px solid rgba(0,0,0,.12);
-  background:#f7f7f7;
-  color:#222;
-  padding:3px 6px;
-  border-radius:8px;
-  font-size:9px;
-  line-height:1.1;
-  cursor:pointer;
-}
+    .drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.32);display:none;z-index:85}
+    .drawer-backdrop.show{display:block}
+    .drawer{position:fixed;top:0;left:0;height:100vh;width:min(330px,100vw);background:#fff;border-right:1px solid var(--line);box-shadow:18px 0 32px rgba(0,0,0,.18);transform:translateX(-100%);transition:transform .2s ease;z-index:95;display:flex;flex-direction:column}
+    .drawer.show{transform:translateX(0)}
+    .drawer-head{padding:8px 10px 6px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:6px;align-items:flex-start}
+    .drawer-body{padding:8px 10px 10px;overflow:auto;display:grid;gap:8px}
 
-.owner-mini-btn:hover{
-  background:#ffffff;
-}
+    .calendar-shell{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+    .cal-head{padding:7px 8px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap}
+    .cal-title{margin:0;font-size:.77rem;font-weight:900}
+    .cal-tools{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+    .cal-body{padding:6px}
+    .month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+    .weekday{text-align:center;font-size:.54rem;font-weight:900;color:var(--muted);padding-bottom:2px}
+    .day{min-height:62px;border:1px solid var(--line);border-radius:7px;background:#fff;padding:4px;display:flex;flex-direction:column;gap:2px;overflow:hidden}
+    .day.out{background:#fafafa;color:#999}
+    .day.today{border:2px solid rgba(255,121,0,.45)}
+    .day-num{font-size:.58rem;font-weight:900}
+    .ev{border-radius:999px;padding:2px 4px;font-size:.52rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid transparent}
+    .ev.sql{background:rgba(46,125,50,.12);color:#2e7d32;border-color:rgba(46,125,50,.22)}
+    .ev.rdv{background:rgba(46,125,50,.12);color:var(--ok);border-color:rgba(46,125,50,.18)}
+    .ev.relance{background:rgba(243,156,18,.13);color:#c77700;border-color:rgba(243,156,18,.18)}
+    .ev.chaud{background:rgba(255,121,0,.12);color:#b35d00;border-color:rgba(255,121,0,.22)}
+    .company-sql{color:#2e7d32;font-weight:900}
+    .company-rdv{color:#0d6efd;font-weight:900}
+    .company-chaud{color:#FF7900;font-weight:900}
+    .company-relance{color:#f39c12;font-weight:900}
+    .mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+    .mini-month{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+    .mini-month h4{margin:0;padding:5px 6px;border-bottom:1px solid var(--line);font-size:.64rem}
+    .mini-month .month-grid{padding:5px;gap:3px}
+    .mini-month .day{min-height:45px;padding:3px;gap:2px;border-radius:6px}
+    .mini-month .weekday{font-size:.5rem}
+    .mini-month .ev{font-size:.48rem;padding:1px 3px}
 
-    #chartPanel{
-      background:white;
-      border-radius:16px;
-      box-shadow:0 8px 24px rgba(0,0,0,.08);
-      position:relative;
-      overflow:hidden;
-      height:calc(100vh - 24px);
-      display:flex;
-      flex-direction:column;
-    }
-    #chartWrap{flex:1; min-height:0; position:relative;}
-    #chart{width:100%; height:100%;}
+    .forecast-wrap{overflow:auto}
+    .forecast-table{width:100%;min-width:300px;border-collapse:separate;border-spacing:0}
+    .forecast-table thead th{position:static;background:#FCFCFC}
+    .forecast-table th,.forecast-table td{border-bottom:1px solid #efefef;padding:5px 6px;font-size:.68rem;text-align:left}
+    .forecast-table td.num{text-align:center;font-weight:900}
+    .forecast-table td.weight{color:#b35d00}
+    .forecast-table tbody tr:last-child td{background:#fff7f0;font-weight:900;border-bottom:none}
+    .forecast-shell{display:grid;gap:2px}
+    .forecast-topbar{display:flex;justify-content:space-between;align-items:center;gap:4px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:5px;padding:4px 5px;box-shadow:none}
+    .forecast-legend{display:flex;gap:2px;flex-wrap:wrap;align-items:center}
+    .forecast-tools{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+    .forecast-add-select{border:1px solid var(--line);border-radius:5px;background:#fff;color:#000;font:inherit;font-size:.56rem;font-weight:900;padding:2px 4px;height:24px}
+    .forecast-add-select:focus{outline:none;border-color:rgba(255,121,0,.5);box-shadow:0 0 0 2px rgba(255,121,0,.12)}
+    .forecast-empty-note{padding:5px 6px;font-size:.5rem;color:#666;background:#fafafa;border:1px dashed #ddd;border-radius:5px;text-align:center}
+    
+    .legend-item{display:inline-flex;align-items:center;gap:1px;padding:1px 3px;border-radius:999px;font-size:.42rem;font-weight:900;border:1px solid transparent}
+    .legend-item.sql{background:rgba(46,125,50,.12);color:#2e7d32;border-color:rgba(46,125,50,.2)}
+    .legend-item.rdv{background:rgba(13,110,253,.10);color:#0d6efd;border-color:rgba(13,110,253,.16)}
+    .legend-item.chaud{background:rgba(255,121,0,.12);color:#b35d00;border-color:rgba(255,121,0,.22)}
+    .legend-item.relance{background:rgba(243,156,18,.14);color:#c77700;border-color:rgba(243,156,18,.22)}
+    .legend-item.nostatus{background:#f5f5f5;color:#555;border-color:#ddd}
+    .forecast-owner-block{display:grid;grid-template-columns:minmax(0,1fr);gap:2px;align-items:start;margin-bottom:0}
+    .forecast-side{display:grid;grid-template-columns:0.86fr 0.86fr;gap:2px;justify-content:end}
+    .forecast-side-card{background:#fff;border:1px solid var(--line);border-radius:5px;padding:4px;box-shadow:none;max-width:168px;width:100%}
+    .forecast-side-title{margin:0 0 2px;font-size:.62rem;font-weight:900}
+    .forecast-side-sub{font-size:.54rem;color:var(--muted);margin-bottom:2px;line-height:1.08}
+    .forecast-out-list{display:grid;gap:2px;max-height:112px;overflow:auto}
+    .forecast-out-item{display:flex;justify-content:space-between;gap:4px;align-items:center;border:1px dashed #ddd;border-radius:4px;padding:2px 4px;font-size:.58rem;background:#fafafa;line-height:1.1}
+    .forecast-board-wrap{overflow:auto;background:#fff;border:1px solid var(--line);border-radius:5px;box-shadow:none}
+    .fc-board{width:100%;min-width:405px;border-collapse:collapse;table-layout:fixed;background:#d9d9d9;font-family:Arial, sans-serif}
+    .fc-board th,.fc-board td{border:1px solid #1d1d1d;padding:0;vertical-align:middle}
+    .fc-owner-title{background:#16a4d8;color:#fff;text-align:center;font-size:.52rem;font-weight:900;letter-spacing:.01em;padding:1px 2px}
+    .fc-quarter-head{background:#bcc4d4;text-align:center;font-weight:900;font-size:.42rem;padding:1px 1px}
+    .fc-quarter-head.quarter-label{width:52px}
+    .fc-status-label{width:52px;text-align:center;font-weight:900;font-size:.42rem;padding:2px 2px;background:#bcc4d4;font-family:Arial, sans-serif}
+    .fc-status-label.sql{background:#bcc4d4}
+    .fc-status-label.realized{background:#7030a0;color:#fff;font-size:.5rem;padding:3px 2px}
+    .fc-status-label.rdv{background:#16a4d8;color:#000}
+    .fc-status-label.chaud{background:#ff7f00;color:#000}
+    .fc-status-label.relance{background:#f2bf00;color:#000}
+    .fc-status-label.totalfuture{background:#7030a0;color:#fff;font-size:.5rem;padding:3px 2px}
+    .fc-status-label.forecasttotal{background:#7030a0;color:#fff;font-size:.5rem;padding:3px 2px}
+    .fc-weight-cell{width:20px;background:#d9d9d9;text-align:center;font-weight:900;font-size:.40rem;font-family:Arial, sans-serif;vertical-align:middle;padding:0 2px}
+    .fc-company-cell{background:#d9d9d9;padding:0;width:auto;vertical-align:middle}
+    .fc-cell{display:flex;align-items:center;justify-content:center;gap:1px;padding:0;min-height:20px;flex-direction:column}
+    .fc-cell.has-row.sql{background:rgba(46,125,50,.08)}
+    .fc-cell.has-row.rdv{background:rgba(13,110,253,.08)}
+    .fc-cell.has-row.chaud{background:rgba(255,121,0,.10)}
+    .fc-cell.has-row.relance{background:rgba(243,156,18,.16)}
+    .fc-company-input{width:auto;max-width:78%;border:none;background:transparent;font-family:Arial, sans-serif;font-size:.46rem;line-height:1.0;padding:1px 0 0;color:#000;text-align:center;font-weight:900;flex:0 1 auto}
+    .fc-company-input:focus{outline:none}
+    .fc-company-input.sql{color:#2e7d32;font-weight:900}
+    .fc-company-input.rdv{color:#0d6efd;font-weight:900}
+    .fc-company-input.chaud{color:#b35d00;font-weight:900}
+    .fc-company-input.relance{color:#c77700;font-weight:900}
+    .fc-delete{border:none;background:transparent;color:#888;cursor:pointer;font-size:.45rem;line-height:1;padding:0;display:none}
+    .fc-cell.has-row .fc-delete{display:inline-block}
+    .fc-total-weight,.fc-total-company{background:#efefef;font-weight:900;font-size:.48rem;font-family:Arial, sans-serif;text-align:center;min-height:24px;padding:3px 2px}
+    .fc-total-company{padding:0 1px;text-align:center;background:#efefef}
+    .fc-total-weight{text-align:center;padding:0 2px}
+    #forecastBoards{display:block}
+    @media (max-width:1280px){ #forecastBoards{grid-template-columns:1fr} .forecast-owner-block{grid-template-columns:1fr} .forecast-side{grid-template-columns:1fr 1fr} }
+    @media (max-width:900px){ .forecast-side{grid-template-columns:1fr} }
+    .dot{display:inline-block;width:7px;height:7px;border-radius:999px;margin-right:5px;vertical-align:middle}
+    .fc-company-cell,.fc-weight-cell,.fc-total-weight,.fc-total-company{text-align:center}
+    
+    .fc-cell-main{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;flex-wrap:nowrap}
+    .fc-date{font-family:Arial, sans-serif;font-size:.44rem;line-height:1.0;color:#444;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;flex:0 0 auto}
+    .fc-company-input,.fc-date{display:block}
+    .fc-company-line{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;padding:0 1px}
 
-    #fsBtn{
-      position:absolute; top:10px; right:10px; z-index:30;
-      border:1px solid rgba(0,0,0,.12);
-      background:rgba(255,255,255,.92);
-      backdrop-filter: blur(6px);
-      padding:8px 10px;
-      border-radius:12px;
-      font-size:12px;
-      cursor:pointer;
-      box-shadow:0 6px 16px rgba(0,0,0,.10);
-    }
-    #fsBtn:hover{background:#ffffff;}
+    .insights{display:grid;gap:4px}
+    .insight{display:flex;justify-content:space-between;gap:6px;align-items:center;padding:5px 0;border-bottom:1px dashed #e5e5e5;font-size:.65rem}
+    .insight:last-child{border-bottom:none}
+    
+    
+    .footer{padding:8px 10px 10px;text-align:center;color:var(--muted);font-size:.62rem}
 
-    #bottomBar{
-      background:#fff;
-      padding:8px 10px 12px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      border-top:1px solid rgba(0,0,0,.06);
-    }
-    #labelBtn{
-      border:1px solid rgba(0,0,0,.12);
-      background:rgba(255,255,255,.95);
-      padding:8px 14px;
-      border-radius:12px;
-      font-size:12px;
-      cursor:pointer;
-      box-shadow:0 6px 16px rgba(0,0,0,.10);
-    }
-    #labelBtn:hover{background:#ffffff;}
-
-    #chartPanel:fullscreen{border-radius:0; width:100vw; height:100vh;}
-    #chartPanel:fullscreen #fsBtn{top:14px; right:14px;}
-
-    .legend{font-size:12px; color:#444; margin-top:10px; line-height:1.5;}
-
-    /* ✅ Bandeau d'alerte environnement (preview Teams/Outlook/SharePoint, plotly bloqué, etc.) */
-    .envwarn{
-      display:none;
-      position:fixed;
-      left:12px;
-      right:12px;
-      top:10px;
-      z-index:9999;
-      padding:10px 12px;
-      border-radius:12px;
-      background:#fff7e6;
-      border:1px solid rgba(255,165,0,.35);
-      color:#5a3b00;
-      box-shadow:0 10px 26px rgba(0,0,0,.10);
-      font-size:12px;
-      line-height:1.35;
-    }
-    .envwarn.info{background:#eef6ff; border-color:rgba(30,136,229,.30); color:#063a63;}
-    .envwarn.error{background:#fff0f0; border-color:rgba(229,57,53,.30); color:#6b0d0d;}
-    .envwarn b{font-weight:700;}
-    .envwarn .closebtn{
-      float:right;
-      cursor:pointer;
-      padding:0 6px;
-      border-radius:10px;
-      border:1px solid rgba(0,0,0,.12);
-      background:#fff;
-      margin-left:10px;
-    }
-
-/* ✅ Décale la barre d'outils Plotly pour éviter le bouton Plein écran */
-#chart .modebar{
-  right: 120px !important;   /* décale la toolbar vers la gauche */
-  top: 10px !important;
-}
-
-#chart .modebar-btn{
-  margin-left: 2px;
-}
+    @media (max-width:1280px) { .layout-main,.layout-cal,.kpis{grid-template-columns:1fr} .mini-grid{grid-template-columns:1fr} }
+    @media (max-width:900px) { .app{padding:6px} .grid-2,.grid-3{grid-template-columns:1fr} .filter-pop{left:0;right:auto;width:min(230px,calc(100vw - 20px))} .drawer{width:min(100vw,320px)} }
   </style>
 
-<!--[if gte mso 9]><xml>
-<mso:CustomDocumentProperties>
-<mso:_dlc_DocId msdt:dt="string">SPEEXX-1335365678-194060</mso:_dlc_DocId>
-<mso:_dlc_DocIdItemGuid msdt:dt="string">7591349f-1e84-4880-811c-28f101fabfbc</mso:_dlc_DocIdItemGuid>
-<mso:_dlc_DocIdUrl msdt:dt="string">https://speexx.sharepoint.com/_layouts/15/DocIdRedir.aspx?ID=SPEEXX-1335365678-194060, SPEEXX-1335365678-194060</mso:_dlc_DocIdUrl>
-</mso:CustomDocumentProperties>
-</xml><![endif]-->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
-
 <body>
-  <!-- Bandeau env (auto) -->
-  <div id="envWarning" class="envwarn" style="display:none;">
-    <span class="closebtn" onclick="document.getElementById('envWarning').style.display='none'">✕</span>
-    <span id="envWarningText"></span>
-  </div>
-
-  <div class="wrap">
-    <div class="panel">
-      <img src="./favicon-180x180.png" alt="AO Appel d'Offres" class="panel-logo"
-      </p>
-
-      <div id="filters" style="margin-bottom:10px;font-size:11px;">
-        <div style="margin-bottom:6px;">
-  <b>Catégorie</b><br>
-  <label style="color:#E53935;"><input type="checkbox" class="f-cat" value="CAC 40" checked> CAC 40</label>
-  <label style="color:#1E88E5;"><input type="checkbox" class="f-cat" value="Entreprise privée" checked> Entreprise privée</label>
-  <label style="color:#43A047;"><input type="checkbox" class="f-cat" value="Ecoles / Public / UE" checked> Public / Ecoles</label>
-</div>
-
-        <div style="margin-bottom:6px;">
-          <b>Produit</b><br>
-          <label><input type="checkbox" class="f-prod" value="Langues" checked> Langues</label>
-          <label><input type="checkbox" class="f-prod" value="Coaching" checked> Coaching</label>
+  <div class="app">
+    <header class="hero">
+      <div class="hero-left">
+        <img class="hero-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABLAAAAGxCAMAAABFm7//AAAAYFBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/eQAAAAD/eQAAAAD/eQD/eQD/eQD/eQD/eQD/eQD/eQD/eQD/eQD/eQD/eQD/eQAAAAD/eQA+bZUBAAAAHnRSTlMAwIBA8BBgMNAg4KCwUIBwQJDwEDDQIJPAULBw4GCpC/cXAAAbqElEQVR42uzBgQAAAACAoP2pF6kCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGD24EAAAAAAAMj/tRFUVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVYWdu1tqGwaiALySVn+WHNcNKVCY9fu/ZUu5AKaheJNdW6n9PYBHA87RHo/s3Vq8+yDDbrfbNSW7YEdjEp3VGTPa4Dw0zblg3+mdg+b4l0U2v8pXzvX2vdDuUnfbkXtbE81kytBibLmhGKRzTLV9GzOiG6xJRI2v8o8YPl9qMjZE2O3W4KxBYksltPTrsoa+gHWIsKIcSqIvobHrTzA5jIa+Zmzf4L61+5/FwdDlurGHBvQFaR4s6yzY96Wj+eqQYTX9yFmqGfZJa7eQOHZ0Law9XCXYmeC8bDv6o9nM8qESW1ols3yoeMG2FYEtWq4IlxgsS4C/PR2YjnCJA9MP2JZsO5KBJcLlDM0E58RCfJ3NsJhQ6UImwLJcQbpMCh6YEjEluEBPPA7+9jgx3V+UVxPPA2xKb0hSCqsEVjR0oRJhCXlEugJaD0vx121gWDKwZCQmC2weiWWEc+4npkdgu5t4vm9qwAodSeusXzqwfKErGAfaXKWrlQxLyEVgqQ44BuKKwFVFhrjjMzdNjsB1YmfidoSONOCwbGAN2HYWOEO/3URk5UIiTOb955mSciHEKDT+TD+1C+E9bIbrSEvXLxdYWSIOPk6FTcbVuWLYaFy9KLmhUsgthINYnkyPuoXw+Qgb4StpMnmhwAooFbEqciVJGECNH0kSWs4AxOU0C6ERbGzff6gWwm+wET2SLhwWCaxCUqoHcd4S0eo7wTwDkrAUGYnC1HnFQujhc3ffJ54HzUJ4gG3wlfRVrx5YPpGczsGL1ks3DqAgJlJgGZ2NadQrhD38y9PE9KRXCE+wDTHREjAqB5ZPJMq2XLHeGA/SLDFoDFlOsRRWYinwbw96pfDEvPIdbEKPtJCgGlgR6VWTtdB1pAXdzWxgGGCeUa0U9sLXPaqVwgN7dtuEQMuxioEVkcSl3PrM8moAQQFJUYFZfEdMVacQRvjK48R00CmEP2ETAi2pqAWWT6QAI0jwhnQVkOIL6Uoe5ojE1cMcVX6LvZ+Y7lQK4TZONARaVlEKrLe8ajCxIpK25EFETqQtRZ2ZFL18IUwww/FZ4+H4YT/i3kBeEY06gVXpTWuJ9VnHajCxIpI+jDpvQVfxQogZ5vimUArv9iPujPtTU9AILEvvtZVYAy0ixdYfXzH/pBHlb60q9GxQvxSe9iPujP1GlZMPLEcftZRYhc5rbZ1LztsYVZIes2whrGon0k9H4UK4jRMNhtaAWXZxZ4K3oSQotBjMN5JXRBhV7k8jWwg944inbIO724+4q3UVviQdWJXOa+D5UKHPtbROgbyST6yMsuc7qt4Lik+T6Ft/p/2jfYzbQZ2VDayetJmbyCui5G8kr2aOg0H0qj2xjMDxIPldhcP+0b4zKq0mSgaW60jdeBN59Yu9K9qOE4SCwgUURKmNNk1OYv//L9uHnu5D4mYXZlw95b6XGpedneEOc9c1ngWvbgTXCPxpsYYJ/j++Z4hCkCB8b/6HkvVxpQ57wLZVw/Hs7Z9Wfxa8um0TWGA0VuTGmL7gorGWanE/GiC4gz/fhzL+FCCw8WahvvJdaesAY+8D++b7KyoveawW94MRrHUN9mSAtXYnecOmPYkf70baOoE+KGvYp5ZPb5jLf3MN7TsgHuijP+CH0ifpadyRZQfI5aHTVhswH1TkO0S+YUThUi3uKA1g1JRE7GUziaRJmayl7NkAa21PAQLrGs/TfukoRLUtF4RDk1PPCFE41tA+TP+q25w97nPGArvTAZY6doPwUsNJ/Hg30lYN4JjW7NFsfVrKo7HmanH/tAx46om7F1/C6QBrTUc/cP9bxh7/wP0e2tqVn+ZHpqq+1Fyel7zU0D5Ay0R5/Pwq2QmwOqV1kj/ltI6qDAgOf4CVQRBsWB9YHQVRpWy7S5NbY2le8lgt7gDBkhgpwP0OgBWTfNj9Ke5gH+0yVeekL2eEIkkrQxeFUybS9HoQ/+9RnVaBJgpToSi0Bvwxb9fPMlE4V4s7QBE6zvQdSwYs5Tb+B+ty1/ZEx2in5VN6kRSgU4g1X4RJNs4ySe9UlflnI4D0IQ3v25puqaF95SRbk5ibowJW7wlDjXuWIAzaX1kuAVr7MEFopvbKcq5j9DK8KeGYw54pPe+/CkbdjNXRUM6xO5bWjETA6j1nBrNQPG7hSw7rAokLTnc/qkXP4hdKNJbNFYSpKavX/LzkuYb2AYw3A+t0zNAAKwhrvFlkDJJyN6lMw+CCbca8eXRuaaBYxWLmP1VNYT19z86yWqrFfaNCxnbCawwhAVZveQOv8d7syd46LfDhXDByXqyj3IIe8gShbUrrJTcveayhfRtlAS0TwCmu5gCWY8Yp9OBFjZBauwrOBQ3rxQbAo25CjzUZMFdWz3micK4Wd0RnyPFuKSoGYBnhBip4KBfoLC2uRrBMew0t7cU6OFxftlfcf77j01tWNNZS59IjdpMQ4ZAAWKYlR8Bo5Bert7ynVdjlOuKjBk4/M91NzIJtEDXn5CWP1eIO+aUW4glZiweslh1aZZrr5am/5z30VQRm+LJDUyzJCIOwhrh7tmu8Py95rqF9mF62EJd3cMBy/FEcDgYpPbe/2wMhpbPUXdZxPPmqiVj2TBv79dwsNbRvuxQXsASyQdRe0es90uhoASCAEkYeRrCMJW8z4Vx4Qlnc+Yb312pxv1KK7KODfPcV4CYtJbnKY9S2seyGiYYRrJY9likeIFciI7QPNvarzqW/WoocDdQhAEYBdhzFPZkwLUKh6/mA4iuJf6HCP36qx/Zfyb8FXS3uuAacJ64PWARxBKFhPM6B1CsGEwcMVVM7bDT98GDv2GwV3/BeQ/uulyFbU6aHAFZosiugNGG3QwPdYb6DPeDvxenXAFCZpNRDvuG9zqX/othxZk7dWB4JWLLXCKEEEJdul4tVFtEd0LtweQGrTNzu4Rvea2jfb/bOdLltGAbCBA/diqpO0nOKvv9bdia94tqqTYGAQBvf/8SybK8IcrG4gsDWkPxYHxB7sY6+agEZ3+9S4J/EJNJTMbJ8LQgVupzh3UL7Cn/o3SGKBZKPyFCmJowMF0t5ma5A8eplPsVI2MKTmJvPN/bL5tJfBRj6846+SBB8tYbaoDs4Ep4urb3Q3k5TvO14RgZaR4BoeDeL+ytKDuDELrJxJOYSB0qj0MX29JpwkaqVYnZNSDf7q/l632Jft7n0BG83LWXuSMGKghFhGIk/zpik7s1Ergh7qTaw4bgxP+CYeL7ubbC59Fz+OxCWLJDdNF3oFcQsFmLSUM8Je7F2lbZ8WRbwFZ0W90uGd7O4E2lwF8PSOzlAdhOixwwW2sJ1lktgnInyvMil2/rCqzbaPVJpeH+k0L4yPVlTk5wQkKWlsjn3E+mnGQVvzkp8s71cNAhkdn8qtbifdUGbxZ0OEpiE1llArgiFE+d6wV/IQlRywp/zHWcwPHEJPQcKDe8PFdpX0n3XrXNy3IDwsXTCDNKxZZZracaGIBkZzOGk84io1uJ+yhezuBd6QCsXLeA7I6SnLQVKmRUk5x7NpN974+gAh7mgU2xx/9fwbhZ3Mj0WoRub86VNLRk4pKe2p2iI6GTJlXRvW8n7CgxZW5RTUGWG9wcL7WN6QGEEH5J7Qy0pg6TT8oniFBBdIwPJzSl7X0k3gGVmiaIu6Ad1NPy7w6x3qQXinRW0B/NMkBDOTSzKHw+uBDwfI+gL7dvixUL7CHC1kEbw4SjB0vCKHm/EH64CjawFvGPZMeujYov7Kc9mcefZWFC1FQ/i37uVsKbLuN4xlICiAh5vpAslAB4pn/WF9m3xZKF9CpdYhUULxE96ZtIxYUSdrJdurU7AZTFptrif8sks7kqXWL8oUB6C+E5ESzomRKXApfNMnUSGhy7RZKbD8P5Qc+m3GJCXOP5t41Ex1e46FMEKqJTBVaOt6PIImi3up3wzi/t/UDDk7Sew9BKC1cubPeB8I1srrhptzX7yrPpC+7b4YqF9uovC33RLYhcsp2Cf36NWQj2CNWfPwdYX2rc59stC+6hMKMM086rHcICEx/NsGa2EerQ1W0RazRb3U96ZxZ1K6lCIwfeMggVHrDlrOXlD9PUI1upy8fpC+7b4aBb3ehQLcWz1C1Z4DMGaUCvgsuk0W9z/6YI2i3tNioUQ+MacywtWqOXkDad6tBVcNm1UF9q3xbOF9tWlWAi9bsFq71KwoB7BQpfPotnifsqTWdzJJEBJxqRZsNxjCJZW3+jO817QF9q3xYuF9tXibvhNbMp/DxsFgpVQLbEa3+g+weojwUsry4f3NueZTogoCfSlBSscIVi+Fm8TYkWC1bodeO0erDeCZR6sAqQJJYmzCdYVHlawgttBp93l/odP5nIvQxhQktUE6/+YYGXgtfcR/uGr9REWw0cUZEomWHKkuxasVufsiYuD6232RDmSqGR1SaVgwV0KVj0Hmns+yk7ndK8LvNh0r3olq0saBWswwcrkcMHy2tNG//Bk4TKlSc2AUnRJoWDdZ0l4z4LV6pxQf4Fnm1DPQRgjyjCZYG1ignUrXQ0Bya+8WEAyD6mZUITVBGsLE6wbWWsYQfHKk42geEOdmjXX7HQ3wSJDF6xQw5CvV55tyBcvqeGvDWOquJfQ16sCqJeQGThawxjVn9EyNkaVn3YBZGVUJlgJb6epVwUUNz+HfQWh+hS/jzaoXojgAfkIugTrPvOwMNUTLxN2fVzqc5L/xiNbTrIA7TIOyALUmzhakWBVlIcVdhWE2idRvCkIbRKFEGlmWWoFVYLV5Fx5PSpQT0Qyhj0FofpZX38LQpv1dQ3lSy0oIVjRHRANlo6vYPfiVZ6j5RJY/cvKCkKLxtpNP68dlqPVNJdwJCxbRhMsIuQ59Uq7oC9NJLQuaFHSvHbs7lGQX9cDQbC82p6QM+Z7EKwJz1DaBX1h5rN1QcuT5nVAOoPbAuSbLCKhll3qUYGQUWxrZUN0FUZjff5+hnVBH0S/THw1IYif9STK5ltQd5Ze4n06pVwoCJV2QV8oCK0L+kjmMfIcLIP4Vy5QLruvSAXwZnqnkwnPUNoFfaEgtC7obBRpFhQQrMEVYSF1deQcMLKhd76H01kQcndBf/t+hnVBK6AB3EuJHfAkfkgYalaBUWG3XX5BWENR+IO9a1FyGoaB8TOOnRACHJRjMP//l0AZmAG3XJOVFBu8H8AF115rZa30Y0xOF4UVYkrESSwlHtTHjGilBHSXEIZupwTj0a1RqQv6UlJOd0HXAqctZQZBSRfTTFhcqCsq/XkBpp0XzQele6Uu6BtjcroLuiIcirI0AWEFaWOOapoFXNN1DXcmPVfYGuuOIOytserBgQGHiSLun4RTWFvbxQKx5WdClQtU6oK+IQi7C7oyuJnqclPSSQibM5SGCnU5bv+GuZ182yOCsFIX9A1B2F3Q9WE7g7Bm4afyse23t3VH/FsZ7gjCCltj3emK3Ftj1QZ9AmHliUIRYqkdX8EzOvlwrDhUBpULVOqCvjEmp7ugq8RMcrUp4Ydpi5Ls1FDpqG1Hvr4YG1bqgr4xJqe7oA9g0o/Bi9X1AYRFGAl4PEUb2skMze3UYLwYGtbpgr4lCLsLmrEGR0kdfgsQFuH9qPAM7daOJvSNasKQGZGaEIRXUfgfFbwbiY1qhXNYeCXNSMCxSzuacKqoXxRfejRYGRc0Lgifuwv6LiSKhZIwYeFp90TxJmlFy3429QhGNFRJA45VPYKFWhCOy1ku6Nd7a6tedRf0PUgQgD+BsJKYLSd7mPWiVJBk8eT1JJXjn4gFod7dhmaWGpNTFio8dRf0HUSB+NicQFjZiD1sOryUywvJo4QztBbKmAVqQXigr8N6ypic5wNJ+qf/puBdCexTQ3CrKUE/mCGqMbRyIZaz2LUTBJ3BESALQBAe6Jxlp1ME4TXr1V3QmG4JMGHh5mep6zEQ/Z0kd5cnkBdXudezlUR6ur2C8FBvUnWKILziqbugscDatUZYdkKXBD1ZRizBa9AqKgeIbRYzzUxr+QoHrTzrGYLwine9NRZ2qFahEcogYeHX40j3V6JQgtdZOGqZpXx2gSSrZ46amVdpF/THo90XXnUX9C04gW26yXUcxfNuLuZd8ETOEcRLEHBuNbQ+O1QmW9ofSR/eSEFqTE5pZX7qLmgoCjAiOSFSl6vnt9NaR+RKsiN7HtJTdYRe2D9VkwrCCPR30EJjcsow6d2b3hoLyQwriaqmgPEITgKJtN4rSZjXEslTpAfWlX51J1JBaBDDtIEEIdJ54VN3QUMbdRFIYieIsPCTlYBOb2gFanC8PRI1nUfdjrx8lUgF4QZtpegQQQjZmC/dBV1iYn/JihQiTmUJxkrUif3EzVhToPr5NLCu1O1nDakgdFjTv01MEF6KLvC9NRbCJzN/lcBE3qnNE56oEp7U5BN208BigeAVaQNkdyulMRBdAwuq6VapWdCfUb751F3Q0H21cjexjUAuHL4gx5j3IhLHbHbf2XAbpR1cs5Yoaaq0kQMCJOBhBRiTAyi6S3dBFxjBgIKyInkDCAuNWzRL+DbtpVe3I7yKQHYQZwK1ozLXBDKdPeMpqJFjFjTMNpebnNdd0FiOiddHvPA0706OYiJZiciQFrP+UQ6A29yjUslqngmVhlgQ4peTB8bkYAmoT90FXUDzlaW4nYqIa9qA1RNw+KF97OxuGvQAXUG/W8Q/FaerrKgFId6axk5CgrDEpbugMdWiHNUTVomNcTxKWu5+5RrzIUQuqRlX93cS9CFzpGFM3g27TS/o1pm0UmQG/t+AKFRigrDkve6CBhPDfv8TFr5VVYZhky8Pl9EhH4Vn7Dw+r/eIwC3JcrWumPMBhPXu73bkUxOlIFyorpGVe0zO+7vKsrug0YtVmYeS+aQtrFQmgVWb9uYHtJ5DBqBIl7dEnLX5g7WmRSsgFmSbS2pvfKo59qnWEX7fDFwjWOHZuyPPe10Uco2jVP7FU5poIxaVq8PIYf4uEJRK+jtmFfiH7K0ZQPz5qUmpfBSrkNFz5J0F/QQUUBWisLugKXIXfzmv0xoOhQFNEdYGNIAQxlzBKGWIF/CKT1wUak5B+O7vz43dBU1iLU7+Bmm5w1khX/NBKmBdHQM/gU8FRBcbRi5BiOcWRyFBWOLSW2MVD4VHoWatzU9oreJxQVH1zY/5NXQGIPupSz4Tmk0Q4roiOilBWIrC7oIu0iynwzRFWNfbuw2lNbezFTgFYYmNKwnwARWEpSjsLujK0ix5rvfE30B0zaxvdDUNgD9cn4kLQvxHMcCYHMwAeOmtsYD4mAPWNUVY+3sV2HwSxgMd4mGcn8W0jn7TW8cxJufpobL57oKuSAl8w1KxpiqhORslkpNAK+SaKNOAK8emnzkE4evHWpd2F3Q1SqDYqxhh8auveRhaYaxfC1t/4j1QPrQqHqW+AIIQq/N87q2xqlECOQdHSFhaZ14Ex+eAoieBVsi1yLXhbmUGUTgBghBy0rx90wveK1EChe8BJawjwWJVIxgoqbUVxrKjgCDERaESE4SlKOwu6CqUQJEXhgmreFCqg68AxgJe3RphLDuKCEJcFK4ArWBx0HN3QQ+n36tX+IGWsHipdxmGRhjLju3shWUQEYT4LW1HVLiVpNJFYSO7tOArGsJiLS33zbzF2rGdveAHIUGIt9QJlFHQ631DDrsLugLG8gM1Yf0Ry1TEV39f4Kr4qmhnxgjrBzFBiD82aSFBWOK5u6BPz7xbM9AT1u+MVRNfydFAHJvZC3akTTNNzKnbUUoQlv9+d0ED4+MYjxVOWL8Yq6qg5eUFPv19cMfII6FV3YAIiEcUOiFBiIvCz8O/DzdnMSg3cBHWlbEq5CuZBU6uGf9DIG6qEPgrEDfAoozFP8/dBQ3Z4nGHCx9hXRmruqCFdYHLJahfwSbquoNRoJ7HAH4/KMP09k13QZ+mWqIZeAiLhxi2ZhbYGsqAW2UA+ESTTYKrZ4qq/IvEG97HL7011lf27ke3TRgIA/h3/m9jl6BlnVRN3vu/5VSaRUtJUwj2xVX9ewIHiQ+fuSPXCJVrmzRqBxakyoWohE818km/qFHUqHItzgMMBWH5ojAyFYRLL30K+iofc1VkgfqBBe9yEeRRmKV8odVkrXnoJoAGCsK7uk0SV0G4LAr7FPR1knI1IQEMgVVqK6NGVGBC/qe90/ZL0uXyyJcfDRBc/2qgNFdBuCwK+6exmCMrGIAtsGCpzRAAdPHCmyTOGk/XkCqchjvcy6t93alPfB1SL30K+kMy5uKcATgDCzCqzRCYI6veg6DlyFKiytGSZXxzO+I/R64e9Lko7FPQH/OTyiUNEmAOrDkXWoyr09K+RFwVjSwlNNaInC9yac+nMH5yNnQe/vQp6FtMzIW4UQM8gbXMhRbjamZc3o8MGCTiTNa0o9mAoSh0OHvi7Y761aegb9MmlkgrD4ApsJb0GPI2arDgYQeVLzS7UngRmLbY2wtCydzOK3ByZO4///G7T0F/Rqch5LupaDwA1sBaSkNeLxoNRun+zIoGrOSepWqs5uU2FjvJrXDyfNjmiJ2eDxt9iwmdBW8GlzcLcbQA8PjAmreKal2+arBLU7hjb5U0+NnJ5QvNXtTuu5PjQHklF0XyANBKYL2SgvINioTEo3gzhA0JMFo8jDbvQqvZi9p1WhoxEal8naMoRmkxay2wXlkzUVjeVcMyX/lpKaLLtwVqYaWrnl6BhLHoujZ4ORuFEEnOcNZuYL3R88pPC2+sXPFvj4TLn01EkxhlY/e/lkYIevf4ckSDELLvq7q/7NQxEQAADAMh/66roeNfQASbXmEBPAgL2CUsIENYQIawgAxhARnCAjKEBWQIC8gQFpAhLCBDWECGsDh26oAEAAAAQND/1+0IdISwISxgQ1jAhrCADWEBG8ICNoQFbAgL2BAWsCEsYENYwIawgA1hARvCAjaEBWwIC9gQFrAhLGBDWMCGsIANYQEbwgI2hAVsCAvYEBawISyInTooAQCGASA2Nph/ybXQ70EiImQIC8gQFpAhLCBDWECGsIAMYQEZwgIyhAVkCAvIEBaQISwgQ1hAxr9r7wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMMeHAgAAAAAAPm/NoKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqrQHBwIAAAAAgvytJ9igAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAE1Qf11nzgJESAAAAAElFTkSuQmCC" alt="Speexx logo">
+        <div>
+          <h1>Dashboard de suivi SQL</h1>
+          <div class="sub" id="workspaceSubtitle">Vue active : Jérémie</div>
+          <div class="sub"></div>
         </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn dark" id="resetDemoBtn" type="button">Tests</button>
+        <button class="btn dark" id="topExportCsvBtn" type="button">Export to CSV</button>
+        <button class="btn dark" id="exportJsonBtn" type="button">JSON</button>
+        <label class="btn dark" for="importJson" style="cursor:pointer;">Importer</label>
+        <input id="importJson" type="file" accept="application/json" style="display:none;">
+      </div>
+    </header>
+    <div class="tabs" id="workspaceTabs">
+      <button class="tab-btn workspace-btn active" data-workspace="anais" type="button">1. Anaïs</button>
+      <button class="tab-btn workspace-btn" data-workspace="jeremie" type="button">2. Jérémie</button>
+    </div>
+    <section class="panel">
+      <div class="tabs" id="subTabs" style="margin:0;padding:8px 8px 0 8px;background:#f8f8f8;border-bottom:1px solid var(--line);">
+        <button class="tab-btn subtab-btn active" data-tab="tabTableau" type="button">A. Tableau</button>
+        <button class="tab-btn subtab-btn" data-tab="tabForecast" type="button">B. Forecast</button>
+        <button class="tab-btn subtab-btn" data-tab="tabCalendrier" type="button">C. Calendrier</button>
+      </div>
+      <div class="tab-content active" id="tabTableau">
+        <div class="kpis" id="kpis"></div>
+        <div class="layout-main">
+          <div class="stack">
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h3 class="card-title">Actions</h3>
+                  <div class="card-sub"></div>
+                </div>
+                <span class="badge">Compact</span>
+              </div>
+              <div class="card-body actions">
+                <div class="action-tile">
+                  <h4>Nouvelle opportunité</h4>
+                  <p></p>
+                  <button class="btn primary" id="openFormBtn" type="button">+ Ajouter</button>
+                </div>
+                <div class="action-tile">
+                  <h4>Filtres</h4>
+                  <p>Les filtres mettent à jour le tableau.</p>
+                  <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">
+                    <button class="btn soft" id="openFiltersBtn" type="button">Ouvrir</button>
+                    <button class="btn soft" id="clearFiltersBtn" type="button">Reset</button>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        <div style="margin-bottom:6px;">
-  <b>Année</b><br>
-  <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-    <input id="yearMin" type="number" value="2012" style="width:58px;">
-    <span>–</span>
-    <input id="yearMax" type="number" value="2027" style="width:58px;">
-  </div>
-</div>
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h3 class="card-title">Résumé</h3>
+                  <div class="card-sub"></div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="summary-list" id="summaryList"></div>
+                <div class="mini-note" style="margin-top:6px;"></div>
+                <div class="chips" id="activeFilterChips" style="margin-top:6px;"></div>
+              </div>
+            </div>
+          </div>
 
-        <!-- ✅ Filtre Owner -->
-        <div id="ownerFilterSection" style="margin-bottom:6px;">
-  <div id="ownerToggle" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
-    <b>Owner / BDR</b>
-    <span id="ownerArrow">▼</span>
-  </div>
-
-  <div id="ownerBulkActions" style="margin-top:4px; display:flex; gap:4px; flex-wrap:wrap;">
-    <button type="button" id="ownerSelectAllBtn" class="owner-mini-btn">Tout sélectionner</button>
-    <button type="button" id="ownerDeselectAllBtn" class="owner-mini-btn">Tout désélectionner</button>
-  </div>
-
-  <div id="ownerFilters" style="margin-top:4px;"></div>
-</div>
+          <div class="card table-card">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">Opportunités à suivre</h3>
+                <div class="card-sub"></div>
+              </div>
+              <div class="toolbar-row">
+                <button class="btn small" id="exportCsvBtn" type="button">CSV</button>
+                <span class="badge" id="rowCount">0 ligne</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="selection-banner" id="selectionBanner">
+                <div id="selectionText">Sélection active</div>
+                <button class="btn small" id="clearSelectionBtn" type="button">Effacer</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="min-width:50px;"><div class="th-wrap"><div class="th-label">Choix</div><input id="checkAllVisible" class="row-check" type="checkbox" title="Cocher toutes les lignes visibles"></div></th>
+                    <th><div class="th-wrap"><div class="th-label">Entreprise</div><button class="filter-btn" data-pop="pop-company" type="button">⏷</button><div class="filter-pop" id="pop-company"><h5>Filtre • Entreprise</h5><div class="stack-mini"><div class="tiny-row"><select id="hCompanyMode" class="tiny"><option value="contains">contains</option><option value="equals">equals</option></select><input id="hCompanyValue" class="tiny" type="text" placeholder="Filtrer"></div><button class="btn small soft" type="button" data-close-pop>Fermer</button></div></div></div></th>
+                    <th><div class="th-wrap"><div class="th-label">Produit</div><button class="filter-btn" data-pop="pop-product" type="button">⏷</button><div class="filter-pop" id="pop-product"><h5>Filtre • Produit</h5><div class="stack-mini" id="hProductFilters"></div><div style="display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;"><button class="btn small soft" type="button" id="hProductAll">Tout</button><button class="btn small soft" type="button" id="hProductReset">Reset</button></div></div></div></th>
+                    <th><div class="th-wrap"><div class="th-label">Notes</div><button class="filter-btn" data-pop="pop-notes" type="button">⏷</button><div class="filter-pop" id="pop-notes"><h5>Filtre • Notes</h5><div class="stack-mini"><div class="tiny-row"><select id="hNotesMode" class="tiny"><option value="contains">contains</option></select><input id="hNotesValue" class="tiny" type="text" placeholder="Filtrer"></div><button class="btn small soft" type="button" data-close-pop>Fermer</button></div></div></div></th>
+                    <th><div class="th-wrap"><div class="th-label">Date qualif.</div><button class="filter-btn" data-pop="pop-qual" type="button">⏷</button><div class="filter-pop" id="pop-qual"><h5>Filtre • Date qualif.</h5><div class="stack-mini"><div><label for="hQualDate">Equals</label><input id="hQualDate" class="tiny" type="date"></div><button class="btn small soft" type="button" id="sortChipQual">Tri croissant : Off</button><button class="btn small soft" type="button" data-close-pop>Fermer</button></div></div></div></th>
+                    <th><div class="th-wrap"><div class="th-label">Next action</div><button class="filter-btn" data-pop="pop-nextaction" type="button">⏷</button><div class="filter-pop" id="pop-nextaction"><h5>Filtre • Next action</h5><div class="stack-mini"><div class="tiny-row"><select id="hNextActionMode" class="tiny"><option value="contains">contains</option><option value="equals">equals</option></select><input id="hNextActionValue" class="tiny" type="text" placeholder="Filtrer"></div><button class="btn small soft" type="button" data-close-pop>Fermer</button></div></div></div></th>
+                    <th><div class="th-wrap"><div class="th-label">Next step</div><button class="filter-btn" data-pop="pop-nextstep" type="button">⏷</button><div class="filter-pop" id="pop-nextstep"><h5>Filtre • Next step</h5><div class="stack-mini"><div><label for="hNextStep">Equals</label><input id="hNextStep" class="tiny" type="date"></div><button class="btn small soft" type="button" id="sortChipNextStep">Tri croissant : Off</button><button class="btn small soft" type="button" data-close-pop>Fermer</button></div></div></div></th>
+                    <th><div class="th-wrap"><div class="th-label">Statut</div><button class="filter-btn" data-pop="pop-status" type="button">⏷</button><div class="filter-pop" id="pop-status"><h5>Filtre • Statut</h5><div class="stack-mini"><div class="tiny-row"><select id="hStatusMode" class="tiny"><option value="contains">contains</option><option value="equals">equals</option></select><input id="hStatusValue" class="tiny" type="text" placeholder="SQL / RDV / Chaud..."></div><button class="btn small soft" type="button" data-close-pop>Fermer</button></div></div></div></th>
+                    <th><div class="th-wrap"><div class="th-label">Pond.</div><button class="filter-btn" data-pop="pop-weight" type="button">⏷</button><div class="filter-pop" id="pop-weight"><h5>Filtre • Pondération</h5><div class="stack-mini" id="hWeightFilters"></div><div style="display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;"><button class="btn small soft" type="button" id="hWeightAll">Tout</button><button class="btn small soft" type="button" id="hWeightReset">Reset</button></div></div></div></th>
+                    <th style="min-width:54px;"><div class="th-wrap"><div class="th-label">Suppr.</div></div></th>
+                  </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <input id="search" placeholder="Rechercher… (ex: Air Liquide)" />
-
-      <div id="listSection">
-        <div id="listToggle" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
-          <b style="font-size:11px;">Liste des entreprises</b>
-          <span id="listArrow">▼</span>
+      <div class="tab-content" id="tabForecast">
+        <div class="forecast-shell">
+          <div class="forecast-topbar">
+            <div>
+              <h3 class="card-title" id="forecastTitle">Forecast</h3>
+              <div class="card-sub">Vue ultra compacte synchronisée avec la liste.</div>
+            </div>
+            <div class="forecast-tools">
+              <select class="forecast-add-select" id="forecastAddSelectJeremie">
+                <option value="sql">SQL</option>
+                <option value="rdv">RDV</option>
+                <option value="chaud">Chaud</option>
+                <option value="relance">A relancer</option>
+              </select>
+              <button class="btn small primary forecast-add-btn" data-owner="global" type="button">Ajouter</button>
+            </div>
+            <div class="forecast-legend">
+              <span class="legend-item sql">SQL / SQL to Nurture</span>
+              <span class="legend-item rdv">RDV</span>
+              <span class="legend-item chaud">Chaud</span>
+              <span class="legend-item relance">A relancer</span>
+              <span class="legend-item nostatus">Sans statut</span>
+            </div>
+          </div>
+          <div id="forecastBoardJeremie"></div>
         </div>
-
-        <div id="list"></div>
       </div>
+      <div class="tab-content" id="tabCalendrier">
+        <div class="calendar-shell">
+          <div class="cal-head">
+            <div>
+              <h3 class="cal-title" id="calTitle">Calendrier</h3>
+              <div class="subtle small">Base : Next step, sinon date qualif.</div>
+            </div>
+            <div class="cal-tools">
+              <button class="btn small" id="prevBtn" type="button">◀</button>
+              <button class="btn small" id="todayBtn" type="button">Aujourd’hui</button>
+              <button class="btn small" id="nextBtn" type="button">▶</button>
+              <div style="width:1px;height:18px;background:var(--line);"></div>
+              <button class="btn small viewBtn" data-view="month" type="button">Mois</button>
+              <button class="btn small viewBtn" data-view="quarter" type="button">Trim.</button>
+              <button class="btn small viewBtn" data-view="year" type="button">Année</button>
+            </div>
+          </div>
+          <div class="cal-body" id="calendar"></div>
+        </div>
+      </div>
+      <div class="footer"></div>
+    </section>
+  </div>
 
-      <div class="legend">
-        <b>Légende</b><br/>
-        1) <span class="badge b-red">Rouge</span> CAC 40<br/>
-        2) <span class="badge b-blue">Bleu</span> Entreprise privée<br/>
-        3) <span class="badge b-green">Vert</span> Écoles supérieures / Public / Européen
+  <div class="overlay" id="formOverlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+      <div class="modal-head">
+        <div>
+          <h3 class="modal-title" id="formTitle">Ajouter / éditer une opportunité</h3>
+          <div class="modal-sub">Nouvelle action sur une entreprise existante = nouvelle ligne conservée.</div>
+        </div>
+        <button class="close-btn" type="button" id="closeFormBtn">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="oppForm" class="stack" novalidate>
+          <input type="hidden" id="recordId">
+          <div><label for="company">Nom de l'entreprise</label><input id="company" class="input" type="text" placeholder="Ex. Test 1"></div>
+          <div class="grid-2"><div><label for="product">Produit</label><select id="product"><option value="">--</option><option value="LT">LT</option><option value="BC">BC</option><option value="MT">MT</option><option value="IT">IT</option></select></div><div><label for="weight">Pondération</label><select id="weight" disabled><option value="">--</option><option value="0">0</option><option value="0.25">0,25</option><option value="0.5">0,5</option><option value="0.75">0,75</option><option value="1">1</option></select><div class="small subtle" style="margin-top:3px;">Calcul automatique selon le statut.</div></div></div>
+          <div class="grid-2"><div><label for="qualDate">Date de qualif.</label><input id="qualDate" class="input" type="date"></div><div><label for="nextStep">Next step (date)</label><input id="nextStep" class="input" type="date"></div></div>
+          <div><label for="nextAction">Next action</label><input id="nextAction" class="input" type="text" placeholder="Ex. Relance / proposition de créneaux"></div>
+          <div><label for="status">Statut</label><select id="status"><option value="">--</option><option value="SQL">SQL</option><option value="SQL to Nurture">SQL to Nurture</option><option value="RDV">RDV</option><option value="Chaud">Chaud</option><option value="A relancer">A relancer</option></select></div>
+          <div><label for="notes">Notes</label><textarea id="notes" placeholder="Contexte, historique, prochaines actions..."></textarea></div>
+          <div class="grid-3"><button class="btn primary" type="submit">Enregistrer</button><button class="btn soft" type="button" id="duplicateBtn">Dupliquer</button><button class="btn danger" type="button" id="deleteBtn">Supprimer</button></div>
+          <button class="btn soft" type="button" id="resetFormBtn">Réinitialiser</button>
+        </form>
       </div>
     </div>
-
-    <div id="chartPanel">
-      <div id="chartWrap">
-        <button id="fsBtn" title="Plein écran">⛶ Plein écran</button>
-        <div id="chart"></div>
-      </div>
-      <div id="bottomBar">
-        <button id="labelBtn" title="Afficher / Masquer les noms">👁️ Afficher les noms</button>
-      </div>
-    </div>
   </div>
 
-<script>
-  /* ============================================================
-     ✅ Protections "partage"
-     - Si la page est ouverte dans une preview iframe (Teams/Outlook/SharePoint),
-       certaines politiques peuvent bloquer le JS ou le fullscreen.
-     ============================================================ */
-  (function envChecks(){
-    const envWarning = document.getElementById('envWarning');
-    const setEnvWarning = (html, kind) => {
-      envWarning.style.display = 'block';
-      envWarning.className = 'envwarn ' + (kind || '');
-      document.getElementById('envWarningText').innerHTML = html;
-    };
-
-    // Ouverture en iframe / preview
-    try {
-      if (window.self !== window.top) {
-        setEnvWarning(
-          "⚠️ <b>Ouverture en mode aperçu (iframe)</b> : certaines fonctions peuvent être bloquées. " +
-          "👉 Recommandé : <b>télécharger le fichier .html</b> puis l’ouvrir dans <b>Chrome/Edge</b>.",
-          "info"
-        );
-      }
-    } catch(e){
-      // accès à window.top peut être bloqué → on affiche pareil
-      setEnvWarning(
-        "⚠️ <b>Ouverture en mode aperçu</b> : certaines fonctions peuvent être bloquées. " +
-        "👉 Recommandé : <b>télécharger le fichier .html</b> puis l’ouvrir dans <b>Chrome/Edge</b>.",
-        "info"
-      );
-    }
-  })();
-
-  // ============================================================
-  // ✅ Etat Plotly (évite tout crash tant que Plotly n'est pas prêt)
-  // ============================================================
-  let plotlyReady = false;
-  function canUsePlotly() { return (typeof Plotly !== "undefined") && plotlyReady; }
-
-  function showHardError(html){
-    const envWarning = document.getElementById('envWarning');
-    envWarning.style.display = 'block';
-    envWarning.className = 'envwarn error';
-    document.getElementById('envWarningText').innerHTML = html;
-  }
-
-  function safeResize(){
-    if (canUsePlotly()) {
-      try { Plotly.Plots.resize('chart'); } catch(e) {}
-    }
-  }
-
-  const data = [
-  { id: 1, name: "Aéroport International de Genève", year: 2024, product: "Langues", revenue: 20000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 2, name: "Aéroports de Paris - ADP", year: 2023, product: "Langues", revenue: 30000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 3, name: "Air Liquide SA", year: 2025, product: "Langues", revenue: 240000, y: 5, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 4, name: "Airbus SE", year: 2019, product: "Langues", revenue: 66000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 5, name: "Alstom University", year: 2012, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Stéphanie Rousseau", owner_missing: false },
-  { id: 6, name: "ArianeGroup France", year: 2023, product: "Langues", revenue: 45000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 7, name: "Axian group", year: 2024, product: "Langues", revenue: 53592, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 8, name: "Banque de France", year: 2024, product: "Langues", revenue: 33500, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 9, name: "BCL - Banque Centrale du Luxembourg", year: 2016, product: "Langues", revenue: 42500, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 10, name: "BNP Paribas SA", year: 2025, product: "Langues", revenue: 201000, y: 5, cat: "CAC 40", color: "#E53935", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 11, name: "BNP Paribas SA", year: 2025, product: "Coaching", revenue: 201000, y: 5, cat: "CAC 40", color: "#E53935", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 12, name: "Bobst Group SA", year: 2024, product: "Langues", revenue: 13507, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 13, name: "Bouygues Construction S.A", year: 2024, product: "Langues", revenue: 79000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 14, name: "Bpost", year: 2025, product: "Langues", revenue: 93000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 15, name: "CACEIS", year: 2023, product: "Langues", revenue: 37500, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 16, name: "Capgemini SE", year: 2024, product: "Langues", revenue: 148000, y: 4, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 17, name: "Cargolux Airlines", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 18, name: "Carrefour France", year: 2024, product: "Langues", revenue: 0, y: 1, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 19, name: "CGI France SAS", year: 2021, product: "Langues", revenue: 120000, y: 4, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 20, name: "CMA CGM S.A.", year: 2022, product: "Langues", revenue: 30000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 21, name: "CMA CGM S.A.", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 22, name: "CNP Assurances SA", year: 2025, product: "Coaching", revenue: 86400, y: -2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 23, name: "Cofidis S.A", year: 2022, product: "Langues", revenue: 12000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 24, name: "Continental Automotive France", year: 2023, product: "Langues", revenue: 17500, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Stéphanie Rousseau", owner_missing: false },
-  { id: 25, name: "Covéa Mutual Insurance Group Company", year: 2020, product: "Langues", revenue: 85000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 26, name: "Danone SA", year: 2022, product: "Langues", revenue: 100000, y: 4, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 27, name: "Dassault Systemes SE", year: 2024, product: "Langues", revenue: 74500, y: 3, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 28, name: "Deloitte France", year: 2024, product: "Langues", revenue: 53000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 29, name: "DEVOTEAM G CLOUD", year: 2020, product: "Langues", revenue: 47000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 30, name: "ELECTRICITE DE FRANCE", year: 2021, product: "Langues", revenue: 90000, y: 3, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 31, name: "EM Lyon", year: 2021, product: "Langues", revenue: 35000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 32, name: "EM NORMANDIE", year: 2024, product: "Langues", revenue: 20000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 33, name: "ENGIE SA", year: 2026, product: "Langues", revenue: 42500, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 34, name: "Europcar France", year: 2019, product: "Langues", revenue: 36100, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 35, name: "Eviden FRANCE", year: 2025, product: "Coaching", revenue: 70000, y: -2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Thierry Le Boeuf", owner_missing: false },
-  { id: 36, name: "Ferrero France", year: 2020, product: "Langues", revenue: 23700, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 37, name: "Generali France", year: 2017, product: "Langues", revenue: 62242.72, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 38, name: "Groupama Holding", year: 2020, product: "Langues", revenue: 42500, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 39, name: "Groupe AFNOR", year: 2022, product: "Langues", revenue: 4500, y: 1, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 40, name: "Groupe Air France KLM", year: 2014, product: "Langues", revenue: 297500, y: 5, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 41, name: "Groupe BPCE", year: 2024, product: "Langues", revenue: 21700, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 42, name: "Groupe Limagrain Holding SA", year: 2022, product: "Langues", revenue: 50000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 43, name: "Groupe Rocher", year: 2021, product: "Langues", revenue: 46000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 44, name: "Groupe Roquette", year: 2021, product: "Langues", revenue: 5000, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Stéphanie Rousseau", owner_missing: false },
-  { id: 45, name: "Groupe Roquette", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Stéphanie Rousseau", owner_missing: false },
-  { id: 46, name: "Groupe SEB", year: 2020, product: "Langues", revenue: 50000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 47, name: "Groupe SNCF ", year: 2024, product: "Coaching", revenue: 84000, y: -2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Julie Pirroni", owner_missing: false },
-  { id: 48, name: "Groupe SNCF ", year: 2026, product: "Coaching", revenue: 50000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Julie Pirroni", owner_missing: false },
-  { id: 49, name: "Groupe SNCF ", year: 2022, product: "Langues", revenue: 30000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Julie Pirroni", owner_missing: false },
-  { id: 50, name: "Ipsen S.A.", year: 2025, product: "Langues", revenue: 60000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 51, name: "JCDecaux SA", year: 2022, product: "Langues", revenue: 15000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 52, name: "Kedge", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 53, name: "Kering SA", year: 2026, product: "Langues", revenue: 40000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 54, name: "Kingfisher France", year: 2022, product: "Langues", revenue: 3000, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 55, name: "La Poste S.A.", year: 2023, product: "Langues", revenue: 30000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 56, name: "L'Oréal SA", year: 2024, product: "Langues", revenue: 39600, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 57, name: "M.P.F. Michelin", year: 2021, product: "Langues", revenue: 160000, y: 4, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 58, name: "Majorel Africa", year: 2023, product: "Langues", revenue: 65000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 59, name: "Manpower France", year: 2016, product: "Langues", revenue: 30000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 60, name: "Mars Food France", year: 2020, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 61, name: "MBDA Group", year: 2020, product: "Langues", revenue: 148750, y: 4, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 62, name: "Naval Group SA", year: 2021, product: "Langues", revenue: 60000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 63, name: "NEOMA BUSINESS SCHOOL", year: 2022, product: "Langues", revenue: 18500, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 64, name: "OPMobility SE", year: 2027, product: "Coaching", revenue: 36000, y: -3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 65, name: "OPMobility SE", year: 2026, product: "Langues", revenue: 18000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 66, name: "Orange SA", year: 2022, product: "Langues", revenue: 30000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 67, name: "RADIALL", year: 2027, product: "Langues", revenue: 110000, y: 4, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 68, name: "RATP Pro", year: 2021, product: "Langues", revenue: 15000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 69, name: "Safran SA", year: 2025, product: "Langues", revenue: 63750, y: 3, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 70, name: "Sanofi SA", year: 2025, product: "Langues", revenue: 10000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 71, name: "Schneider Electric SE", year: 2025, product: "Langues", revenue: 203000, y: 5, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 72, name: "SNCB Holding S.a.", year: 2026, product: "Langues", revenue: 233000, y: 5, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 73, name: "Société Générale", year: 2021, product: "Langues", revenue: 176000, y: 4, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 74, name: "Solvay SA", year: 2026, product: "Coaching", revenue: 20000, y: -4, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 75, name: "Solvay SA", year: 2025, product: "Langues", revenue: 17000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 76, name: "Sonepar S.A.", year: 2025, product: "Langues", revenue: 204065, y: 5, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 77, name: "Sopra Steria Group SA", year: 2024, product: "Langues", revenue: 50000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 78, name: "Spie SA", year: 2022, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 79, name: "Teleperformance Limited", year: 2023, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 80, name: "Teleperformance Limited", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "CAC 40", color: "#E53935", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 81, name: "Thales SA", year: 2024, product: "Langues", revenue: 95000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 82, name: "TNT France", year: 2017, product: "Langues", revenue: 185000, y: 4, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 83, name: "TotalEnergies SE", year: 2023, product: "Langues", revenue: 30000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 84, name: "Unilabs SA", year: 2023, product: "Langues", revenue: 36480, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 85, name: "Veepee France", year: 2021, product: "Langues", revenue: 57480, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 86, name: "Verisure France", year: 2023, product: "Langues", revenue: 30000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 87, name: "Vinci Construction France", year: 2022, product: "Langues", revenue: 36000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 88, name: "Xpo Logistics Europe SA", year: 2022, product: "Coaching", revenue: 0, y: -5, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 89, name: "Kering SA", year: 2022, product: "Langues", revenue: 30000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 90, name: "Orange SA", year: 2027, product: "Coaching", revenue: 0, y: 1, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-];
-
-  // ✅ Normalisation owner/owner_missing
-  for (const d of data) {
-    if (!('owner' in d)) d.owner = null;
-    if (!('owner_missing' in d)) d.owner_missing = (d.owner == null || String(d.owner).trim() === '');
-  }
-
-  // ✅ Ajout 2028 car présent dans data (sans changer tes inputs)
-  const years = [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028];
-
-  /* =====================================================================================
-     ✅ OPTION 1 : PALIERS Y DISCRETS + POSITIONNEMENT AUTOMATIQUE DES BULLES (revenue -> y)
-  ====================================================================================== */
-  const USE_AUTO_Y = true;
-
-  const Y_BANDS_LANGUES = [
-    { max: 10000,   y: 1, label: 'Langues ≤ 10k€' },
-    { max: 50000,   y: 2, label: 'Langues 10–50k€' },
-    { max: 100000,  y: 3, label: 'Langues 50–100k€' },
-    { max: 200000,  y: 4, label: 'Langues 100–200k€' },
-    { max: 1000000, y: 5, label: 'Langues > 200k€' }
-  ];
-
-  const Y_BANDS_COACHING = [
-    { max: 10000,   y: -5, label: 'Coaching ≤ 10k€' },
-    { max: 30000,   y: -4, label: 'Coaching 10–30k€' },
-    { max: 50000,   y: -3, label: 'Coaching 30–50k€' },
-    { max: 100000,  y: -2, label: 'Coaching 50–100k€' },
-    { max: 1000000, y: -1, label: 'Coaching > 100k€' }
-  ];
-
-  function computeYFromRevenue(revenue, product){
-    const r = Number(revenue);
-    const val = Number.isFinite(r) ? r : 0;
-    const bands = (String(product).toLowerCase() === 'coaching') ? Y_BANDS_COACHING : Y_BANDS_LANGUES;
-    for (const b of bands) if (val <= b.max) return b.y;
-    return bands[bands.length - 1].y;
-  }
-
-  function buildYAxisTicks(){
-    const all = [...Y_BANDS_COACHING, ...Y_BANDS_LANGUES].slice().sort((a,b)=>a.y-b.y);
-    const vals = all.map(b=>b.y);
-    const texts = all.map(b=>b.label);
-    return { vals, texts, minY: Math.min(...vals), maxY: Math.max(...vals) };
-  }
-
-  if (USE_AUTO_Y) {
-    for (const d of data) d.y = computeYFromRevenue(d.revenue, d.product);
-  }
-
-  const { vals: yTickVals, texts: yTickText, minY, maxY } = buildYAxisTicks();
-  /* ===================================================================================== */
-
-  function catBadge(cat){
-    if(cat==='CAC 40') return 'b-red';
-    if(cat==='Entreprise privée') return 'b-blue';
-    return 'b-green';
-  }
-
-  function bubbleSizeByCat(cat){
-    if (cat === 'CAC 40') return 27;
-    if (cat === 'Entreprise privée') return 15;
-    return 9;
-  }
-
-  function ownerLabel(d){
-    const o = (d && d.owner != null && String(d.owner).trim() !== '') ? String(d.owner).trim() : 'Owner / BDR manquant';
-    return o;
-  }
-
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-  }
-
-  // ✅ UI filtre Owner (checkbox)
-  function renderOwnerFilters(){
-    const box = document.getElementById('ownerFilters');
-    const uniq = new Set();
-    for (const d of data) uniq.add(ownerLabel(d));
-    const owners = [...uniq].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'}));
-    box.innerHTML = owners.map(o => {
-      const v = escapeHtml(o);
-      return `<label><input type="checkbox" class="f-owner" value="${v}" checked> ${v}</label>`;
-    }).join('');
-  }
-
-  renderOwnerFilters();
-
-  let ownerOpen = true;
-
-  const ownerToggle = document.getElementById('ownerToggle');
-  const ownerFilters = document.getElementById('ownerFilters');
-  const ownerArrow = document.getElementById('ownerArrow');
-
-const ownerSelectAllBtn = document.getElementById('ownerSelectAllBtn');
-const ownerDeselectAllBtn = document.getElementById('ownerDeselectAllBtn');
-
-function setAllOwnerCheckboxes(checked){
-  document.querySelectorAll('.f-owner').forEach(cb => {
-    cb.checked = checked;
-  });
-  updateChart();
-}
-
-ownerSelectAllBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  setAllOwnerCheckboxes(true);
-});
-
-ownerDeselectAllBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  setAllOwnerCheckboxes(false);
-});
-
-
-  ownerToggle.addEventListener('click', () => {
-  ownerOpen = !ownerOpen;
-
-  if (ownerOpen) {
-    ownerFilters.style.display = 'block';
-    document.getElementById('ownerBulkActions').style.display = 'flex';
-    ownerArrow.textContent = '▼';
-  } else {
-    ownerFilters.style.display = 'none';
-    document.getElementById('ownerBulkActions').style.display = 'none';
-    ownerArrow.textContent = '▶';
-  }
-});
-
-  let listOpen = true;
-
-  const listToggle = document.getElementById('listToggle');
-  const listElContainer = document.getElementById('list');
-  const listArrow = document.getElementById('listArrow');
-
-  listToggle.addEventListener('click', () => {
-    listOpen = !listOpen;
-
-    if (listOpen) {
-      listElContainer.style.display = 'block';
-      listArrow.textContent = '▼';
-    } else {
-      listElContainer.style.display = 'none';
-      listArrow.textContent = '▶';
-    }
-  });
-
-  let showNames = false;
-
-  function applyNoOffset(points){
-  const DX = 0.18;
-
-  const groups = new Map();
-  for (const p of points) {
-    const key = `${p.year}|${p.y}|${p.color}`;
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(p);
-  }
-
-  for (const group of groups.values()) {
-    const n = group.length;
-
-    if (n === 1) {
-      const p = group[0];
-      p.plotYear = p.year;
-      p.plotY    = p.y;
-
-      // valeurs par défaut du label
-      p.labelX   = p.plotYear;
-      p.labelY   = p.plotY;
-      p.textPos  = 'middle center';
-    } else {
-      const startX = -((n - 1) / 2) * DX;
-
-      for (let i = 0; i < n; i++) {
-        const p = group[i];
-        p.plotYear = p.year + (startX + i * DX);
-        p.plotY    = p.y;
-
-        // valeurs par défaut du label
-        p.labelX   = p.plotYear;
-        p.labelY   = p.plotY;
-        p.textPos  = 'middle center';
-      }
-    }
-  }
-}
-
-
-  // init global (sans plotly)
-  applyNoOffset(data);
-
-  function computeLabelFontSize(n){
-    if (n >= 140) return 7;
-    if (n >= 100) return 8;
-    if (n >= 70)  return 9;
-    return 10;
-  }
-
-
-function dataToPixelX(x, xRange, plotWidth){
-  return ((x - xRange[0]) / (xRange[1] - xRange[0])) * plotWidth;
-}
-
-function dataToPixelY(y, yRange, plotHeight){
-  return plotHeight - ((y - yRange[0]) / (yRange[1] - yRange[0])) * plotHeight;
-}
-
-function pixelToDataX(px, xRange, plotWidth){
-  return xRange[0] + (px / plotWidth) * (xRange[1] - xRange[0]);
-}
-
-function pixelToDataY(py, yRange, plotHeight){
-  return yRange[0] + ((plotHeight - py) / plotHeight) * (yRange[1] - yRange[0]);
-}
-
-function rectsOverlap(a, b, pad = 2){
-  return !(
-    a.right + pad < b.left ||
-    a.left  - pad > b.right ||
-    a.bottom + pad < b.top ||
-    a.top    - pad > b.bottom
-  );
-}
-
-function estimateLabelRect(point, fontSize, centerX, centerY){
-  const text = String(point.name || '');
-  const width = Math.max(28, Math.min(240, text.length * fontSize * 0.58));
-  const height = fontSize + 6;
-
-  return {
-    left: centerX - width / 2,
-    right: centerX + width / 2,
-    top: centerY - height / 2,
-    bottom: centerY + height / 2,
-    width,
-    height
-  };
-}
-
-function applySmartLabelPositions(points, fontSize, xRange, yRange){
-  const plotWidth = Math.max(320, graphDiv.clientWidth - layoutBase.margin.l - layoutBase.margin.r);
-  const plotHeight = Math.max(240, graphDiv.clientHeight - layoutBase.margin.t - layoutBase.margin.b);
-
-  const candidates = [
-    { dx:  0, dy: -14 },
-    { dx:  0, dy:   0 },
-    { dx:  0, dy:  14 },
-
-    { dx: 12, dy: -12 },
-    { dx:-12, dy: -12 },
-    { dx: 12, dy:   0 },
-    { dx:-12, dy:   0 },
-    { dx: 12, dy:  12 },
-    { dx:-12, dy:  12 },
-
-    { dx:  0, dy: -26 },
-    { dx:  0, dy:  26 },
-
-    { dx: 18, dy:  -8 },
-    { dx:-18, dy:  -8 },
-    { dx: 18, dy:   8 },
-    { dx:-18, dy:   8 }
-  ];
-
-  const ordered = points.slice().sort((a, b) => {
-    if (a.plotYear !== b.plotYear) return a.plotYear - b.plotYear;
-    if (a.plotY !== b.plotY) return a.plotY - b.plotY;
-    return String(a.name).localeCompare(String(b.name), 'fr', { sensitivity: 'base' });
-  });
-
-  const placedRects = [];
-
-  for (const p of ordered) {
-    const pointPx = dataToPixelX(p.plotYear, xRange, plotWidth);
-    const pointPy = dataToPixelY(p.plotY, yRange, plotHeight);
-
-    let chosen = null;
-
-    for (const c of candidates) {
-      const cx = pointPx + c.dx;
-      const cy = pointPy + c.dy;
-
-      const rect = estimateLabelRect(p, fontSize, cx, cy);
-      const overlaps = placedRects.some(r => rectsOverlap(rect, r, 2));
-
-      if (!overlaps) {
-        chosen = { cx, cy, rect };
-        break;
-      }
-    }
-
-    if (!chosen) {
-      for (let step = 1; step <= 4; step++) {
-        const extra = 26 + step * 10;
-
-        const fallbackPositions = [
-          { dx: 0, dy: -extra },
-          { dx: 0, dy:  extra },
-          { dx: 12, dy: -extra },
-          { dx:-12, dy: -extra },
-          { dx: 12, dy:  extra },
-          { dx:-12, dy:  extra }
-        ];
-
-        for (const c of fallbackPositions) {
-          const cx = pointPx + c.dx;
-          const cy = pointPy + c.dy;
-
-          const rect = estimateLabelRect(p, fontSize, cx, cy);
-          const overlaps = placedRects.some(r => rectsOverlap(rect, r, 2));
-
-          if (!overlaps) {
-            chosen = { cx, cy, rect };
-            break;
-          }
-        }
-
-        if (chosen) break;
-      }
-    }
-
-    if (!chosen) {
-      const rect = estimateLabelRect(p, fontSize, pointPx, pointPy);
-      chosen = { cx: pointPx, cy: pointPy, rect };
-    }
-
-    p.labelX = pixelToDataX(chosen.cx, xRange, plotWidth);
-    p.labelY = pixelToDataY(chosen.cy, yRange, plotHeight);
-    p.textPos = 'middle center';
-
-    placedRects.push(chosen.rect);
-  }
-}
-
-
-  function getFilterState(){
-    const q = document.getElementById('search').value.trim().toLowerCase();
-    const selectedCats = [...document.querySelectorAll('.f-cat:checked')].map(e=>e.value);
-    const selectedProds = [...document.querySelectorAll('.f-prod:checked')].map(e=>e.value);
-    const selectedOwners = [...document.querySelectorAll('.f-owner:checked')].map(e=>e.value);
-
-    let yearMin = parseInt(document.getElementById('yearMin').value,10);
-    let yearMax = parseInt(document.getElementById('yearMax').value,10);
-    if (Number.isNaN(yearMin)) yearMin = Math.min(...years);
-    if (Number.isNaN(yearMax)) yearMax = Math.max(...years);
-    if (yearMin > yearMax) { const t = yearMin; yearMin = yearMax; yearMax = t; }
-
-    return { q, selectedCats, selectedProds, selectedOwners, yearMin, yearMax };
-  }
-
-  function getFilteredPoints(){
-    const { q, selectedCats, selectedProds, selectedOwners, yearMin, yearMax } = getFilterState();
-    return data.filter(d =>
-      (!q || d.name.toLowerCase().includes(q)) &&
-      selectedCats.includes(d.cat) &&
-      selectedProds.includes(d.product) &&
-      selectedOwners.includes(ownerLabel(d)) &&
-      d.year >= yearMin &&
-      d.year <= yearMax
-    );
-  }
-
-  function renderListFromPoints(points, filterText=''){
-    const el = document.getElementById('list');
-    el.innerHTML = '';
-    const q = filterText.trim().toLowerCase();
-
-    (points || [])
-      .filter(d => (!q || d.name.toLowerCase().includes(q)))
-      .sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}))
-      .forEach(d=>{
-        const div=document.createElement('div');
-        div.className='item';
-        const own = ownerLabel(d);
-
-        div.innerHTML = `
-          <div>
-            <b>${escapeHtml(d.name)}</b>
-            <span class="badge ${catBadge(d.cat)}">${escapeHtml(d.cat)}</span>
-          </div>
-          <div class="small">
-            ${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(own)}
-          </div>
-        `;
-        div.onmouseenter=()=>highlight(d.id);
-        div.onclick=()=>highlight(d.id);
-        el.appendChild(div);
-      });
-  }
-
-  // ✅ Lecture robuste des ranges envoyées par plotly_relayout
-  function extractAxisRange(ev, axisName){
-    const k0 = `${axisName}.range[0]`;
-    const k1 = `${axisName}.range[1]`;
-    if (ev && ev[k0] != null && ev[k1] != null) return [Number(ev[k0]), Number(ev[k1])];
-
-    const k = `${axisName}.range`;
-    if (ev && Array.isArray(ev[k]) && ev[k].length === 2) return [Number(ev[k][0]), Number(ev[k][1])];
-
-    const ka = `${axisName}.autorange`;
-    if (ev && ev[ka]) return null;
-
-    return undefined;
-  }
-
-  function buildMarkerTrace(cat, ptsAll){
-    const pts = (ptsAll || data).filter(d=>d.cat===cat);
-    return {
-      type:'scatter',
-      mode:'markers',
-      name:cat,
-      showlegend:false,
-      legendgroup: cat,
-      x: pts.map(p=>p.plotYear),
-      y: pts.map(p=>p.plotY),
-      text: pts.map(p=>p.name),
-      customdata: pts.map(p => [p.product, p.revenue, p.year, ownerLabel(p)]),
-      hovertemplate:
-        '<b>%{text}</b><br>' +
-        'Année : %{customdata[2]}<br>' +
-        'Produit : %{customdata[0]}<br>' +
-        'Estimated revenue : %{customdata[1]:,.0f} €<br>' +
-        'Owner / BDR : %{customdata[3]}' +
-        '<extra></extra>',
-      marker: {
-        size: pts.map(p => bubbleSizeByCat(p.cat)),
-        color: pts.map(p=>p.color),
-        opacity: 1,
-        line: { width: 1, color: '#111111' }
-      }
-    };
-  }
-
-  function buildTextTrace(cat, ptsAll){
-    const ptsAllArr = (ptsAll || data);
-    const pts = ptsAllArr.filter(d=>d.cat===cat);
-    const fontSize = computeLabelFontSize(ptsAllArr.length);
-    return {
-      type:'scatter',
-      mode:'text',
-      name:cat + ' (labels)',
-      showlegend:false,
-      legendgroup: cat,
-      hoverinfo:'skip',
-      x: pts.map(p=>p.labelX ?? p.plotYear),
-      y:pts.map(p=>p.labelY??p.plotY),
-      text: pts.map(p=>p.name),
-      textposition: pts.map(p=>p.textPos),
-      textfont:{size:fontSize, color:'#111', family:'Segoe UI, Arial'},
-      cliponaxis:false,
-      visible: showNames
-    };
-  }
-
-  function isCategoryChecked(cat){
-    const cb = [...document.querySelectorAll('.f-cat')].find(el => el.value === cat);
-    return !!(cb && cb.checked);
-  }
-
-  function buildLegendProxy(name, color){
-    const active = isCategoryChecked(name);
-
-    return {
-      type:'scatter',
-      mode:'markers',
-      name,
-      legendgroup: name,
-      showlegend:true,
-      hoverinfo:'skip',
-      x:[null],
-      y:[null],
-      marker:{
-        size:12,
-        color:color,
-        opacity: active ? 1 : 0.25,
-        line:{ width:1, color:'#111111' }
-      }
-    };
-  }
-
-  function toggleCategoryCheckbox(cat){
-    const cb = [...document.querySelectorAll('.f-cat')].find(el => el.value === cat);
-    if (!cb) return false;
-
-    cb.checked = !cb.checked;
-    return true;
-  }
-
-
-  // Trace highlight (anneau)
-  const traceHi = {
-    type:'scatter',
-    mode:'markers',
-    showlegend:false,
-    x:[null],
-    y:[null],
-    hoverinfo:'skip',
-    marker:{ size:[46], color:['#ffffff'], opacity:0.0, line:{ color:'#111111', width:4 } }
-  };
-
-  const layoutBase = {
-    uirevision: 'keep',
-    margin:{l:110,r:30,t:40,b:45},
-    paper_bgcolor:'#ffffff',
-    plot_bgcolor:'#ffffff',
-    xaxis:{
-      title:'Année',
-      tickmode:'array',
-      tickvals: years,
-      ticktext: years.map(String)
-    },
-    yaxis:{
-      title:'Produit + Estimated €',
-      tickmode:'array',
-      tickvals: yTickVals,
-      ticktext: yTickText,
-      zeroline:true,
-      zerolinecolor:'#9e9e9e',
-      zerolinewidth:2,
-      gridwidth: 1.5,
-      gridcolor: 'rgba(0,0,0,0.08)',
-      range:[minY - 0.8, maxY + 0.8],
-      dtick:1,
-      automargin: true
-    },
-    legend:{
-      orientation:'h',
-      yanchor:'bottom',
-      y:1.02,
-      xanchor:'left',
-      x:-0.1,
-      font: {color:'#444'},
-      bgcolor: 'rgba(255,255,255,0)',
-      borderwidth: 0,
-      itemsizing: 'constant',
-      itemwidth: 60
-    },
-    annotations: [{
-      xref:'paper', yref:'paper',
-      x:0.01, y:0.99,
-      xanchor:'left', yanchor:'top',
-      text:'',
-      showarrow:false,
-      align:'left',
-      bgcolor:'rgba(255,255,255,0.96)',
-      bordercolor:'rgba(0,0,0,0.18)',
-      borderwidth:1,
-      borderpad:8,
-      font:{size:12, color:'#111', family:'Segoe UI, Arial'},
-      visible:false
-    }]
-  };
-
-  // Indices stables car ordre stable
-  const IDX_HI = 6;
-
-  // ✅ state zoom courant (pour filtrer la liste selon fenêtre visible)
-  let currentRanges = { xr: null, yr: null };
-
-  // ✅ dernier set affiché (utile pour highlight fiable)
-  let lastPts = [];
-  let lastPtsById = new Map();
-
-  function setInfoBox(html, visible){
-    if (!canUsePlotly()) return;
-    Plotly.relayout('chart', {
-      'annotations[0].text': html || '',
-      'annotations[0].visible': !!visible
-    });
-  }
-
-  function updateLastPts(pts){
-    lastPts = pts.slice();
-    lastPtsById = new Map(pts.map(p => [p.id, p]));
-  }
-
-  function updateListAccordingToView(){
-    const searchEl = document.getElementById('search');
-    const base = getFilteredPoints();
-
-    // s'assurer qu'on a plotYear/plotY sur base
-    applyNoOffset(base);
-
-    const xr = currentRanges.xr;
-    const yr = currentRanges.yr;
-
-    let visible = base;
-
-    if (xr || yr) {
-      const xMin = xr ? Math.min(xr[0], xr[1]) : null;
-      const xMax = xr ? Math.max(xr[0], xr[1]) : null;
-      const yMin = yr ? Math.min(yr[0], yr[1]) : null;
-      const yMax = yr ? Math.max(yr[0], yr[1]) : null;
-
-      visible = base.filter(p => {
-        const x = (p.plotYear ?? p.year);
-        const y = (p.plotY ?? p.y);
-
-        const inX = (xr == null) ? true : (x >= xMin && x <= xMax);
-        const inY = (yr == null) ? true : (y >= yMin && y <= yMax);
-        return inX && inY;
-      });
-    }
-
-    renderListFromPoints(visible, searchEl.value);
-  }
-
-  function highlight(id){
-    if (!canUsePlotly()) return;
-
-    // priorité au point réellement affiché (post-offset)
-    let d = lastPtsById.get(id);
-    if (!d) d = data.find(x => x.id === id);
-    if(!d) return;
-
-    const own = ownerLabel(d);
-    const html =
-      `<b>${escapeHtml(d.name)}</b><br>` +
-      `${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(own)}`;
-
-    Plotly.restyle('chart',
-      {
-        x: [[d.plotYear ?? d.year]],
-        y: [[d.plotY ?? d.y]],
-        'marker.color': [[d.color]],
-        'marker.size': [[46]],
-        'marker.opacity': [[0.98]],
-        'marker.line.color': [['#111111']],
-        'marker.line.width': [[4]]
-      },
-      [IDX_HI]
-    );
-
-    setInfoBox(html, true);
-  }
-
-  function clearHighlight(){
-    if (!canUsePlotly()) return;
-    Plotly.restyle('chart', {x:[null], y:[null], 'marker.opacity':[0.0]}, [IDX_HI]);
-    setInfoBox('', false);
-  }
-
-  function updateChart(){
-  if (!canUsePlotly()) return;
-
-  const pts = getFilteredPoints();
-
-  // 1) On place d'abord les bulles
-  applyNoOffset(pts);
-  updateLastPts(pts);
-
-  const { yearMin, yearMax } = getFilterState();
-
-  // 2) On détermine les ranges visibles du graphique
-  const xRangeForLabels = currentRanges.xr
-    ? [Math.min(currentRanges.xr[0], currentRanges.xr[1]), Math.max(currentRanges.xr[0], currentRanges.xr[1])]
-    : [yearMin - 1.6, yearMax + 1.6];
-
-  const yRangeForLabels = currentRanges.yr
-    ? [Math.min(currentRanges.yr[0], currentRanges.yr[1]), Math.max(currentRanges.yr[0], currentRanges.yr[1])]
-    : [minY - 0.8, maxY + 0.8];
-
-  // 3) Taille actuelle des labels
-  const fontSize = computeLabelFontSize(pts.length);
-
-  // 4) Positionnement intelligent des labels
-  applySmartLabelPositions(pts, fontSize, xRangeForLabels, yRangeForLabels);
-
-  const tMkGreen = buildMarkerTrace('Ecoles / Public / UE', pts);
-  const tMkRed   = buildMarkerTrace('CAC 40', pts);
-  const tMkBlue  = buildMarkerTrace('Entreprise privée', pts);
-
-  const tTxGreen = buildTextTrace('Ecoles / Public / UE', pts);
-  const tTxRed   = buildTextTrace('CAC 40', pts);
-  const tTxBlue  = buildTextTrace('Entreprise privée', pts);
-
- const legGreen = buildLegendProxy('Ecoles / Public / UE', '#43A047');
-  const legRed   = buildLegendProxy('CAC 40', '#E53935');
-  const legBlue  = buildLegendProxy('Entreprise privée', '#1E88E5');
-
-
-  // ✅ si l'utilisateur est zoomé, on ne force pas le range x
-  const layoutDyn = {
-    ...layoutBase,
-    xaxis: {
-      ...layoutBase.xaxis,
-      ...(currentRanges.xr ? {} : { range: [yearMin - 1.6, yearMax + 1.6] })
-    }
-  };
-
-  Plotly.react(
-    'chart',
-    [
-      tMkGreen, legGreen,
-      tMkRed,   legRed,
-      tMkBlue,  legBlue,
-      traceHi,
-      tTxGreen, tTxRed, tTxBlue
-    ],
-    layoutDyn,
-    {displaylogo:false, responsive:true}
-  );
-
-  clearHighlight();
-  updateListAccordingToView();
-}
-
-  const graphDiv = document.getElementById('chart');
-
-  // ✅ Plein écran (sécurisé)
-  const chartPanel = document.getElementById('chartPanel');
-  const fsBtn = document.getElementById('fsBtn');
-
-  function setFsLabel(){
-    fsBtn.textContent = document.fullscreenElement ? '⤫ Quitter plein écran' : '⛶ Plein écran';
-  }
-
-  fsBtn.addEventListener('click', () => {
-    try {
-      if (document.fullscreenElement) document.exitFullscreen();
-      else (chartPanel.requestFullscreen ? chartPanel.requestFullscreen() : (chartPanel.webkitRequestFullscreen && chartPanel.webkitRequestFullscreen()));
-    } catch(e) {
-      // si bloqué (preview), on ne casse rien
-    }
-  });
-
-  // ✅ Search + filtres
-  const searchEl = document.getElementById('search');
-  const listEl = document.getElementById('list');
-
-  searchEl.addEventListener('input', () => {
-    updateChart();
-  });
-
-  listEl.addEventListener('mouseleave', () => clearHighlight());
-
-  function wireFilterListeners(){
-    document
-      .querySelectorAll('.f-cat, .f-prod, .f-owner, #yearMin, #yearMax')
-      .forEach(el =>
-        el.addEventListener('change', () => {
-          updateChart();
-        })
-      );
-  }
-
-  wireFilterListeners();
-
-  // ✅ Toggle labels
-  const labelBtn = document.getElementById('labelBtn');
-
-  function setLabelBtn(){
-    labelBtn.textContent = showNames ? '🙈 Masquer les noms' : '👁️ Afficher les noms';
-  }
-
-  labelBtn.addEventListener('click', () => {
-    showNames = !showNames;
-    setLabelBtn();
-    updateChart();
-    safeResize();
-  });
-
-  setLabelBtn();
-
-  // ============================================================
-  // ✅ INIT Plotly ROBUSTE (attend Plotly + timeout + branchements)
-  // ============================================================
-  function waitForPlotlyAndInit() {
-    const START = Date.now();
-    const MAX_WAIT_MS = 12000; // timeout robuste
-
-    (function tick(){
-      if (typeof Plotly !== "undefined") {
-        // Plotly présent → on init
-        Plotly.newPlot('chart', [], layoutBase, {displaylogo:false, responsive:true})
-          .then(() => {
-            plotlyReady = true;
-
-            // Info source Plotly
-            const src = window.__PLOTLY_LOAD_SOURCE__ || "unknown";
-            if (src === "local") {
-              // Optionnel : message discret
-              console.log("ℹ Plotly source : LOCAL (offline)");
-            } else if (src === "cdn") {
-              console.log("ℹ Plotly source : CDN");
-            }
-
-            // ✅ Brancher les events Plotly UNIQUEMENT maintenant (sinon crash)
-            graphDiv.on('plotly_relayout', (ev) => {
-              const xr = extractAxisRange(ev, 'xaxis');
-              const yr = extractAxisRange(ev, 'yaxis');
-
-              // Reset (double-clic)
-              if ((ev && ev['xaxis.autorange']) || (ev && ev['yaxis.autorange'])) {
-                currentRanges = { xr: null, yr: null };
-                updateListAccordingToView();
-                return;
-              }
-
-              // Si pas d'info de range, on ignore
-              const hasRangeInfo = (xr !== undefined) || (yr !== undefined);
-              if (!hasRangeInfo) return;
-
-              // xr/yr peuvent être null (autorange)
-              currentRanges = {
-                xr: (xr === undefined ? currentRanges.xr : xr),
-                yr: (yr === undefined ? currentRanges.yr : yr)
-              };
-
-              updateListAccordingToView();
-            });
-
-graphDiv.on('plotly_legendclick', (ev) => {
-  const trace =
-    (ev && ev.data && typeof ev.curveNumber === 'number')
-      ? ev.data[ev.curveNumber]
-      : null;
-
-  const cat = trace ? (trace.legendgroup || trace.name) : null;
-  if (!cat) return false;
-
-  const changed = toggleCategoryCheckbox(cat);
-  if (!changed) return false;
-
-  clearHighlight();
-  updateChart();
-
-  // on bloque le comportement natif de Plotly
-  return false;
-});
-
-            graphDiv.on('plotly_legenddoubleclick', () => {
-              // ⛔ on bloque aussi le double-clic Plotly
-              // (qui isole normalement une seule catégorie)
-              return false;
-            });
-
-            // Fullscreen change → resize Plotly
-            document.addEventListener('fullscreenchange', () => {
-              setFsLabel();
-              safeResize();
-            });
-
-            window.addEventListener('resize', () => safeResize());
-            setFsLabel();
-
-            // ✅ first render
-            updateChart();
-          })
-          .catch((e) => {
-            showHardError(
-              "❌ <b>Erreur Plotly</b> : impossible d’initialiser le graphique.<br>" +
-              "Détail : <code>" + escapeHtml(String(e && e.message ? e.message : e)) + "</code>"
-            );
-          });
-        return;
-      }
-
-      // Timeout
-      if (Date.now() - START > MAX_WAIT_MS) {
-        showHardError(
-          "❌ <b>Plotly non chargé</b> après attente.<br>" +
-          "👉 Vérifie si le réseau/proxy bloque le CDN.<br>" +
-          "✅ Recommandé : placer <b>plotly-2.27.0.min.js</b> dans le même dossier (mode offline)."
-        );
-        return;
-      }
-
-      // retry
-      setTimeout(tick, 100);
-    })();
-  }
-
-  waitForPlotlyAndInit();
-
-</script>
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="filterDrawer">
+    <div class="drawer-head">
+      <div>
+        <h3 class="modal-title" style="margin:0;">Filtres avancés</h3>
+        <div class="modal-sub">Panneau complémentaire aux filtres d’en-tête.</div>
+      </div>
+      <button class="close-btn" type="button" id="closeDrawerBtn">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div><label>Nom de l'entreprise</label><div class="field-inline"><select id="fCompanyMode"><option value="contains">contains</option><option value="equals">equals</option></select><input id="fCompanyValue" class="input" type="text" placeholder="Rechercher une entreprise"></div></div>
+      <div><label>Produit</label><div class="check-grid" id="productFilters"></div></div>
+      <div><label>Notes</label><div class="field-inline"><select id="fNotesMode"><option value="contains">contains</option></select><input id="fNotesValue" class="input" type="text" placeholder="Mots-clés dans les notes"></div></div>
+      <div class="grid-2"><div><label>Date qualif. (equals)</label><input id="fQualDate" class="input" type="date"></div><div><label>Tri date qualif.</label><button class="btn soft" type="button" id="toggleSortQual">Tri croissant : Off</button></div></div>
+      <div><label>Next action</label><div class="field-inline"><select id="fNextActionMode"><option value="contains">contains</option><option value="equals">equals</option></select><input id="fNextActionValue" class="input" type="text" placeholder="Filtrer l’action"></div></div>
+      <div class="grid-2"><div><label>Next step (equals)</label><input id="fNextStep" class="input" type="date"></div><div><label>Tri next step</label><button class="btn soft" type="button" id="toggleSortNextStep">Tri croissant : Off</button></div></div>
+      <div><label>Statut</label><div class="field-inline"><select id="fStatusMode"><option value="contains">contains</option><option value="equals">equals</option></select><input id="fStatusValue" class="input" type="text" placeholder="SQL / RDV / Chaud..."></div></div>
+      <div><label>Pondération</label><div class="check-grid" id="weightFilters"></div></div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;"><button class="btn soft" type="button" id="drawerClearBtn">Réinitialiser</button><button class="btn primary" type="button" id="drawerApplyBtn">Appliquer / Fermer</button></div>
+    </div>
+  </aside>
+
+    <script>
+    const STORAGE='speexx_dashboard_opps_v8_multiowner';
+    const SUPABASE_URL = 'https://xvnbxtzhrsmrvrssfaym.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_-JAeacQ1qnKF3rp5dbvicA_vQ4rW_eY';
+    const SUPABASE_TABLE = 'dashboard_RDV';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    const FILTERS='speexx_dashboard_filters_v8_multiowner';
+    const FORECAST_META='speexx_dashboard_forecast_meta_v8_multiowner';
+    const APP_PREFS='speexx_dashboard_prefs_v8_multiowner';
+    const PRODUCTS=['LT','BC','MT','IT'];
+    const WEIGHTS=['0','0.25','0.5','0.75','1'];
+    const BASE_STATUSES=['SQL','SQL to Nurture','RDV','Chaud','A relancer'];
+    const MONTHS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    const WEEK=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+    const WORKSPACES=[{ key:'anais', label:'Anaïs', owner:'Anaïs' },{ key:'jeremie', label:'Jérémie', owner:'Jérémie' }];
+    const FORECAST_SECTIONS=[
+      {key:'sql', label:'SQL', statuses:['SQL','SQL to Nurture'], defaultRows:0, color:'sql', createStatus:'SQL'},
+      {key:'rdv', label:'Rdv', statuses:['RDV'], defaultRows:0, color:'rdv', createStatus:'RDV'},
+      {key:'chaud', label:'Chaud', statuses:['Chaud'], defaultRows:0, color:'chaud', createStatus:'Chaud'},
+      {key:'relance', label:'Call Back', statuses:['A relancer'], defaultRows:0, color:'relance', createStatus:'A relancer'}
+    ];
+    function uid(){ return 'id-'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4); }
+    function esc(s){ return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function norm(v){ return String(v ?? '').trim().toLowerCase(); }
+    function plain(v){ return String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g,'').trim().toLowerCase(); }
+    function niceWeight(v){ return String(v ?? '').replace('.',','); }
+    function read(key, fallback){ try{ const raw=localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }catch(e){ return fallback; } }
+    function toKey(d){ if(!(d instanceof Date)||isNaN(d)) return ''; return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+    function formatDate(s){ if(!s) return '—'; const d=new Date(s+'T00:00:00'); return isNaN(d) ? s : d.toLocaleDateString('fr-FR'); }
+    function capitalize(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
+    function normalizeStatusValue(status){ return status==='Autre' ? 'Chaud' : (status || ''); }
+    function autoWeightForStatus(status){ const s=plain(normalizeStatusValue(status)); if(s==='sql' || s==='sql to nurture') return '1'; if(s==='rdv') return '0.75'; if(s==='chaud') return '0.5'; if(s==='a relancer') return '0.25'; return ''; }
+    function displayStatus(r){ return normalizeStatusValue(r.status) || '—'; }
+    function isMatch(val, filterVal, mode='contains'){ if(!filterVal) return true; const a=norm(val); const b=norm(filterVal); return mode==='equals' ? a===b : a.includes(b); }
+    function badgeClass(status){ const s=plain(normalizeStatusValue(status)); if(s==='sql') return 'status-sql'; if(s==='sql to nurture') return 'status-nurture'; if(s==='rdv') return 'status-rdv'; if(s==='chaud') return 'status-chaud'; if(s==='a relancer') return 'status-relance'; return ''; }
+    function eventClass(status){ const s=plain(normalizeStatusValue(status)); if(s==='sql' || s==='sql to nurture') return 'sql'; if(s==='rdv') return 'rdv'; if(s==='chaud') return 'chaud'; if(s==='a relancer') return 'relance'; return ''; }
+    function companyClassForStatus(status){ const s=plain(normalizeStatusValue(status)); if(s==='sql' || s==='sql to nurture') return 'company-sql'; if(s==='rdv') return 'company-rdv'; if(s==='chaud') return 'company-chaud'; if(s==='a relancer') return 'company-relance'; return ''; }
+    function ownerLabelFromKey(key){ const ws = WORKSPACES.find(x => x.key===key); return ws ? ws.label : 'Jérémie'; }
+    function ownerValueFromKey(key){ const ws = WORKSPACES.find(x => x.key===key); return ws ? ws.owner : 'Jérémie'; }
+    function ownerKeyFromValue(owner){ return plain(owner)==='anais' ? 'anais' : 'jeremie'; }
+    function defaultFilters(){ return { companyMode:'contains', companyValue:'', products:[...PRODUCTS], notesMode:'contains', notesValue:'', qualDate:'', sortQual:false, nextActionMode:'contains', nextActionValue:'', nextStep:'', sortNextStep:false, statusMode:'contains', statusValue:'', weights:[...WEIGHTS] }; }
+    function defaultForecastMetaEntry(){ return {sql:0,rdv:0,chaud:0,relance:0}; }
+    function defaultForecastMeta(){ return { anais: defaultForecastMetaEntry(), jeremie: defaultForecastMetaEntry() }; }
+    function defaultFiltersByOwner(){ return { anais: defaultFilters(), jeremie: defaultFilters() }; }
+    function defaultPrefs(){ return { activeOwner:'jeremie', activeTabsByOwner:{ anais:'tabTableau', jeremie:'tabTableau' } }; }
+    function normalizeOwnerValue(owner){ const raw = String(owner || '').trim(); return raw ? raw : 'Jérémie'; }
+    function normalizeRow(r){ const owner = normalizeOwnerValue(r.owner); const status = normalizeStatusValue(r.status); return { id: r.id || uid(), company: r.company || '', owner, product: r.product || '', notes: r.notes || '', qualDate: r.qualDate || '', nextAction: r.nextAction || '', nextStep: r.nextStep || '', status, statusCustom: '', weight: autoWeightForStatus(status) || String(r.weight ?? ''), selected: !!r.selected, createdAt: r.createdAt || Date.now() }; }
+    const demoRows = [
+      { id: uid(), company:'Test 1', owner:'Jérémie', product:'LT', notes:'', qualDate:'', nextAction:'', nextStep:'', status:'SQL', weight:'1', selected:false, createdAt: Date.now()-2 },
+      { id: uid(), company:'Test 2', owner:'Jérémie', product:'BC', notes:'', qualDate:'', nextAction:'', nextStep:'', status:'A relancer', weight:'0.25', selected:false, createdAt: Date.now()-1 },
+      { id: uid(), company:'Test 3', owner:'Anaïs', product:'MT', notes:'', qualDate:'', nextAction:'', nextStep:'', status:'RDV', weight:'0.75', selected:false, createdAt: Date.now() }
+    ].map(normalizeRow);
+    const savedFilters = read(FILTERS, defaultFiltersByOwner());
+    const savedForecastMeta = read(FORECAST_META, defaultForecastMeta());
+    const savedPrefs = read(APP_PREFS, defaultPrefs());
+    const state = { rows: JSON.parse(JSON.stringify(demoRows)), filtersByOwner: savedFilters, forecastMetaByOwner: savedForecastMeta, selectedIdByOwner: { anais:null, jeremie:null }, activeOwner: savedPrefs.activeOwner || 'jeremie', activeTabsByOwner: savedPrefs.activeTabsByOwner || { anais:'tabTableau', jeremie:'tabTableau' }, calViewByOwner: { anais:'month', jeremie:'month' }, calDateByOwner: { anais:new Date(), jeremie:new Date() } };
+    function currentFilters(){ return state.filtersByOwner[state.activeOwner]; }
+    function currentSelectedId(){ return state.selectedIdByOwner[state.activeOwner] || null; }
+    function setCurrentSelectedId(id){ state.selectedIdByOwner[state.activeOwner] = id || null; }
+    function currentCalDate(){ return state.calDateByOwner[state.activeOwner]; }
+    function currentCalView(){ return state.calViewByOwner[state.activeOwner]; }
+    function currentSubTab(){ return state.activeTabsByOwner[state.activeOwner]; }
+    function save(){ localStorage.setItem(FILTERS, JSON.stringify(state.filtersByOwner)); localStorage.setItem(FORECAST_META, JSON.stringify(state.forecastMetaByOwner)); localStorage.setItem(APP_PREFS, JSON.stringify({ activeOwner: state.activeOwner, activeTabsByOwner: state.activeTabsByOwner })); }
+    function emptyToNull(value) { return value === '' || value === undefined || value === null ? null : value; }
+    function weightToDb(value) { if (value === '' || value === undefined || value === null) return null; return Number(value); }
+    function toDbRow(r) { return { id: r.id, company: r.company || '', owner: normalizeOwnerValue(r.owner), product: r.product || '', notes: r.notes || '', qual_date: emptyToNull(r.qualDate), next_action: r.nextAction || '', next_step: emptyToNull(r.nextStep), status: normalizeStatusValue(r.status || ''), weight: weightToDb(r.weight), selected: !!r.selected, created_at_ms: r.createdAt || Date.now() }; }
+    function fromDbRow(r) { return normalizeRow({ id: r.id, company: r.company || '', owner: r.owner || 'Jérémie', product: r.product || '', notes: r.notes || '', qualDate: r.qual_date || '', nextAction: r.next_action || '', nextStep: r.next_step || '', status: r.status || '', weight: r.weight === null || r.weight === undefined ? '' : String(r.weight), selected: !!r.selected, createdAt: r.created_at_ms || Date.now() }); }
+    async function requireLogin() { const { data: sessionData } = await sb.auth.getSession(); if (sessionData.session) return sessionData.session.user; const email = prompt('Entre ton email Speexx pour accéder au dashboard :'); if (!email) { alert('Connexion annulée.'); return null; } try { const { error } = await sb.auth.signInWithOtp({ email: email.trim(), options: { emailRedirectTo: 'https://jeremielecam.github.io/Forecast-SQL-RDV/' } }); if (error) { alert('Erreur Supabase : ' + error.message); return null; } alert('Un lien de connexion vient de t’être envoyé par email. Clique dessus, puis reviens sur le dashboard.'); return null; } catch (err) { alert('Erreur technique : ' + (err && err.message ? err.message : String(err))); return null; } }
+    async function loadRowsFromSupabase() { const { data, error } = await sb.from(SUPABASE_TABLE).select('*').order('next_step', { ascending: true, nullsFirst: false }).order('company', { ascending: true }); if (error) { console.error(error); return; } state.rows = (data || []).map(fromDbRow); render(); }
+    async function saveRowToSupabase(row) { const { error } = await sb.from(SUPABASE_TABLE).upsert({ ...toDbRow(row), updated_at: new Date().toISOString() }); if (error) { console.error(error); alert('Impossible de sauvegarder dans Supabase : ' + error.message); return false; } return true; }
+    async function deleteRowFromSupabase(id) { const { data, error } = await sb.from(SUPABASE_TABLE).delete().eq('id', id).select('id'); if (error || !data || !data.length) { console.error(error); alert('Impossible de supprimer dans Supabase.'); return false; } return true; }
+    function startSupabaseRealtime() { sb.channel('dashboard-rdv-live').on('postgres_changes', { event:'*', schema:'public', table:SUPABASE_TABLE }, async () => { await loadRowsFromSupabase(); }).subscribe(); }
+    async function initSupabaseDashboard() { const user = await requireLogin(); if (!user) return; await loadRowsFromSupabase(); startSupabaseRealtime(); }
+    function getOwnerRows(ownerKey = state.activeOwner){ const ownerLabel = ownerValueFromKey(ownerKey); return state.rows.filter(r => plain(normalizeOwnerValue(r.owner)) === plain(ownerLabel)); }
+    function getFilteredRows(ownerKey = state.activeOwner){ const f = state.filtersByOwner[ownerKey]; return [...getOwnerRows(ownerKey)].filter(r => isMatch(r.company, f.companyValue, f.companyMode)).filter(r => !r.product || f.products.includes(String(r.product))).filter(r => isMatch(r.notes, f.notesValue, f.notesMode)).filter(r => !f.qualDate || r.qualDate===f.qualDate).filter(r => isMatch(r.nextAction, f.nextActionValue, f.nextActionMode)).filter(r => !f.nextStep || r.nextStep===f.nextStep).filter(r => isMatch(displayStatus(r), f.statusValue, f.statusMode)).filter(r => !r.weight || f.weights.includes(String(r.weight))).sort((a,b)=>String(a.company||'').localeCompare(String(b.company||''), 'fr') || (a.createdAt||0) - (b.createdAt||0)); }
+    function getRowsForCalendarAndForecast(ownerKey = state.activeOwner){ const filtered=getFilteredRows(ownerKey); const selected=filtered.filter(r=>r.selected); return selected.length ? selected : filtered; }
+    function renderChoiceList(targetId, values, selected, key, compact=false, weight=false){ const el=document.getElementById(targetId); if(!el) return; el.innerHTML=''; values.forEach(v=>{ const label=document.createElement('label'); label.className=compact ? 'check compact' : 'check'; const input=document.createElement('input'); input.type='checkbox'; input.checked=selected.includes(String(v)); input.style.accentColor='var(--orange)'; input.addEventListener('change',()=>{ const filters = currentFilters(); if(input.checked){ if(!filters[key].includes(String(v))) filters[key].push(String(v)); } else { filters[key]=filters[key].filter(x=>x!==String(v)); if(filters[key].length===0) filters[key]=values.map(String); } save(); render(); }); const span=document.createElement('span'); span.textContent=weight ? niceWeight(v) : v; label.appendChild(input); label.appendChild(span); el.appendChild(label); }); }
+    function syncInputs(){ const f=currentFilters(); const map={ fCompanyMode:f.companyMode, fCompanyValue:f.companyValue, fNotesMode:f.notesMode, fNotesValue:f.notesValue, fQualDate:f.qualDate, fNextActionMode:f.nextActionMode, fNextActionValue:f.nextActionValue, fNextStep:f.nextStep, fStatusMode:f.statusMode, fStatusValue:f.statusValue, hCompanyMode:f.companyMode, hCompanyValue:f.companyValue, hNotesMode:f.notesMode, hNotesValue:f.notesValue, hQualDate:f.qualDate, hNextActionMode:f.nextActionMode, hNextActionValue:f.nextActionValue, hNextStep:f.nextStep, hStatusMode:f.statusMode, hStatusValue:f.statusValue }; Object.entries(map).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.value = val ?? ''; }); ['toggleSortQual','sortChipQual'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent='Tri croissant : '+(f.sortQual?'On':'Off'); }); ['toggleSortNextStep','sortChipNextStep'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent='Tri croissant : '+(f.sortNextStep?'On':'Off'); }); renderChoiceList('productFilters', PRODUCTS, f.products, 'products', false, false); renderChoiceList('weightFilters', WEIGHTS, f.weights, 'weights', false, true); renderChoiceList('hProductFilters', PRODUCTS, f.products, 'products', true, false); renderChoiceList('hWeightFilters', WEIGHTS, f.weights, 'weights', true, true); document.getElementById('workspaceSubtitle').textContent = 'Vue active : ' + ownerLabelFromKey(state.activeOwner); document.querySelectorAll('.workspace-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.workspace===state.activeOwner)); document.querySelectorAll('.subtab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab===currentSubTab())); document.querySelectorAll('.tab-content').forEach(el => el.classList.toggle('active', el.id===currentSubTab())); }
+    function renderKpis(rows){ const totalWeight=rows.reduce((s,r)=>s+Number(r.weight||0),0); const uniqueCompanies=new Set(rows.map(r=>norm(r.company)).filter(Boolean)).size; const rdv=rows.filter(r=>plain(displayStatus(r))==='rdv').length; const chaud=rows.filter(r=>plain(displayStatus(r))==='chaud').length; const relance=rows.filter(r=>plain(displayStatus(r))==='a relancer').length; const cards=[ {label:'Lignes visibles', value:rows.length, mini:`${uniqueCompanies} comptes distincts`}, {label:'Pondération visible', value:niceWeight(totalWeight.toFixed(2).replace(/\.00$/,'')), mini:'Somme pondérée'}, {label:'RDV', value:rdv, mini:'Lignes en rendez-vous'}, {label:'Chaud', value:chaud, mini:'Lignes chaudes'}, {label:'À relancer', value:relance, mini:'Relances à piloter'} ]; document.getElementById('kpis').innerHTML=cards.map(c=>`<div class="kpi"><div class="label">${esc(c.label)}</div><div class="value">${esc(String(c.value))}</div><div class="mini">${esc(c.mini)}</div></div>`).join(''); }
+    function renderSummary(){ const tableRows=getFilteredRows(); const dashRows=getRowsForCalendarAndForecast(); const totalWeight=dashRows.reduce((s,r)=>s+Number(r.weight||0),0); const selectedCount=tableRows.filter(r=>r.selected).length; const items=[ ['Workspace', ownerLabelFromKey(state.activeOwner)], ['Tableau visible', String(tableRows.length)], ['Lignes cochées', String(selectedCount)], ['Base calendrier/forecast', String(dashRows.length)], ['Pondération active', niceWeight(totalWeight.toFixed(2).replace(/\.00$/,''))], ['Avec next action', String(dashRows.filter(r=>r.nextAction).length)] ]; document.getElementById('summaryList').innerHTML=items.map(([k,v])=>`<div class="summary-item"><span class="summary-key">${esc(k)}</span><strong>${esc(v)}</strong></div>`).join(''); }
+    function renderActiveChips(){ const f=currentFilters(); const chips=['Vue: ' + ownerLabelFromKey(state.activeOwner)]; if(f.companyValue) chips.push('Entreprise: '+f.companyValue); if(f.products.length!==PRODUCTS.length) chips.push('Produit: '+f.products.join(', ')); if(f.notesValue) chips.push('Notes: '+f.notesValue); if(f.qualDate) chips.push('Date qualif.: '+formatDate(f.qualDate)); if(f.sortQual) chips.push('Tri qualif.'); if(f.nextActionValue) chips.push('Next action: '+f.nextActionValue); if(f.nextStep) chips.push('Next step: '+formatDate(f.nextStep)); if(f.sortNextStep) chips.push('Tri next step'); if(f.statusValue) chips.push('Statut: '+f.statusValue); if(f.weights.length!==WEIGHTS.length) chips.push('Pondération: '+f.weights.map(niceWeight).join(', ')); const selectedCount=getFilteredRows().filter(r=>r.selected).length; if(selectedCount) chips.push('Cochées: '+selectedCount); const el=document.getElementById('activeFilterChips'); el.innerHTML=chips.map(c=>`<span class="chip">${esc(c)}</span>`).join(''); }
+    function renderSelectionBanner(){ const banner=document.getElementById('selectionBanner'); const txt=document.getElementById('selectionText'); const count=getFilteredRows().filter(r=>r.selected).length; if(count){ banner.classList.add('show'); txt.textContent=`Sélection active : ${count} ligne${count>1?'s':''} cochée${count>1?'s':''}`; } else { banner.classList.remove('show'); } }
+    function resetForm(){ document.getElementById('oppForm').reset(); document.getElementById('recordId').value=''; document.getElementById('product').value=''; document.getElementById('status').value=''; document.getElementById('weight').value=''; }
+    function fillForm(r, open=true){ document.getElementById('recordId').value=r.id || ''; document.getElementById('company').value=r.company || ''; document.getElementById('product').value=r.product || ''; document.getElementById('notes').value=r.notes || ''; document.getElementById('qualDate').value=r.qualDate || ''; document.getElementById('nextAction').value=r.nextAction || ''; document.getElementById('nextStep').value=r.nextStep || ''; document.getElementById('status').value=normalizeStatusValue(r.status) || ''; document.getElementById('weight').value=autoWeightForStatus(r.status); if(open) document.getElementById('formOverlay').classList.add('show'); }
+    function renderTable(rows){ const tbody=document.getElementById('tbody'); document.getElementById('rowCount').textContent=`${rows.length} ligne${rows.length>1?'s':''}`; tbody.innerHTML=''; const activeSelectedId = currentSelectedId(); const checkAll=document.getElementById('checkAllVisible'); const allChecked = rows.length && rows.every(r=>r.selected); checkAll.checked=!!allChecked; checkAll.indeterminate = rows.some(r=>r.selected) && !allChecked; rows.forEach(r=>{ const tr=document.createElement('tr'); if(activeSelectedId===r.id) tr.classList.add('selected'); tr.innerHTML=`<td class="cell-checkbox"><input class="row-check" data-id="${esc(r.id)}" type="checkbox" ${r.selected ? 'checked' : ''}></td><td><strong class="${companyClassForStatus(r.status)}">${esc(r.company||'—')}</strong></td><td>${r.product ? `<span class="pill" style="background:#fafafa;color:#000;border-color:#ddd;">${esc(r.product)}</span>` : '—'}</td><td>${esc(r.notes||'—')}</td><td>${formatDate(r.qualDate)}</td><td>${esc(r.nextAction||'—')}</td><td>${formatDate(r.nextStep)}</td><td><span class="pill ${badgeClass(displayStatus(r))}">${esc(displayStatus(r))}</span></td><td><strong>${r.weight ? niceWeight(r.weight) : '—'}</strong></td><td><button class="btn icon danger delete-row-btn" type="button" data-id="${esc(r.id)}" title="Supprimer cette ligne">✕</button></td>`; tr.addEventListener('click',(e)=>{ if(e.target && (e.target.classList.contains('row-check') || e.target.classList.contains('delete-row-btn'))) return; setCurrentSelectedId(r.id); fillForm(r,true); save(); render(); }); tbody.appendChild(tr); }); tbody.querySelectorAll('.row-check').forEach(cb=>{ cb.addEventListener('click',e=>e.stopPropagation()); cb.addEventListener('change',()=>{ const row=state.rows.find(x=>x.id===cb.dataset.id); if(row) row.selected=cb.checked; save(); render(); }); }); tbody.querySelectorAll('.delete-row-btn').forEach(btn => { btn.addEventListener('click', async (e) => { e.stopPropagation(); const id = btn.dataset.id; if (!id) return; if (!confirm('Supprimer cette ligne ?')) return; const ok = await deleteRowFromSupabase(id); if (!ok) return; state.rows = state.rows.filter(r => r.id !== id); if (currentSelectedId() === id) setCurrentSelectedId(null); save(); render(); await loadRowsFromSupabase(); });}); if(!rows.length){ const tr=document.createElement('tr'); tr.innerHTML='<td colspan="10" style="padding:18px 10px;text-align:center;color:#666;">Aucune opportunité ne correspond aux filtres actuels.</td>'; tbody.appendChild(tr); } }
+    function getQuarterSourceDate(r){ const s=plain(displayStatus(r)); if(s==='sql' || s==='sql to nurture') return r.qualDate || r.nextStep || ''; return r.nextStep || r.qualDate || ''; }
+    function getQuarterNumberFromDateStr(dateStr){ if(!dateStr) return null; const d=new Date(dateStr+'T00:00:00'); return isNaN(d) ? null : Math.floor(d.getMonth()/3)+1; }
+    function getForecastQuarter(row){ return getQuarterNumberFromDateStr(getQuarterSourceDate(row)); }
+    function makeQuarterDate(sectionKey, quarter){ const year=new Date().getFullYear(); const month=((quarter-1)*3)+2; const date=`${year}-${String(month).padStart(2,'0')}-15`; return sectionKey==='sql' ? {qualDate:date,nextStep:''} : {qualDate:'',nextStep:date}; }
+    function computeBoard(ownerKey){ const ownerRows=getOwnerRows(ownerKey); const noStatusRows=ownerRows.filter(r=>displayStatus(r)==='—'); const noDateRows=ownerRows.filter(r=>displayStatus(r)!=='—' && !getForecastQuarter(r)); const sectionData={}; FORECAST_SECTIONS.forEach(section=>{ const validRows=ownerRows.filter(r=>section.statuses.includes(displayStatus(r)) && getForecastQuarter(r)); const grouped={1:[],2:[],3:[],4:[]}; validRows.sort((a,b)=>String(a.company||'').localeCompare(String(b.company||''),'fr')).forEach(r=>{ const q=getForecastQuarter(r); if(q) grouped[q].push(r); }); const maxGrouped=Math.max(grouped[1].length, grouped[2].length, grouped[3].length, grouped[4].length, 0); const extra=((state.forecastMetaByOwner[ownerKey]||{})[section.key]||0); const rowsCount=Math.max(maxGrouped + extra, maxGrouped ? maxGrouped : extra ? extra : 1); sectionData[section.key]={grouped, rowsCount}; }); return {ownerRows,noStatusRows,noDateRows,sectionData}; }
+    function totalWeightForRows(rows){ return rows.reduce((sum,r)=>sum+Number(r.weight||0),0); }
+    function renderBoardTable(ownerKey){ const board=computeBoard(ownerKey); const ownerLabel=ownerLabelFromKey(ownerKey).toUpperCase(); let h=`<div class="forecast-owner-block"><div class="forecast-board-wrap"><table class="fc-board"><colgroup><col style="width:58px;"><col><col style="width:20px;"><col><col style="width:20px;"><col><col style="width:20px;"><col><col style="width:20px;"></colgroup><thead><tr><th class="fc-owner-title" colspan="9">${ownerLabel}</th></tr><tr><th class="fc-quarter-head quarter-label">Quarter</th><th class="fc-quarter-head" colspan="2">Q1</th><th class="fc-quarter-head" colspan="2">Q2</th><th class="fc-quarter-head" colspan="2">Q3</th><th class="fc-quarter-head" colspan="2">Q4</th></tr></thead><tbody>`; FORECAST_SECTIONS.forEach((section, idx)=>{ const data=board.sectionData[section.key]; for(let rowIndex=0; rowIndex<data.rowsCount; rowIndex++){ h+='<tr>'; if(rowIndex===0) h+=`<td class="fc-status-label ${section.key}" rowspan="${data.rowsCount}">${section.label}</td>`; for(let quarter=1; quarter<=4; quarter++){ const current=data.grouped[quarter][rowIndex]; const rowId=current ? current.id : ''; const currentWeight=current ? niceWeight(current.weight||autoWeightForStatus(section.createStatus)) : ''; const currentDate=current ? formatDate(getQuarterSourceDate(current)) : ''; const colorClass=section.color; const hasRow=current ? `has-row ${colorClass}` : ''; h+=`<td class="fc-company-cell"><div class="fc-cell ${hasRow}"><div class="fc-cell-main"><div class="fc-company-line"><input class="fc-company-input ${current ? colorClass : ''}" type="text" value="${esc(current ? current.company || '' : '')}" data-row-id="${esc(rowId)}" data-owner="${ownerKey}" data-section="${section.key}" data-quarter="${quarter}" placeholder="">${currentDate ? `<span class="fc-date">${esc(currentDate)}</span>` : ''}</div><button class="fc-delete" type="button" data-delete-id="${esc(rowId)}" title="Supprimer">×</button></div></div></td><td class="fc-weight-cell">${esc(currentWeight)}</td>`; } h+='</tr>'; } if(idx===0){ h+='<tr><td class="fc-status-label realized">TOTAL réalisé</td>'; for(let quarter=1; quarter<=4; quarter++){ const qRows=data.grouped[quarter]; h+=`<td class="fc-total-company"></td><td class="fc-total-weight">${esc(niceWeight(totalWeightForRows(qRows).toFixed(2).replace(/\.00$/,'')))}</td>`; } h+='</tr>'; } }); h+='<tr><td class="fc-status-label totalfuture">TOTAL à venir</td>'; for(let quarter=1; quarter<=4; quarter++){ const qRows=['rdv','chaud','relance'].flatMap(k=>board.sectionData[k].grouped[quarter]); h+=`<td class="fc-total-company"></td><td class="fc-total-weight">${esc(niceWeight(totalWeightForRows(qRows).toFixed(2).replace(/\.00$/,'')))}</td>`; } h+='</tr></tbody></table></div><div class="forecast-side"><div class="forecast-side-card"><h4 class="forecast-side-title">Hors tableau</h4><div class="forecast-side-sub">Sans statut ou sans date exploitable.</div><div class="forecast-out-list">'; const outside=[...board.noStatusRows, ...board.noDateRows.filter(r=>!board.noStatusRows.some(x=>x.id===r.id))]; if(!outside.length) h+='<div class="forecast-out-item"><span>Aucun élément</span><span>—</span></div>'; else outside.sort((a,b)=>String(a.company||'').localeCompare(String(b.company||''),'fr')).forEach(r=>{ const reason=displayStatus(r)==='—' ? 'Sans statut' : 'Sans date'; h+=`<div class="forecast-out-item"><span>${esc(r.company||'—')}</span><span>${esc(reason)}</span></div>`; }); h+='</div></div></div></div>'; return h; }
+    async function upsertForecastTableCell(input){ const company=input.value.trim(); const rowId=input.dataset.rowId; const ownerKey=input.dataset.owner; const sectionKey=input.dataset.section; const quarter=Number(input.dataset.quarter || '0'); const section=FORECAST_SECTIONS.find(s=>s.key===sectionKey); if(!section || !quarter) return; const ownerValue=ownerValueFromKey(ownerKey); const dates=makeQuarterDate(sectionKey, quarter); if(!company && rowId){ const okDelete = await deleteRowFromSupabase(rowId); if(!okDelete) return; state.rows=state.rows.filter(r=>r.id!==rowId); if(currentSelectedId()===rowId) setCurrentSelectedId(null); save(); render(); return; } if(!company) return; let existing=state.rows.find(r=>r.id===rowId); if(existing){ existing.company=company; existing.owner=ownerValue; existing.status=section.createStatus; existing.qualDate=dates.qualDate; existing.nextStep=dates.nextStep; existing.weight=autoWeightForStatus(existing.status || section.createStatus); const ok = await saveRowToSupabase(existing); if(ok){ save(); render(); } return; } const newRow=normalizeRow({ id:uid(), company, owner:ownerValue, product:'', notes:'', qualDate:dates.qualDate, nextAction:'', nextStep:dates.nextStep, status:section.createStatus, weight:autoWeightForStatus(section.createStatus), selected:false, createdAt:Date.now() }); const ok = await saveRowToSupabase(newRow); if(!ok) return; state.rows.push(newRow); save(); render(); }
+    function addForecastLine(ownerKey, sectionKey){ if(!state.forecastMetaByOwner[ownerKey]) state.forecastMetaByOwner[ownerKey]=defaultForecastMetaEntry(); if(typeof state.forecastMetaByOwner[ownerKey][sectionKey] !== 'number') state.forecastMetaByOwner[ownerKey][sectionKey]=0; state.forecastMetaByOwner[ownerKey][sectionKey]+=1; save(); render(); }
+    function bindForecastBoardInputs(){ document.querySelectorAll('.fc-company-input').forEach(input=>{ input.addEventListener('change',()=>upsertForecastTableCell(input)); input.addEventListener('blur',()=>upsertForecastTableCell(input)); }); document.querySelectorAll('.fc-delete').forEach(btn=>btn.addEventListener('click', async ()=>{ const id=btn.dataset.deleteId; if(!id) return; const ok = await deleteRowFromSupabase(id); if(!ok) return; state.rows=state.rows.filter(r=>r.id!==id); if(currentSelectedId()===id) setCurrentSelectedId(null); save(); render(); })); }
+    function renderForecastBoards(){ const host=document.getElementById('forecastBoardJeremie'); if(host) host.innerHTML=renderBoardTable(state.activeOwner); bindForecastBoardInputs(); document.getElementById('forecastTitle').textContent = 'Forecast — ' + ownerLabelFromKey(state.activeOwner); }
+    function getCalendarDate(r){ return r.nextStep || r.qualDate || ''; }
+    function renderDayCell(dateObj,inMonth,events,today){ const limited=events.slice(0,3); const more=events.length-limited.length; return `<div class="day ${inMonth?'':'out'} ${today?'today':''}"><div class="day-num">${dateObj.getDate()}</div>${limited.map(r=>`<div class="ev ${eventClass(displayStatus(r))}" title="${esc(r.company||'')} • ${esc(r.nextAction||'')}">${esc(r.company||'Action')} — ${esc((r.nextAction||'').slice(0,12))}</div>`).join('')}${more>0 ? `<div class="subtle" style="font-size:.56rem;">+ ${more}</div>` : ''}</div>`; }
+    function renderMonthGrid(dateObj, rows){ const year=dateObj.getFullYear(); const month=dateObj.getMonth(); const first=new Date(year,month,1); const last=new Date(year,month+1,0); const start=(first.getDay()+6)%7; const total=Math.ceil((start+last.getDate())/7)*7; const todayKey=toKey(new Date()); let html=`<div class="month-grid">${WEEK.map(d=>`<div class="weekday">${d}</div>`).join('')}`; for(let i=0;i<total;i++){ const dn=i-start+1; const cellDate=new Date(year,month,dn); const inMonth=cellDate.getMonth()===month; const key=toKey(cellDate); const events=rows.filter(r=>{ const ds=getCalendarDate(r); if(!ds) return false; return toKey(new Date(ds))===key; }); html+=renderDayCell(cellDate,inMonth,events,key===todayKey); } html+='</div>'; return html; }
+    function renderQuarter(dateObj, rows){ const y=dateObj.getFullYear(); const start=Math.floor(dateObj.getMonth()/3)*3; let html='<div class="mini-grid">'; for(let i=0;i<3;i++){ const d=new Date(y,start+i,1); html+=`<div class="mini-month"><h4>${capitalize(MONTHS[d.getMonth()])} ${y}</h4>${renderMonthGrid(d,rows)}</div>`; } html+='</div>'; return html; }
+    function renderYear(dateObj, rows){ const y=dateObj.getFullYear(); let html='<div class="mini-grid">'; for(let i=0;i<12;i++){ const d=new Date(y,i,1); html+=`<div class="mini-month"><h4>${capitalize(MONTHS[i])} ${y}</h4>${renderMonthGrid(d,rows)}</div>`; } html+='</div>'; return html; }
+    function renderCalendar(rows){ const d=new Date(currentCalDate()); const title=document.getElementById('calTitle'); const target=document.getElementById('calendar'); if(currentCalView()==='month'){ title.textContent=`Calendrier — ${ownerLabelFromKey(state.activeOwner)} — ${capitalize(MONTHS[d.getMonth()])} ${d.getFullYear()}`; target.innerHTML=renderMonthGrid(d,rows); } else if(currentCalView()==='quarter'){ const q=Math.floor(d.getMonth()/3)+1; title.textContent=`Calendrier — ${ownerLabelFromKey(state.activeOwner)} — T${q} ${d.getFullYear()}`; target.innerHTML=renderQuarter(d,rows); } else { title.textContent=`Calendrier — ${ownerLabelFromKey(state.activeOwner)} — Année ${d.getFullYear()}`; target.innerHTML=renderYear(d,rows); } document.querySelectorAll('.viewBtn').forEach(btn=>btn.classList.toggle('primary', btn.dataset.view===currentCalView())); }
+    function exportCSV(rows){ const headers=['Entreprise','Owner','Produit','Notes','Date qualif.','Next action','Next step','Statut','Pondération','Cochée']; const lines=[headers, ...rows.map(r=>[r.company,r.owner,r.product,r.notes,r.qualDate,r.nextAction,r.nextStep,displayStatus(r),r.weight,r.selected ? 'Oui':'Non'])]; const csv=lines.map(row=>row.map(v=>`"${String(v ?? '').replace(/"/g,'""')}"`).join(';')).join('
+'); const blob=new Blob([csv], {type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='dashboard_RDV_'+state.activeOwner+'.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+    function exportJSON(rows){ const blob=new Blob([JSON.stringify(rows,null,2)], {type:'application/json;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='dashboard_RDV_'+state.activeOwner+'.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+    function openForm(){ document.getElementById('formOverlay').classList.add('show'); }
+    function closeForm(){ document.getElementById('formOverlay').classList.remove('show'); }
+    function openDrawer(){ document.getElementById('drawerBackdrop').classList.add('show'); document.getElementById('filterDrawer').classList.add('show'); }
+    function closeDrawer(){ document.getElementById('drawerBackdrop').classList.remove('show'); document.getElementById('filterDrawer').classList.remove('show'); }
+    function closeAllPops(exceptId=''){ document.querySelectorAll('.filter-pop').forEach(pop=>{ if(pop.id!==exceptId) pop.classList.remove('show'); }); }
+    function bindFilterPopupButtons(){ document.querySelectorAll('.filter-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); const target=document.getElementById(btn.dataset.pop); const willOpen=!target.classList.contains('show'); closeAllPops(); if(willOpen) target.classList.add('show'); }); }); document.querySelectorAll('[data-close-pop]').forEach(btn=>btn.addEventListener('click',()=>closeAllPops())); document.addEventListener('click',(e)=>{ if(!e.target.closest('.th-wrap')) closeAllPops(); }); }
+    function updateFromLeft(){ const f=currentFilters(); f.companyMode=document.getElementById('fCompanyMode').value; f.companyValue=document.getElementById('fCompanyValue').value; f.notesMode=document.getElementById('fNotesMode').value; f.notesValue=document.getElementById('fNotesValue').value; f.qualDate=document.getElementById('fQualDate').value; f.nextActionMode=document.getElementById('fNextActionMode').value; f.nextActionValue=document.getElementById('fNextActionValue').value; f.nextStep=document.getElementById('fNextStep').value; f.statusMode=document.getElementById('fStatusMode').value; f.statusValue=document.getElementById('fStatusValue').value; save(); render(); }
+    function updateFromHeader(){ const f=currentFilters(); f.companyMode=document.getElementById('hCompanyMode').value; f.companyValue=document.getElementById('hCompanyValue').value; f.notesMode=document.getElementById('hNotesMode').value; f.notesValue=document.getElementById('hNotesValue').value; f.qualDate=document.getElementById('hQualDate').value; f.nextActionMode=document.getElementById('hNextActionMode').value; f.nextActionValue=document.getElementById('hNextActionValue').value; f.nextStep=document.getElementById('hNextStep').value; f.statusMode=document.getElementById('hStatusMode').value; f.statusValue=document.getElementById('hStatusValue').value; save(); render(); }
+    function shiftPeriod(step){ const d=new Date(currentCalDate()); if(currentCalView()==='month') d.setMonth(d.getMonth()+step); else if(currentCalView()==='quarter') d.setMonth(d.getMonth()+step*3); else d.setFullYear(d.getFullYear()+step); state.calDateByOwner[state.activeOwner]=d; render(); }
+    function switchWorkspace(ownerKey){ state.activeOwner = ownerKey; save(); render(); }
+    function switchSubTab(tabId){ state.activeTabsByOwner[state.activeOwner] = tabId; save(); render(); }
+    function bind(){ document.querySelectorAll('.workspace-btn').forEach(btn=>btn.addEventListener('click',()=>switchWorkspace(btn.dataset.workspace))); document.querySelectorAll('.subtab-btn').forEach(btn=>btn.addEventListener('click',()=>switchSubTab(btn.dataset.tab))); ['fCompanyMode','fCompanyValue','fNotesMode','fNotesValue','fQualDate','fNextActionMode','fNextActionValue','fNextStep','fStatusMode','fStatusValue'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.addEventListener('input', updateFromLeft); el.addEventListener('change', updateFromLeft); }}); ['hCompanyMode','hCompanyValue','hNotesMode','hNotesValue','hQualDate','hNextActionMode','hNextActionValue','hNextStep','hStatusMode','hStatusValue'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.addEventListener('input', updateFromHeader); el.addEventListener('change', updateFromHeader); }}); document.getElementById('toggleSortQual').addEventListener('click',()=>{currentFilters().sortQual=!currentFilters().sortQual; save(); render();}); document.getElementById('toggleSortNextStep').addEventListener('click',()=>{currentFilters().sortNextStep=!currentFilters().sortNextStep; save(); render();}); document.getElementById('sortChipQual').addEventListener('click',()=>{currentFilters().sortQual=!currentFilters().sortQual; save(); render();}); document.getElementById('sortChipNextStep').addEventListener('click',()=>{currentFilters().sortNextStep=!currentFilters().sortNextStep; save(); render();}); document.getElementById('openFormBtn').addEventListener('click',()=>{ resetForm(); setCurrentSelectedId(null); openForm(); }); document.getElementById('closeFormBtn').addEventListener('click', closeForm); document.getElementById('formOverlay').addEventListener('click',(e)=>{ if(e.target.id==='formOverlay') closeForm(); }); document.getElementById('status').addEventListener('change',()=>{ document.getElementById('weight').value=autoWeightForStatus(document.getElementById('status').value); }); document.getElementById('resetFormBtn').addEventListener('click', resetForm); document.getElementById('openFiltersBtn').addEventListener('click', openDrawer); document.getElementById('closeDrawerBtn').addEventListener('click', closeDrawer); document.getElementById('drawerBackdrop').addEventListener('click', closeDrawer); document.getElementById('drawerApplyBtn').addEventListener('click', closeDrawer); document.getElementById('clearFiltersBtn').addEventListener('click',()=>{ state.filtersByOwner[state.activeOwner]=defaultFilters(); save(); render(); }); document.getElementById('drawerClearBtn').addEventListener('click',()=>{ state.filtersByOwner[state.activeOwner]=defaultFilters(); save(); render(); }); document.getElementById('clearSelectionBtn').addEventListener('click',()=>{ state.rows=state.rows.map(r=>ownerKeyFromValue(r.owner)===state.activeOwner ? ({...r, selected:false}) : r); save(); render(); }); document.getElementById('hProductAll').addEventListener('click',()=>{ currentFilters().products=[...PRODUCTS]; save(); render(); }); document.getElementById('hProductReset').addEventListener('click',()=>{ currentFilters().products=[...PRODUCTS]; save(); render(); }); document.getElementById('hWeightAll').addEventListener('click',()=>{ currentFilters().weights=[...WEIGHTS]; save(); render(); }); document.getElementById('hWeightReset').addEventListener('click',()=>{ currentFilters().weights=[...WEIGHTS]; save(); render(); }); document.getElementById('checkAllVisible').addEventListener('change',()=>{ const ids=new Set(getFilteredRows().map(r=>r.id)); const flag=document.getElementById('checkAllVisible').checked; state.rows=state.rows.map(r=> ids.has(r.id) ? ({...r,selected:flag}) : r); save(); render(); }); document.getElementById('oppForm').addEventListener('submit', async (e) => { e.preventDefault(); const isEdit = !!document.getElementById('recordId').value; const id = isEdit ? document.getElementById('recordId').value : uid(); const existing = state.rows.find(x => x.id === id); const formStatus = normalizeStatusValue(document.getElementById('status').value); const row = normalizeRow({ id, company: document.getElementById('company').value.trim(), owner: ownerValueFromKey(state.activeOwner), product: document.getElementById('product').value, notes: document.getElementById('notes').value.trim(), qualDate: document.getElementById('qualDate').value, nextAction: document.getElementById('nextAction').value.trim(), nextStep: document.getElementById('nextStep').value, status: formStatus, weight: autoWeightForStatus(formStatus), selected: existing ? existing.selected : false, createdAt: existing ? existing.createdAt : Date.now() }); const ok = await saveRowToSupabase(row); if (!ok) return; const idx = state.rows.findIndex(r => r.id === id); if (idx >= 0) state.rows[idx] = row; else state.rows.push(row); setCurrentSelectedId(row.id); save(); render(); closeForm(); await loadRowsFromSupabase(); }); document.getElementById('duplicateBtn').addEventListener('click', async ()=>{ const id=document.getElementById('recordId').value; const src=state.rows.find(r=>r.id===id); if(!src) return; const copy=normalizeRow({...src,id:uid(),owner:ownerValueFromKey(state.activeOwner),selected:false,createdAt:Date.now()}); const ok = await saveRowToSupabase(copy); if(!ok) return; state.rows.push(copy); setCurrentSelectedId(copy.id); save(); render(); await loadRowsFromSupabase(); }); document.getElementById('deleteBtn').addEventListener('click', async () => { const id = document.getElementById('recordId').value; if (!id) return; if (!confirm('Supprimer cette ligne ?')) return; const ok = await deleteRowFromSupabase(id); if (!ok) return; state.rows = state.rows.filter(r => r.id !== id); if (currentSelectedId() === id) setCurrentSelectedId(null); resetForm(); save(); render(); closeForm(); await loadRowsFromSupabase(); }); document.getElementById('exportCsvBtn').addEventListener('click',()=>exportCSV(getFilteredRows())); document.getElementById('topExportCsvBtn').addEventListener('click',()=>exportCSV(getFilteredRows())); document.getElementById('exportJsonBtn').addEventListener('click',()=>exportJSON(getOwnerRows(state.activeOwner))); document.getElementById('resetDemoBtn').addEventListener('click',()=>{ state.rows=JSON.parse(JSON.stringify(demoRows)); state.filtersByOwner=defaultFiltersByOwner(); state.forecastMetaByOwner=defaultForecastMeta(); state.selectedIdByOwner={ anais:null, jeremie:null }; resetForm(); save(); render(); closeDrawer(); closeForm(); }); document.getElementById('importJson').addEventListener('change',(e)=>{ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const data=JSON.parse(reader.result); if(!Array.isArray(data)) throw new Error('invalid'); const imported=data.map(item=>normalizeRow({ id:item.id||uid(), company:item.company||'', owner:item.owner||ownerValueFromKey(state.activeOwner), product:item.product||'', notes:item.notes||'', qualDate:item.qualDate||'', nextAction:item.nextAction||'', nextStep:item.nextStep||'', status:item.status||'', weight:item.weight||'', selected:!!item.selected, createdAt:item.createdAt||Date.now() })); state.rows = [...state.rows.filter(r=>ownerKeyFromValue(r.owner)!==state.activeOwner), ...imported]; state.filtersByOwner[state.activeOwner]=defaultFilters(); state.forecastMetaByOwner[state.activeOwner]=defaultForecastMetaEntry(); setCurrentSelectedId(null); resetForm(); save(); render(); } catch(err){ alert('Le JSON importé est invalide.'); } }; reader.readAsText(file,'utf-8'); e.target.value=''; }); document.querySelectorAll('.forecast-add-btn').forEach(btn=>btn.addEventListener('click',()=>{ const owner=state.activeOwner; const select=document.getElementById('forecastAddSelectJeremie'); const section=select ? select.value : 'sql'; addForecastLine(owner, section); })); document.querySelectorAll('.viewBtn').forEach(btn=>btn.addEventListener('click',()=>{ state.calViewByOwner[state.activeOwner]=btn.dataset.view; render(); })); document.getElementById('prevBtn').addEventListener('click',()=>shiftPeriod(-1)); document.getElementById('nextBtn').addEventListener('click',()=>shiftPeriod(1)); document.getElementById('todayBtn').addEventListener('click',()=>{ state.calDateByOwner[state.activeOwner]=new Date(); render(); }); bindFilterPopupButtons(); }
+    function render(){ const filtered=getFilteredRows(); const dashboard=getRowsForCalendarAndForecast(); syncInputs(); renderActiveChips(); renderSummary(); renderSelectionBanner(); renderKpis(filtered); renderTable(filtered); renderForecastBoards(); renderCalendar(dashboard); save(); }
+    bind(); resetForm(); render(); initSupabaseDashboard();
+  </script>
 </body>
 </html>
