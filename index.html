@@ -127,6 +127,12 @@
 /* V8 - Dashboard popup editor beside selected company */
 #companyEditor.company-popup{position:absolute;left:215px;top:0;width:340px;z-index:5000;box-shadow:0 18px 40px rgba(0,0,0,.25);background:#fffaf5;}
 
+
+/* V9 popup next to selected company */
+.panel{position:relative;}
+#companyEditor{position:absolute;display:none;z-index:9999;left:210px;width:360px;max-height:85vh;overflow:auto;}
+#companyEditor.open{display:block;}
+
 </style>
 </head>
 <body onload="loadPlotly()">
@@ -1721,14 +1727,11 @@ function selectCompany(id){
   }
   selectedCompanyId=id;
   renderList(); renderCompanyTable(); renderEditors(); highlightCompany(id);
-  const row=document.querySelector(`#list .item[data-id="${id}"]`);
-  const popup=document.getElementById('companyEditor');
-  const panel=document.querySelector('.panel');
-  if(row&&popup&&panel){
-    const r=row.getBoundingClientRect();
-    const p=panel.getBoundingClientRect();
-    popup.style.top=(row.offsetTop-4)+'px';
-    popup.style.left=(panel.clientWidth+8)+'px';
+  const item=document.querySelector(`#list .item[data-id="${id}"]`);
+  const editor=document.getElementById('companyEditor');
+  if(item && editor){
+    editor.style.top=(item.offsetTop)+'px';
+    editor.style.left='215px';
   }
 }
 function highlightCompany(id){ if(!window.Plotly||!plotlyReady)return; const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return; Plotly.relayout('chart', {'annotations[0].text':`<b>${escapeHtml(d.name)}</b><br>${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(ownerLabel(d))}`,'annotations[0].visible':true}); }
