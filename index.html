@@ -102,7 +102,14 @@
     .envwarn.error{background:#fff0f0;border-color:rgba(229,57,53,.30);}
     .closebtn{float:right;cursor:pointer;padding:0 6px;border-radius:10px;border:1px solid rgba(0,0,0,.12);background:#fff;margin-left:10px;}
     @media(max-width:1150px){.dashboard-grid{grid-template-columns:220px 1fr}.list-page{grid-template-columns:1fr}.list-side{min-height:280px}}
-  </style>
+  
+/* V6 Advanced Column Filters */
+.filter-trigger{cursor:pointer;color:#FF7900;margin-left:4px;font-weight:700}
+.filter-menu{display:none;position:absolute;background:#fff;border:1px solid #ccc;border-radius:8px;padding:8px;z-index:999;min-width:220px;box-shadow:0 8px 24px rgba(0,0,0,.15)}
+.filter-menu.open{display:block}
+.filter-menu label{font-size:10px;display:block;margin:2px 0}
+
+</style>
 </head>
 <body onload="loadPlotly()">
   <div id="envWarning" class="envwarn"><span class="closebtn" onclick="document.getElementById('envWarning').style.display='none'">✕</span><span id="envWarningText"></span></div>
@@ -1567,5 +1574,19 @@ function exportCsv(){ const rows=[CSV_HEADERS.join(';')].concat(data.map(d=>CSV_
 function parseCsvLine(line,delimiter){ const out=[]; let cur='',q=false; for(let i=0;i<line.length;i++){const ch=line[i],nx=line[i+1]; if(ch==='"'&&q&&nx==='"'){cur+='"';i++;continue;} if(ch==='"'){q=!q;continue;} if(ch===delimiter&&!q){out.push(cur);cur='';continue;} cur+=ch;} out.push(cur); return out; }
 function importCsv(e){ const file=e.target.files&&e.target.files[0]; if(!file)return; file.text().then(text=>{ const clean=String(text||'').replace(/^\ufeff/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim(); if(!clean)return; const lines=clean.split('\n').filter(Boolean); const delim=lines[0].split(';').length>=lines[0].split(',').length?';':','; const headers=parseCsvLine(lines[0],delim).map(h=>h.trim()); const rows=lines.slice(1).map(line=>{const cells=parseCsvLine(line,delim),o={}; headers.forEach((h,i)=>o[h]=cells[i]??''); return normalizePoint(o);}); rows.forEach(row=>{ const idx=data.findIndex(d=>Number(d.id)===Number(row.id) || (d.name.toLowerCase()===row.name.toLowerCase()&&Number(d.year)===Number(row.year)&&d.product===row.product)); if(idx>=0)data[idx]={...data[idx],...row,id:data[idx].id}; else data.push({...row,id:nextDataId()}); }); renderOwners(); updateAll(); document.getElementById('dataToolsStatus').textContent='Import CSV terminé : '+rows.length+' ligne(s).'; e.target.value=''; }); }
 </script>
+
+<script>
+/* V6 Advanced Filters configuration */
+window.ADVANCED_TABLE_FILTERS={
+ entreprise:{operators:['equals','contains'],sort:['az','za']},
+ notes:{operators:['equals','contains'],sort:['az','za']},
+ annee:{sort:['oldest','newest'],checkbox:true},
+ revenue:{sort:['largest','smallest']},
+ produit:{checkbox:true},
+ cat:{checkbox:true},
+ owner:{checkbox:true}
+};
+</script>
+
 </body>
 </html>
