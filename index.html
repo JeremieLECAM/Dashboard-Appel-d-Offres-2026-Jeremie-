@@ -187,16 +187,12 @@
 .watch-year{font-weight:900;color:#000;background:#fff6ee;}
 
 
-/* V12 - correction écart visuel axes / popup sans impact graphique */
-html,body{height:100%;overflow:hidden;}
-.tab-content{height:calc(100vh - 46px)!important;overflow:hidden!important;}
-.dashboard-grid{height:100%!important;min-height:0!important;overflow:hidden!important;}
-.panel{overflow:auto!important;position:relative!important;min-height:0!important;}
-.chart-panel{min-width:0!important;min-height:0!important;height:100%!important;overflow:hidden!important;}
-#chartWrap{min-height:0!important;overflow:hidden!important;}
-#chart{width:100%!important;height:100%!important;}
-#companyEditor.company-popup{display:none!important;position:absolute!important;width:0!important;height:0!important;overflow:hidden!important;padding:0!important;border:0!important;box-shadow:none!important;}
+
+/* V13 - rollback graphique + popup indépendant */
+#companyEditor.company-popup{display:none!important;width:0!important;height:0!important;overflow:hidden!important;padding:0!important;border:0!important;box-shadow:none!important;}
 .floating-company-popup{position:fixed!important;z-index:30000!important;}
+.watch-table .th-inner{position:relative;display:flex;align-items:center;gap:4px;}
+.watch-table .filter-menu{left:0;top:24px;}
 
 </style>
 </head>
@@ -1603,6 +1599,14 @@ let tableFilters = {
   cat: null,
   owner: null
 };
+let watchSort = { col: 'year', dir: 'desc' };
+let watchFilters = {
+  name: { op: 'contains', value: '' },
+  year: null,
+  product: null,
+  cat: null,
+  owner: null
+};
 const STORAGE_KEY = 'ao_dashboard_data_orange_v1';
 const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','outline','owner','owner_missing','notes'];
 const CAT_COLORS = {'CAC 40':'#E53935','Entreprise privée':'#1E88E5','Ecoles / Public / UE':'#43A047'}; // couleurs métier conservées
@@ -1798,7 +1802,7 @@ function renderCompanyTable(){
   wrap.querySelectorAll('tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>selectCompany(tr.dataset.id)));
   bindTableFilterEvents();
 }  
-function updateChart(){ if(!window.Plotly || !plotlyReady) return; const pts=filteredData(); const groups=new Map(); pts.forEach(p=>{p.plotYear=p.year; p.plotY=p.y; const k=p.year+'|'+p.y+'|'+p.color; if(!groups.has(k))groups.set(k,[]); groups.get(k).push(p);}); groups.forEach(g=>{ const dx=.18; const start=-((g.length-1)/2)*dx; g.forEach((p,i)=>p.plotYear=p.year+start+i*dx);}); const traces=[]; CAT_ORDER.forEach(cat=>{ const cpts=pts.filter(p=>p.cat===cat); traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:false,x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),customdata:cpts.map(p=>[p.id,p.product,p.revenue,p.year,ownerLabel(p),p.notes||'']),hovertemplate:'<b>%{text}</b><br>Année : %{customdata[3]}<br>Produit : %{customdata[1]}<br>Estimated revenue : %{customdata[2]:,.0f} €<br>Owner / BDR : %{customdata[4]}<extra></extra>',marker:{size:cpts.map(p=>bubbleSizeByCat(p.cat)),color:cpts.map(p=>p.color),opacity:1,line:{width:1,color:'#111'}}}); traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:true,hoverinfo:'skip',x:[null],y:[null],marker:{size:12,color:colorForCategory(cat),line:{width:1,color:'#111'}}}); }); if(showNames){ CAT_ORDER.forEach(cat=>{ const cpts=pts.filter(p=>p.cat===cat); traces.push({type:'scatter',mode:'text',showlegend:false,hoverinfo:'skip',x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),textfont:{size:pts.length>100?8:10,color:'#000'},textposition:'top center'}); }); } traces.push({type:'scatter',mode:'markers',showlegend:false,hoverinfo:'skip',x:[null],y:[null],marker:{size:[46],color:['#fff'],opacity:0,line:{color:'#000',width:4}}}); const ticks=[...Y_BANDS_COACHING,...Y_BANDS_LANGUES].sort((a,b)=>a.y-b.y); const f=getFilterState(); Plotly.react('chart', traces, {uirevision:'keep',autosize:true,margin:{l:110,r:30,t:40,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-1.6,f.yMax+1.6],fixedrange:false,automargin:true},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.8,5.8],fixedrange:false,automargin:true,zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},legend:{orientation:'h',y:1.02,x:-.1},font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true}); const gd=document.getElementById('chart'); gd.removeAllListeners && gd.removeAllListeners('plotly_click'); gd.on && gd.on('plotly_click', ev=>{ const pt=ev&&ev.points&&ev.points[0]; const id=pt&&pt.customdata?pt.customdata[0]:null; if(id!=null) selectCompany(id); }); }
+function updateChart(){ if(!window.Plotly || !plotlyReady) return; const pts=filteredData(); const groups=new Map(); pts.forEach(p=>{p.plotYear=p.year; p.plotY=p.y; const k=p.year+'|'+p.y+'|'+p.color; if(!groups.has(k))groups.set(k,[]); groups.get(k).push(p);}); groups.forEach(g=>{ const dx=.18; const start=-((g.length-1)/2)*dx; g.forEach((p,i)=>p.plotYear=p.year+start+i*dx);}); const traces=[]; CAT_ORDER.forEach(cat=>{ const cpts=pts.filter(p=>p.cat===cat); traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:false,x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),customdata:cpts.map(p=>[p.id,p.product,p.revenue,p.year,ownerLabel(p),p.notes||'']),hovertemplate:'<b>%{text}</b><br>Année : %{customdata[3]}<br>Produit : %{customdata[1]}<br>Estimated revenue : %{customdata[2]:,.0f} €<br>Owner / BDR : %{customdata[4]}<extra></extra>',marker:{size:cpts.map(p=>bubbleSizeByCat(p.cat)),color:cpts.map(p=>p.color),opacity:1,line:{width:1,color:'#111'}}}); traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:true,hoverinfo:'skip',x:[null],y:[null],marker:{size:12,color:colorForCategory(cat),line:{width:1,color:'#111'}}}); }); if(showNames){ CAT_ORDER.forEach(cat=>{ const cpts=pts.filter(p=>p.cat===cat); traces.push({type:'scatter',mode:'text',showlegend:false,hoverinfo:'skip',x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),textfont:{size:pts.length>100?8:10,color:'#000'},textposition:'top center'}); }); } traces.push({type:'scatter',mode:'markers',showlegend:false,hoverinfo:'skip',x:[null],y:[null],marker:{size:[46],color:['#fff'],opacity:0,line:{color:'#000',width:4}}}); const ticks=[...Y_BANDS_COACHING,...Y_BANDS_LANGUES].sort((a,b)=>a.y-b.y); const f=getFilterState(); Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:40,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-1.6,f.yMax+1.6]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.8,5.8],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},legend:{orientation:'h',y:1.02,x:-.1},font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true}); const gd=document.getElementById('chart'); gd.removeAllListeners && gd.removeAllListeners('plotly_click'); gd.on && gd.on('plotly_click', ev=>{ const pt=ev&&ev.points&&ev.points[0]; const id=pt&&pt.customdata?pt.customdata[0]:null; if(id!=null) selectCompany(id); }); }
 function selectCompany(id){
   id=Number(id);
   if(selectedCompanyId===id){
@@ -1863,17 +1867,6 @@ function addCompanyFromForm(e){ e.preventDefault(); const d=normalizePoint({id:n
 function downloadTextFile(filename,text,mime='text/plain;charset=utf-8'){ const blob=new Blob([text],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
 
 
-
-function preserveChartSizeDuringPopup(){
-  const chart = document.getElementById('chart');
-  const wrap = document.getElementById('chartWrap');
-  if(!chart || !wrap) return;
-  const rect = wrap.getBoundingClientRect();
-  if(rect.width > 0 && rect.height > 0){
-    chart.style.width = rect.width + 'px';
-    chart.style.height = rect.height + 'px';
-  }
-}
 
 function isDashboardActive(){
   const tab = document.getElementById('tabDashboard');
@@ -1957,14 +1950,127 @@ function saveFloatingEditor(id){
   renderDashboardFloatingPopup();
 }
 
+
+function getWatchYears(){
+  const y=new Date().getFullYear();
+  return [y-2,y-3,y-4,y-5];
+}
+function getWatchBaseRows(){
+  const watchYears=getWatchYears();
+  return data.filter(d=>watchYears.includes(Number(d.year)) && ['CAC 40','Entreprise privée'].includes(d.cat));
+}
+function watchUniqueValues(field){
+  const rows=getWatchBaseRows();
+  const vals=rows.map(d=>field==='owner'?ownerLabel(d):d[field])
+    .filter(v=>v!==null && v!==undefined && String(v).trim()!=='')
+    .map(v=>String(v));
+  return [...new Set(vals)].sort((a,b)=>field==='year' ? Number(a)-Number(b) : a.localeCompare(b,'fr',{sensitivity:'base'}));
+}
+function watchTextPass(value, filter){
+  if(!filter || !filter.value) return true;
+  const v=normText(value), q=normText(filter.value);
+  return filter.op==='equals' ? v===q : v.includes(q);
+}
+function watchCheckboxPass(value, col){
+  const selected=watchFilters[col];
+  if(!Array.isArray(selected)) return true;
+  return selected.includes(String(value));
+}
+function isWatchFilterActive(col){
+  if(col==='name') return !!(watchFilters.name && watchFilters.name.value);
+  if(['year','product','cat','owner'].includes(col)) return Array.isArray(watchFilters[col]);
+  return watchSort && watchSort.col===col;
+}
+function sortWatchRows(rows){
+  const col=watchSort.col;
+  const dir=watchSort.dir==='desc' ? -1 : 1;
+  return rows.sort((a,b)=>{
+    let va=col==='owner'?ownerLabel(a):a[col];
+    let vb=col==='owner'?ownerLabel(b):b[col];
+    if(col==='year') return (Number(va||0)-Number(vb||0))*dir;
+    return String(va??'').localeCompare(String(vb??''),'fr',{sensitivity:'base'})*dir;
+  });
+}
+function getFilteredWatchRows(){
+  let rows=getWatchBaseRows()
+    .filter(d=>watchTextPass(d.name, watchFilters.name))
+    .filter(d=>watchCheckboxPass(d.year,'year'))
+    .filter(d=>watchCheckboxPass(d.product,'product'))
+    .filter(d=>watchCheckboxPass(d.cat,'cat'))
+    .filter(d=>watchCheckboxPass(ownerLabel(d),'owner'));
+  return sortWatchRows(rows);
+}
+function watchTextFilterMenu(col,label){
+  const f=watchFilters[col] || {op:'contains',value:''};
+  return `<div class="filter-menu" id="watch-filter-${col}">
+    <div class="fm-title">${label}</div>
+    <select id="watch-${col}FilterOp"><option value="contains" ${f.op==='contains'?'selected':''}>Contains</option><option value="equals" ${f.op==='equals'?'selected':''}>Equals</option></select>
+    <input type="text" id="watch-${col}FilterValue" value="${escapeHtml(f.value||'')}" placeholder="Filtrer…">
+    <div class="fm-sort"><button type="button" class="primary" data-watch-sort="${col}" data-watch-dir="asc">A → Z</button><button type="button" data-watch-sort="${col}" data-watch-dir="desc">Z → A</button></div>
+    <div class="fm-actions"><button type="button" class="primary" data-watch-apply-text="${col}">Appliquer</button><button type="button" data-watch-reset="${col}">Réinitialiser</button></div>
+  </div>`;
+}
+function watchCheckboxFilterMenu(col,label,options={}){
+  const vals=watchUniqueValues(col);
+  const selected=Array.isArray(watchFilters[col])?watchFilters[col]:vals;
+  const sortBtns=options.sort?`<div class="fm-sort"><button type="button" class="primary" data-watch-sort="${col}" data-watch-dir="asc">${options.asc}</button><button type="button" data-watch-sort="${col}" data-watch-dir="desc">${options.desc}</button></div>`:'';
+  return `<div class="filter-menu" id="watch-filter-${col}">
+    <div class="fm-title">${label}</div>${sortBtns}
+    <div class="fm-bulk"><button type="button" data-watch-select-all="${col}">Tout sélectionner</button><button type="button" data-watch-deselect-all="${col}">Tout désélectionner</button></div>
+    <div class="fm-checks">${vals.map(v=>`<label><input type="checkbox" class="watch-check" data-watch-col="${col}" value="${escapeHtml(v)}" ${selected.includes(String(v))?'checked':''}> ${escapeHtml(v)}</label>`).join('')}</div>
+    <div class="fm-actions"><button type="button" class="primary" data-watch-apply-check="${col}">Appliquer</button><button type="button" data-watch-reset="${col}">Réinitialiser</button></div>
+  </div>`;
+}
+function watchTh(label,col,menu){
+  return `<th><div class="th-inner"><span>${label}</span><button type="button" class="filter-trigger ${isWatchFilterActive(col)?'active':''}" data-watch-filter-trigger="${col}">▾</button>${menu}</div></th>`;
+}
+function bindWatchFilterEvents(){
+  document.querySelectorAll('[data-watch-filter-trigger]').forEach(btn=>btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    const id='watch-filter-'+btn.dataset.watchFilterTrigger;
+    document.querySelectorAll('#watchModal .filter-menu').forEach(m=>{ if(m.id!==id) m.classList.remove('open'); });
+    const menu=document.getElementById(id);
+    if(menu) menu.classList.toggle('open');
+  }));
+  document.querySelectorAll('#watchModal .filter-menu').forEach(menu=>menu.addEventListener('click',e=>e.stopPropagation()));
+  document.querySelectorAll('[data-watch-sort]').forEach(btn=>btn.addEventListener('click',()=>{ watchSort={col:btn.dataset.watchSort,dir:btn.dataset.watchDir}; renderWatchTable(); }));
+  document.querySelectorAll('[data-watch-apply-text]').forEach(btn=>btn.addEventListener('click',()=>{
+    const col=btn.dataset.watchApplyText;
+    watchFilters[col]={op:document.getElementById('watch-'+col+'FilterOp').value,value:document.getElementById('watch-'+col+'FilterValue').value};
+    renderWatchTable();
+  }));
+  document.querySelectorAll('[data-watch-select-all]').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll(`.watch-check[data-watch-col="${btn.dataset.watchSelectAll}"]`).forEach(cb=>cb.checked=true); }));
+  document.querySelectorAll('[data-watch-deselect-all]').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll(`.watch-check[data-watch-col="${btn.dataset.watchDeselectAll}"]`).forEach(cb=>cb.checked=false); }));
+  document.querySelectorAll('[data-watch-apply-check]').forEach(btn=>btn.addEventListener('click',()=>{
+    const col=btn.dataset.watchApplyCheck;
+    watchFilters[col]=[...document.querySelectorAll(`.watch-check[data-watch-col="${col}"]:checked`)].map(cb=>cb.value);
+    renderWatchTable();
+  }));
+  document.querySelectorAll('[data-watch-reset]').forEach(btn=>btn.addEventListener('click',()=>{
+    const col=btn.dataset.watchReset;
+    if(col==='name') watchFilters[col]={op:'contains',value:''};
+    else if(['year','product','cat','owner'].includes(col)) watchFilters[col]=null;
+    if(watchSort && watchSort.col===col) watchSort={col:'year',dir:'desc'};
+    renderWatchTable();
+  }));
+}
+function renderWatchTable(){
+  const watchYears=getWatchYears();
+  const rows=getFilteredWatchRows();
+  const body = rows.length ? `<table class="watch-table"><thead><tr>
+    ${watchTh('Année','year',watchCheckboxFilterMenu('year','Année',{sort:true,asc:'Plus ancien → récent',desc:'Plus récent → ancien'}))}
+    ${watchTh('Entreprise','name',watchTextFilterMenu('name','Entreprise'))}
+    ${watchTh('Catégorie','cat',watchCheckboxFilterMenu('cat','Catégorie'))}
+    ${watchTh('Produit','product',watchCheckboxFilterMenu('product','Produit'))}
+    ${watchTh('Owner / BDR','owner',watchCheckboxFilterMenu('owner','Owner / BDR'))}
+  </tr></thead><tbody>${rows.map(d=>`<tr><td class="watch-year">${d.year}</td><td><b>${escapeHtml(d.name)}</b></td><td>${escapeHtml(d.cat)}</td><td>${escapeHtml(d.product)}</td><td>${escapeHtml(ownerLabel(d))}</td></tr>`).join('')}</tbody></table>` : '<p>Aucune entreprise CAC 40 ou Entreprise privée trouvée avec les filtres appliqués.</p>';
+  document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">A surveiller</h2><div class="mini-note">Années surveillées : ${watchYears.join(', ')} · catégories : CAC 40 et Entreprise privée</div>${body}`;
+  bindWatchFilterEvents();
+}
+
 function renderWatchList(){
- const y=new Date().getFullYear();
- const watchYears=[y-2,y-3,y-4,y-5];
- const rows=data.filter(d=>watchYears.includes(Number(d.year)) && ['CAC 40','Entreprise privée'].includes(d.cat))
- .sort((a,b)=>b.year-a.year || a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));
- const body = rows.length ? `<table class="watch-table"><thead><tr><th>Année</th><th>Entreprise</th><th>Catégorie</th><th>Produit</th><th>Owner / BDR</th></tr></thead><tbody>${rows.map(d=>`<tr><td class="watch-year">${d.year}</td><td><b>${escapeHtml(d.name)}</b></td><td>${escapeHtml(d.cat)}</td><td>${escapeHtml(d.product)}</td><td>${escapeHtml(ownerLabel(d))}</td></tr>`).join('')}</tbody></table>` : '<p>Aucune entreprise CAC 40 ou Entreprise privée trouvée sur N-2, N-3, N-4 et N-5.</p>';
- document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">A surveiller</h2><div class="mini-note">Années surveillées : ${watchYears.join(', ')} · catégories : CAC 40 et Entreprise privée</div>${body}`;
- document.getElementById('watchModal').classList.add('open');
+  document.getElementById('watchModal').classList.add('open');
+  renderWatchTable();
 }
 function exportConstData(){ const out='const data = '+JSON.stringify(data,null,2)+';\n'; downloadTextFile('const_data_AO_dashboard.js',out,'application/javascript;charset=utf-8'); document.getElementById('dataToolsStatus').textContent='Export const_data généré.'; }
 function csvEscape(v){ if(v==null)return''; const s=String(v); return /[";\n\r,]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
