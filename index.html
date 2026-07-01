@@ -137,6 +137,55 @@
 #watchModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20000;}
 #watchModal.open{display:block;}
 #watchCard{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(900px,90vw);max-height:80vh;overflow:auto;background:#fff;border-radius:16px;padding:15px;}
+
+/* V11 stable - popup indépendant + boutons A surveiller visibles */
+#companyEditor.company-popup{display:none!important;} /* l'ancien conteneur dashboard ne sert plus à afficher la fiche */
+.floating-company-popup{
+  position:fixed;
+  display:none;
+  z-index:30000;
+  width:370px;
+  max-height:82vh;
+  overflow:auto;
+  border:2px solid var(--orange);
+  border-radius:14px;
+  background:#fffaf5;
+  padding:9px;
+  box-shadow:0 18px 42px rgba(0,0,0,.28);
+  font-size:10px;
+}
+.floating-company-popup.open{display:block;}
+#bottomBar{gap:8px;}
+#bottomBar #watchBtn1{
+  position:static!important;
+  right:auto!important;
+  top:auto!important;
+  border:1px solid var(--orange);
+  background:var(--orange);
+  color:#000;
+  border-radius:12px;
+  padding:8px 14px;
+  font-size:12px;
+  font-weight:900;
+  cursor:pointer;
+}
+#watchBtn2{
+  position:static!important;
+  border:1px solid var(--orange)!important;
+  background:var(--orange)!important;
+  color:#000!important;
+  border-radius:10px!important;
+  padding:7px 10px!important;
+  font-size:11px!important;
+  font-weight:900!important;
+  cursor:pointer!important;
+  flex:0 0 auto;
+}
+.watch-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px;}
+.watch-table th{background:#000;color:#fff;border-bottom:3px solid var(--orange);padding:7px;text-align:left;}
+.watch-table td{border-bottom:1px solid #eee;padding:7px;vertical-align:top;}
+.watch-year{font-weight:900;color:#000;background:#fff6ee;}
+
 </style>
 </head>
 <body onload="loadPlotly()">
@@ -208,7 +257,7 @@
 
       <main id="chartPanel" class="chart-panel">
         <div id="chartWrap"><button id="fsBtn" type="button">⛶ Plein écran</button><div id="chart"></div></div>
-        <button id="watchBtn1" type="button">A surveiller</button><div id="bottomBar"><button id="labelBtn" type="button">👁️ Afficher les noms</button></div>
+        <div id="bottomBar"><button id="labelBtn" type="button">👁️ Afficher les noms</button><button id="watchBtn1" type="button">A surveiller</button></div>
       </main>
     </div>
   </div>
@@ -1578,7 +1627,9 @@ function wireUI(){
   document.getElementById('tabDashboardBtn').onclick=()=>switchTab('dashboard'); document.getElementById('tabListBtn').onclick=()=>switchTab('list');
   document.getElementById('fsBtn').onclick=()=>{ const p=document.getElementById('chartPanel'); if(document.fullscreenElement) document.exitFullscreen(); else p.requestFullscreen && p.requestFullscreen(); };
   document.addEventListener('fullscreenchange',()=>{document.getElementById('fsBtn').textContent=document.fullscreenElement?'⤫ Quitter plein écran':'⛶ Plein écran'; setTimeout(resizeChart,60);});
-  window.addEventListener('resize', resizeChart);
+  window.addEventListener('resize', ()=>{resizeChart(); syncFloatingPopupPosition();});
+  window.addEventListener('scroll', syncFloatingPopupPosition, true);
+  document.querySelector('#tabDashboard .panel')?.addEventListener('scroll', syncFloatingPopupPosition);
   document.getElementById('labelBtn').onclick=()=>{ showNames=!showNames; document.getElementById('labelBtn').textContent=showNames?'🙈 Masquer les noms':'👁️ Afficher les noms'; updateChart(); };
   document.querySelectorAll('.f-cat,.f-prod,#yearMin,#yearMax').forEach(el=>el.addEventListener('change', updateAll));
   document.getElementById('search').addEventListener('input', updateAll);
@@ -1590,13 +1641,27 @@ function wireUI(){
   document.getElementById('newCompanyYear').value = new Date().getFullYear(); document.getElementById('newCompanyForm').addEventListener('submit', addCompanyFromForm);
   document.getElementById('exportConstDataBtn').onclick=exportConstData; document.getElementById('exportCsvBtn').onclick=exportCsv; document.getElementById('importCsvBtn').onclick=()=>document.getElementById('importCsvInput').click(); document.getElementById('importCsvInput').addEventListener('change', importCsv);document.getElementById('watchBtn1')?.addEventListener('click',renderWatchList);document.getElementById('watchBtn2')?.addEventListener('click',renderWatchList);
 }
-function switchTab(tab){ const list=tab==='list'; document.getElementById('tabDashboard').classList.toggle('active',!list); document.getElementById('tabList').classList.toggle('active',list); document.getElementById('tabDashboardBtn').classList.toggle('active',!list); document.getElementById('tabListBtn').classList.toggle('active',list); if(list) renderCompanyTable(); setTimeout(resizeChart,60); }
+function switchTab(tab){
+  const list=tab==='list';
+  document.getElementById('tabDashboard').classList.toggle('active',!list);
+  document.getElementById('tabList').classList.toggle('active',list);
+  document.getElementById('tabDashboardBtn').classList.toggle('active',!list);
+  document.getElementById('tabListBtn').classList.toggle('active',list);
+  if(list){
+    closeFloatingCompanyPopup();
+    renderCompanyTable();
+    renderEditors();
+  } else if(selectedCompanyId != null){
+    renderDashboardFloatingPopup();
+  }
+  // Pas de resize automatique ici : on évite tout redimensionnement Plotly lors d'un simple clic/switch.
+}
 function resizeChart(){ if(window.Plotly) try{Plotly.Plots.resize('chart');}catch(e){} }
 function getFilterState(){ const q=document.getElementById('search').value.trim().toLowerCase(); const cats=[...document.querySelectorAll('.f-cat:checked')].map(e=>e.value); const prods=[...document.querySelectorAll('.f-prod:checked')].map(e=>e.value); const owners=[...document.querySelectorAll('.f-owner:checked')].map(e=>e.value); let yMin=parseInt(document.getElementById('yearMin').value,10), yMax=parseInt(document.getElementById('yearMax').value,10); if(Number.isNaN(yMin)) yMin=Math.min(...years); if(Number.isNaN(yMax)) yMax=Math.max(...years); if(yMin>yMax){const t=yMin;yMin=yMax;yMax=t;} return {q,cats,prods,owners,yMin,yMax}; }
 function filteredData(){ const f=getFilterState(); return data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); }
 function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.map(ownerLabel))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); }
 function updateAll(){ normalizeAllData(); renderList(); renderCompanyTable(); renderEditors(); updateChart(); saveData(); }
-function renderList(){ const pts=filteredData().sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'})); document.getElementById('list').innerHTML=pts.map(d=>`<div class="item ${Number(d.id)===Number(selectedCompanyId)?'selected':''}" data-id="${d.id}"><div><b>${escapeHtml(d.name)}</b><span class="badge ${catBadge(d.cat)}">${escapeHtml(d.cat)}</span></div><div class="small">${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(ownerLabel(d))}${d.notes?`<br><span style="color:#666">📝 ${escapeHtml(d.notes).slice(0,90)}</span>`:''}</div></div>`).join(''); document.querySelectorAll('#list .item').forEach(el=>el.addEventListener('click',()=>selectCompany(el.dataset.id))); }
+function renderList(){ const pts=filteredData().sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'})); document.getElementById('list').innerHTML=pts.map(d=>`<div class="item ${Number(d.id)===Number(selectedCompanyId)?'selected':''}" data-id="${d.id}"><div><b>${escapeHtml(d.name)}</b><span class="badge ${catBadge(d.cat)}">${escapeHtml(d.cat)}</span></div><div class="small">${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(ownerLabel(d))}${d.notes?`<br><span style="color:#666">📝 ${escapeHtml(d.notes).slice(0,90)}</span>`:''}</div></div>`).join(''); document.querySelectorAll('#list .item').forEach(el=>el.addEventListener('click',()=>selectCompany(el.dataset.id))); syncFloatingPopupPosition(); }
 
 function normText(v){ return String(v ?? '').trim().toLowerCase(); }
 function uniqueSortedValues(field){
@@ -1726,22 +1791,25 @@ function selectCompany(id){
   id=Number(id);
   if(selectedCompanyId===id){
     selectedCompanyId=null;
-    renderList(); renderCompanyTable(); renderEditors();
+    renderList();
+    renderCompanyTable();
+    closeFloatingCompanyPopup();
+    renderEditors();
     return;
   }
   selectedCompanyId=id;
-  renderList(); renderCompanyTable(); renderEditors(); highlightCompany(id);
-  const row=document.querySelector(`#list .item[data-id="${id}"]`);
-  const popup=document.getElementById('companyEditor');
-  const panel=document.querySelector('.panel');
-  if(row&&popup&&panel){
-    const r=row.getBoundingClientRect();
-    const p=panel.getBoundingClientRect();
-    popup.style.top=(row.offsetTop-4)+'px';
-    popup.style.left=(panel.clientWidth+8)+'px';
+  renderList();
+  renderCompanyTable();
+  if(isDashboardActive()){
+    // Important V11 : ouverture du popup sans toucher à Plotly, donc le graphique ne se déforme plus.
+    renderDashboardFloatingPopup();
+  } else {
+    closeFloatingCompanyPopup();
+    renderEditors();
   }
 }
 function highlightCompany(id){ if(!window.Plotly||!plotlyReady)return; const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return; Plotly.relayout('chart', {'annotations[0].text':`<b>${escapeHtml(d.name)}</b><br>${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(ownerLabel(d))}`,'annotations[0].visible':true}); }
+function renderEditors(){ renderEditor('companyEditorList','list'); }
 function renderEditors(){ ['companyEditor','companyEditorList'].forEach((cid,idx)=>renderEditor(cid, idx?'list':'dash')); }
 function renderEditor(containerId,prefix){
   const box=document.getElementById(containerId); if(!box)return;
@@ -1783,12 +1851,96 @@ function saveEditor(prefix,id){
 function addCompanyFromForm(e){ e.preventDefault(); const d=normalizePoint({id:nextDataId(),name:document.getElementById('newCompanyName').value,year:document.getElementById('newCompanyYear').value,revenue:document.getElementById('newCompanyRevenue').value,product:document.getElementById('newCompanyProduct').value,cat:document.getElementById('newCompanyCat').value,owner:document.getElementById('newCompanyOwner').value,notes:document.getElementById('newCompanyNotes').value}); if(!d.name)return; data.push(d); e.target.reset(); document.getElementById('newCompanyYear').value=new Date().getFullYear(); document.getElementById('newCompanyStatus').textContent='Entreprise ajoutée : '+d.name; renderOwners(); updateAll(); selectCompany(d.id); }
 function downloadTextFile(filename,text,mime='text/plain;charset=utf-8'){ const blob=new Blob([text],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
 
+
+function isDashboardActive(){
+  const tab = document.getElementById('tabDashboard');
+  return !!(tab && tab.classList.contains('active'));
+}
+function closeFloatingCompanyPopup(){
+  const popup = document.getElementById('floatingCompanyPopup');
+  if(!popup) return;
+  popup.classList.remove('open');
+  popup.style.display='none';
+  popup.innerHTML='';
+}
+function currentDashboardListItem(){
+  if(selectedCompanyId == null) return null;
+  return document.querySelector(`#list .item[data-id="${selectedCompanyId}"]`);
+}
+function syncFloatingPopupPosition(){
+  const popup = document.getElementById('floatingCompanyPopup');
+  if(!popup || !popup.classList.contains('open') || selectedCompanyId == null) return;
+  const item = currentDashboardListItem();
+  const panel = document.querySelector('#tabDashboard .panel');
+  if(!item || !panel || !isDashboardActive()){
+    popup.style.display='none';
+    return;
+  }
+  const itemRect = item.getBoundingClientRect();
+  const panelRect = panel.getBoundingClientRect();
+  // Popup hors du bloc liste : à droite du panneau gauche, donc il peut recouvrir le graphique.
+  const left = Math.round(panelRect.right + 12);
+  let top = Math.round(itemRect.top);
+  const popupHeight = popup.offsetHeight || 420;
+  const maxTop = Math.max(8, window.innerHeight - popupHeight - 8);
+  top = Math.max(8, Math.min(top, maxTop));
+  popup.style.left = left + 'px';
+  popup.style.top = top + 'px';
+  popup.style.display='block';
+}
+function renderDashboardFloatingPopup(){
+  const popup = document.getElementById('floatingCompanyPopup');
+  if(!popup) return;
+  const d = data.find(x=>Number(x.id)===Number(selectedCompanyId));
+  if(!d){ closeFloatingCompanyPopup(); return; }
+  const prefix='float';
+  const productGroup = `${prefix}EditProductChoice`;
+  const ownerGroup = `${prefix}EditOwnerChoice`;
+  const owners = getEditorOwners(ownerLabel(d));
+  popup.innerHTML = `<h3>Fiche entreprise<br><span style="font-weight:600;color:#444">${escapeHtml(d.name)}</span></h3>
+  <form id="${prefix}EditForm">
+    <div class="field-label">Entreprise</div><input id="${prefix}EditName" type="text" value="${escapeHtml(d.name)}">
+    <div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div>
+    <div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching'], d.product)}
+    <div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='Entreprise privée'?'selected':''}>Entreprise privée</option><option ${d.cat==='Ecoles / Public / UE'?'selected':''}>Ecoles / Public / UE</option></select>
+    <div class="field-label">Owner / BDR</div>${singleCheckboxGroupHtml(ownerGroup, owners, ownerLabel(d))}
+    <div class="field-label">Notes</div><textarea id="${prefix}EditNotes">${escapeHtml(d.notes||'')}</textarea>
+    <div class="editor-actions"><button type="submit" class="editor-save">Enregistrer</button><button type="button" id="${prefix}EditClose" class="editor-close">Fermer</button></div>
+  </form>`;
+  popup.classList.add('open');
+  popup.style.display='block';
+  bindSingleCheckboxGroups(popup);
+  document.getElementById(`${prefix}EditForm`).onsubmit=e=>{e.preventDefault(); saveFloatingEditor(d.id);};
+  document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderList();renderCompanyTable();closeFloatingCompanyPopup();};
+  syncFloatingPopupPosition();
+}
+function saveFloatingEditor(id){
+  const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return;
+  const prefix='float';
+  d.name=document.getElementById(`${prefix}EditName`).value.trim();
+  d.year=Number(document.getElementById(`${prefix}EditYear`).value)||new Date().getFullYear();
+  d.revenue=Number(document.getElementById(`${prefix}EditRevenue`).value||0);
+  d.product=selectedGroupValue(`${prefix}EditProductChoice`, d.product);
+  d.cat=document.getElementById(`${prefix}EditCat`).value;
+  d.color=colorForCategory(d.cat);
+  d.owner=selectedGroupValue(`${prefix}EditOwnerChoice`, ownerLabel(d));
+  if(d.owner === 'Owner / BDR manquant') d.owner = null;
+  d.owner_missing=!d.owner;
+  d.notes=document.getElementById(`${prefix}EditNotes`).value;
+  d.y=computeYFromRevenue(d.revenue,d.product);
+  renderOwners();
+  updateAll();
+  selectedCompanyId=d.id;
+  renderDashboardFloatingPopup();
+}
+
 function renderWatchList(){
  const y=new Date().getFullYear();
- const years=[y-2,y-3,y-4,y-5];
- const rows=data.filter(d=>years.includes(Number(d.year)) && ['CAC 40','Entreprise privée'].includes(d.cat))
- .sort((a,b)=>b.year-a.year||a.name.localeCompare(b.name,'fr'));
- document.getElementById('watchContent').innerHTML='<h2>A surveiller</h2>'+rows.map(d=>`<div style="padding:6px;border-bottom:1px solid #eee"><b>${escapeHtml(d.name)}</b> - ${d.year}<br>${escapeHtml(d.product)} | ${escapeHtml(ownerLabel(d))}</div>`).join('');
+ const watchYears=[y-2,y-3,y-4,y-5];
+ const rows=data.filter(d=>watchYears.includes(Number(d.year)) && ['CAC 40','Entreprise privée'].includes(d.cat))
+ .sort((a,b)=>b.year-a.year || a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));
+ const body = rows.length ? `<table class="watch-table"><thead><tr><th>Année</th><th>Entreprise</th><th>Catégorie</th><th>Produit</th><th>Owner / BDR</th></tr></thead><tbody>${rows.map(d=>`<tr><td class="watch-year">${d.year}</td><td><b>${escapeHtml(d.name)}</b></td><td>${escapeHtml(d.cat)}</td><td>${escapeHtml(d.product)}</td><td>${escapeHtml(ownerLabel(d))}</td></tr>`).join('')}</tbody></table>` : '<p>Aucune entreprise CAC 40 ou Entreprise privée trouvée sur N-2, N-3, N-4 et N-5.</p>';
+ document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">A surveiller</h2><div class="mini-note">Années surveillées : ${watchYears.join(', ')} · catégories : CAC 40 et Entreprise privée</div>${body}`;
  document.getElementById('watchModal').classList.add('open');
 }
 function exportConstData(){ const out='const data = '+JSON.stringify(data,null,2)+';\n'; downloadTextFile('const_data_AO_dashboard.js',out,'application/javascript;charset=utf-8'); document.getElementById('dataToolsStatus').textContent='Export const_data généré.'; }
@@ -1797,5 +1949,6 @@ function exportCsv(){ const rows=[CSV_HEADERS.join(';')].concat(data.map(d=>CSV_
 function parseCsvLine(line,delimiter){ const out=[]; let cur='',q=false; for(let i=0;i<line.length;i++){const ch=line[i],nx=line[i+1]; if(ch==='"'&&q&&nx==='"'){cur+='"';i++;continue;} if(ch==='"'){q=!q;continue;} if(ch===delimiter&&!q){out.push(cur);cur='';continue;} cur+=ch;} out.push(cur); return out; }
 function importCsv(e){ const file=e.target.files&&e.target.files[0]; if(!file)return; file.text().then(text=>{ const clean=String(text||'').replace(/^\ufeff/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim(); if(!clean)return; const lines=clean.split('\n').filter(Boolean); const delim=lines[0].split(';').length>=lines[0].split(',').length?';':','; const headers=parseCsvLine(lines[0],delim).map(h=>h.trim()); const rows=lines.slice(1).map(line=>{const cells=parseCsvLine(line,delim),o={}; headers.forEach((h,i)=>o[h]=cells[i]??''); return normalizePoint(o);}); rows.forEach(row=>{ const idx=data.findIndex(d=>Number(d.id)===Number(row.id) || (d.name.toLowerCase()===row.name.toLowerCase()&&Number(d.year)===Number(row.year)&&d.product===row.product)); if(idx>=0)data[idx]={...data[idx],...row,id:data[idx].id}; else data.push({...row,id:nextDataId()}); }); renderOwners(); updateAll(); document.getElementById('dataToolsStatus').textContent='Import CSV terminé : '+rows.length+' ligne(s).'; e.target.value=''; }); }
 </script>
+<div id="floatingCompanyPopup" class="floating-company-popup"></div>
 <div id="watchModal"><div id="watchCard"><button onclick="document.getElementById('watchModal').classList.remove('open')">Fermer</button><div id="watchContent"></div></div></div></body>
 </html>
