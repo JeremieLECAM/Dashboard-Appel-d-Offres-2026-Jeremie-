@@ -123,6 +123,10 @@
 .choice-list{max-height:130px;overflow:auto;border:1px solid #ddd;border-radius:9px;padding:6px;background:#fff;}
 .choice-list label{display:block;font-size:10px;margin:3px 0;color:#000;}
 
+
+/* V8 - Dashboard popup editor beside selected company */
+#companyEditor.company-popup{position:absolute;left:215px;top:0;width:340px;z-index:5000;box-shadow:0 18px 40px rgba(0,0,0,.25);background:#fffaf5;}
+
 </style>
 </head>
 <body onload="loadPlotly()">
@@ -188,7 +192,7 @@
 
         <input id="search" type="text" placeholder="Rechercher… (ex: Air Liquide)" />
         <div id="listSection" class="section open"><button type="button" id="listToggle" class="section-head">Liste des entreprises <span id="listArrow">▼</span></button><div id="list" class="section-body" style="display:block"></div></div>
-        <div id="companyEditor" class="company-editor"></div>
+        <div id="companyEditor" class="company-editor company-popup"></div>
         <div class="legend"><b>Légende</b><br>1) <span class="badge b-red">Rouge</span> CAC 40<br>2) <span class="badge b-blue">Bleu</span> Entreprise privée<br>3) <span class="badge b-green">Vert</span> Écoles supérieures / Public / Européen</div>
       </aside>
 
@@ -1708,7 +1712,25 @@ function renderCompanyTable(){
   bindTableFilterEvents();
 }  
 function updateChart(){ if(!window.Plotly || !plotlyReady) return; const pts=filteredData(); const groups=new Map(); pts.forEach(p=>{p.plotYear=p.year; p.plotY=p.y; const k=p.year+'|'+p.y+'|'+p.color; if(!groups.has(k))groups.set(k,[]); groups.get(k).push(p);}); groups.forEach(g=>{ const dx=.18; const start=-((g.length-1)/2)*dx; g.forEach((p,i)=>p.plotYear=p.year+start+i*dx);}); const traces=[]; CAT_ORDER.forEach(cat=>{ const cpts=pts.filter(p=>p.cat===cat); traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:false,x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),customdata:cpts.map(p=>[p.id,p.product,p.revenue,p.year,ownerLabel(p),p.notes||'']),hovertemplate:'<b>%{text}</b><br>Année : %{customdata[3]}<br>Produit : %{customdata[1]}<br>Estimated revenue : %{customdata[2]:,.0f} €<br>Owner / BDR : %{customdata[4]}<extra></extra>',marker:{size:cpts.map(p=>bubbleSizeByCat(p.cat)),color:cpts.map(p=>p.color),opacity:1,line:{width:1,color:'#111'}}}); traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:true,hoverinfo:'skip',x:[null],y:[null],marker:{size:12,color:colorForCategory(cat),line:{width:1,color:'#111'}}}); }); if(showNames){ CAT_ORDER.forEach(cat=>{ const cpts=pts.filter(p=>p.cat===cat); traces.push({type:'scatter',mode:'text',showlegend:false,hoverinfo:'skip',x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),textfont:{size:pts.length>100?8:10,color:'#000'},textposition:'top center'}); }); } traces.push({type:'scatter',mode:'markers',showlegend:false,hoverinfo:'skip',x:[null],y:[null],marker:{size:[46],color:['#fff'],opacity:0,line:{color:'#000',width:4}}}); const ticks=[...Y_BANDS_COACHING,...Y_BANDS_LANGUES].sort((a,b)=>a.y-b.y); const f=getFilterState(); Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:40,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-1.6,f.yMax+1.6]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.8,5.8],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},legend:{orientation:'h',y:1.02,x:-.1},font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true}); const gd=document.getElementById('chart'); gd.removeAllListeners && gd.removeAllListeners('plotly_click'); gd.on && gd.on('plotly_click', ev=>{ const pt=ev&&ev.points&&ev.points[0]; const id=pt&&pt.customdata?pt.customdata[0]:null; if(id!=null) selectCompany(id); }); }
-function selectCompany(id){ selectedCompanyId=Number(id); renderList(); renderCompanyTable(); renderEditors(); highlightCompany(id); }
+function selectCompany(id){
+  id=Number(id);
+  if(selectedCompanyId===id){
+    selectedCompanyId=null;
+    renderList(); renderCompanyTable(); renderEditors();
+    return;
+  }
+  selectedCompanyId=id;
+  renderList(); renderCompanyTable(); renderEditors(); highlightCompany(id);
+  const row=document.querySelector(`#list .item[data-id="${id}"]`);
+  const popup=document.getElementById('companyEditor');
+  const panel=document.querySelector('.panel');
+  if(row&&popup&&panel){
+    const r=row.getBoundingClientRect();
+    const p=panel.getBoundingClientRect();
+    popup.style.top=(row.offsetTop-4)+'px';
+    popup.style.left=(panel.clientWidth+8)+'px';
+  }
+}
 function highlightCompany(id){ if(!window.Plotly||!plotlyReady)return; const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return; Plotly.relayout('chart', {'annotations[0].text':`<b>${escapeHtml(d.name)}</b><br>${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(ownerLabel(d))}`,'annotations[0].visible':true}); }
 function renderEditors(){ ['companyEditor','companyEditorList'].forEach((cid,idx)=>renderEditor(cid, idx?'list':'dash')); }
 function renderEditor(containerId,prefix){
