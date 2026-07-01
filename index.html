@@ -311,6 +311,67 @@
     .secondary-mini-note{font-size:9px;line-height:1.25;margin-top:6px;color:#666;}
     .tool-grid{display:grid;grid-template-columns:1fr;gap:4px;}
 
+
+
+    /* ✅ V4 : onglets, liste complète, fiche entreprise éditable, notes */
+    .app-tabs{
+      display:flex;
+      gap:8px;
+      padding:10px 12px 0 12px;
+      box-sizing:border-box;
+      background:#f7f7fb;
+    }
+    .tab-btn{
+      border:1px solid rgba(0,0,0,.12);
+      background:#fff;
+      color:#222;
+      border-radius:12px 12px 0 0;
+      padding:8px 14px;
+      font-size:12px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 4px 12px rgba(0,0,0,.06);
+    }
+    .tab-btn.active{background:#1E88E5;color:#fff;border-color:#1E88E5;}
+    .tab-content{display:none;height:calc(100vh - 44px);}
+    .tab-content.active{display:block;}
+    .tab-content .wrap{height:100%;}
+    .company-editor{
+      display:none;
+      border:1px solid rgba(30,136,229,.22);
+      background:#f8fbff;
+      border-radius:12px;
+      padding:8px;
+      margin-top:8px;
+      font-size:10px;
+      line-height:1.25;
+    }
+    .company-editor.open{display:block;}
+    .company-editor h3{font-size:11px;margin:0 0 6px 0;line-height:1.2;}
+    .company-editor label{display:block;font-weight:800;font-size:9px;margin:5px 0 2px;color:#333;}
+    .company-editor input,.company-editor select,.company-editor textarea{
+      width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:9px;padding:5px 7px;font-size:10px;background:#fff;
+    }
+    .company-editor textarea{min-height:78px;resize:vertical;line-height:1.25;}
+    .editor-row2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+    .editor-actions{display:flex;gap:6px;margin-top:8px;}
+    .editor-actions button{flex:1;border:1px solid rgba(0,0,0,.12);border-radius:9px;padding:6px 7px;font-size:10px;font-weight:800;cursor:pointer;}
+    .editor-save{background:#1E88E5;color:#fff;}
+    .editor-close{background:#fff;color:#222;}
+    .list-page{height:100%;padding:12px;box-sizing:border-box;display:grid;grid-template-columns:1fr 300px;gap:12px;}
+    .list-main,.list-side{background:#fff;border-radius:16px;padding:12px;box-shadow:0 8px 24px rgba(0,0,0,.08);overflow:auto;}
+    .list-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:10px;}
+    .list-toolbar h2{font-size:14px;margin:0;white-space:nowrap;}
+    #companyTableSearch{width:260px;max-width:100%;border:1px solid #ddd;border-radius:10px;padding:7px 9px;font-size:11px;}
+    .company-table{width:100%;border-collapse:collapse;font-size:10px;}
+    .company-table th{position:sticky;top:0;background:#f6f7fb;z-index:1;text-align:left;border-bottom:1px solid #ddd;padding:7px 6px;font-size:10px;white-space:nowrap;}
+    .company-table td{border-bottom:1px solid #eee;padding:6px;vertical-align:top;}
+    .company-table tr{cursor:pointer;}
+    .company-table tr:hover{background:#f8fbff;}
+    .company-table tr.selected{background:#eef6ff;}
+    .notes-cell{max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#555;}
+    #newCompanyNotes{min-height:58px;resize:vertical;line-height:1.25;}
+
   </style>
 
 <!--[if gte mso 9]><xml>
@@ -329,10 +390,14 @@
     <span id="envWarningText"></span>
   </div>
 
+  <div class="app-tabs">
+    <button type="button" id="tabDashboardBtn" class="tab-btn active">Dashboard</button>
+    <button type="button" id="tabListBtn" class="tab-btn">Liste entreprises</button>
+  </div>
+  <div id="tabDashboard" class="tab-content active">
   <div class="wrap">
     <div class="panel">
-      <img src="./favicon-180x180.png" alt="AO Appel d'Offres" class="panel-logo"
-      </p>
+      <img src="./favicon-180x180.png" alt="AO Appel d'Offres" class="panel-logo" />
 
 
       <div id="newCompanySection" class="collapsible-section">
@@ -366,6 +431,8 @@
             </select>
             <label for="newCompanyOwner">Owner / BDR</label>
             <input id="newCompanyOwner" placeholder="Ex: Jérémie Lecamus" />
+            <label for="newCompanyNotes">Notes</label>
+            <textarea id="newCompanyNotes" placeholder="Notes libres sur l’entreprise, contexte AO, contacts, prochaines actions…"></textarea>
             <button type="submit" class="primary-mini-btn">Ajouter au dashboard</button>
             <div id="newCompanyStatus" class="secondary-mini-note">L’ajout est immédiat. Utilise ensuite “Exporter const_data” ou “Export CSV” pour conserver/partager les données.</div>
           </form>
@@ -383,7 +450,7 @@
             <button type="button" id="importCsvBtn" class="data-mini-btn secondary">Import CSV</button>
             <input id="importCsvInput" type="file" accept=".csv,text/csv" style="display:none" />
           </div>
-          <div id="dataToolsStatus" class="secondary-mini-note">CSV attendu : id,name,year,product,revenue,y,cat,color,outline,owner,owner_missing.</div>
+          <div id="dataToolsStatus" class="secondary-mini-note">CSV attendu : id,name,year,product,revenue,y,cat,color,outline,owner,owner_missing,notes.</div>
         </div>
       </div>
       <div id="filters" style="margin-bottom:10px;font-size:11px;">
@@ -436,6 +503,7 @@
         <div id="list"></div>
       </div>
 
+      <div id="companyEditor" class="company-editor"></div>
       <div class="legend">
         <b>Légende</b><br/>
         1) <span class="badge b-red">Rouge</span> CAC 40<br/>
@@ -682,7 +750,7 @@
      ✅ Gestion locale des données : ajout, const_data, CSV import/export
      ============================================================ */
   const AO_STORAGE_KEY = 'ao_dashboard_data_v3';
-  const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','outline','owner','owner_missing'];
+  const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','outline','owner','owner_missing','notes'];
 
   function colorForCategory(cat){
     if(cat === 'CAC 40') return '#E53935';
@@ -707,7 +775,8 @@
       color: row.color || colorForCategory(cat),
       outline: row.outline || '',
       owner,
-      owner_missing: (owner == null || String(owner).trim() === '')
+      owner_missing: (owner == null || String(owner).trim() === ''),
+      notes: row.notes == null ? '' : String(row.notes)
     };
   }
 
@@ -784,7 +853,7 @@
     normalizeAllData();
     const payload = 'const data = ' + JSON.stringify(data.map(d => ({
       id:d.id, name:d.name, year:d.year, product:d.product, revenue:d.revenue, y:d.y,
-      cat:d.cat, color:d.color, outline:d.outline || '', owner:d.owner, owner_missing:d.owner_missing
+      cat:d.cat, color:d.color, outline:d.outline || '', owner:d.owner, owner_missing:d.owner_missing, notes:d.notes || ''
     })), null, 2) + ';\n';
     downloadTextFile('const_data_AO_dashboard.js', payload, 'application/javascript;charset=utf-8');
     const st = document.getElementById('dataToolsStatus');
@@ -889,6 +958,7 @@
           product: document.getElementById('newCompanyProduct').value,
           cat: document.getElementById('newCompanyCat').value,
           owner: document.getElementById('newCompanyOwner').value,
+          notes: document.getElementById('newCompanyNotes').value,
           outline: ''
         });
         if (!company.name) return;
@@ -1271,12 +1341,183 @@ function applySmartLabelPositions(points, fontSize, xRange, yRange){
           </div>
         `;
         div.onmouseenter=()=>highlight(d.id);
-        div.onclick=()=>highlight(d.id);
+        div.onclick=()=>selectCompany(d.id);
         el.appendChild(div);
       });
   }
 
-  // ✅ Lecture robuste des ranges envoyées par plotly_relayout
+
+
+  /* ============================================================
+     ✅ Sélection + fiche éditable + onglet liste complète
+     ============================================================ */
+  let selectedCompanyId = null;
+
+  function getCompanyById(id){
+    return data.find(d => Number(d.id) === Number(id));
+  }
+
+  function switchTab(tabName){
+    const isList = tabName === 'list';
+    document.getElementById('tabDashboard').classList.toggle('active', !isList);
+    document.getElementById('tabList').classList.toggle('active', isList);
+    document.getElementById('tabDashboardBtn').classList.toggle('active', !isList);
+    document.getElementById('tabListBtn').classList.toggle('active', isList);
+    if (isList) renderCompanyTable();
+    setTimeout(() => safeResize(), 50);
+  }
+
+  function renderAllCompanyEditors(){
+    renderCompanyEditor('companyEditor', selectedCompanyId, 'dash');
+    renderCompanyEditor('companyEditorList', selectedCompanyId, 'list');
+    markSelectedTableRow();
+  }
+
+  function renderCompanyEditor(containerId, id, prefix){
+    const box = document.getElementById(containerId);
+    if (!box) return;
+    const d = getCompanyById(id);
+    if (!d) {
+      box.classList.remove('open');
+      box.innerHTML = '<div class="secondary-mini-note">Clique sur une entreprise pour ouvrir sa fiche.</div>';
+      return;
+    }
+    box.classList.add('open');
+    box.innerHTML = `
+      <h3>Fiche entreprise<br><span style="font-weight:600;color:#555;">${escapeHtml(d.name)}</span></h3>
+      <form id="${prefix}CompanyEditForm">
+        <label>Entreprise</label>
+        <input id="${prefix}EditName" value="${escapeHtml(d.name)}" />
+        <div class="editor-row2">
+          <div>
+            <label>Année</label>
+            <input id="${prefix}EditYear" type="number" value="${Number(d.year) || ''}" />
+          </div>
+          <div>
+            <label>Estimated €</label>
+            <input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${Number(d.revenue) || 0}" />
+          </div>
+        </div>
+        <label>Produit</label>
+        <select id="${prefix}EditProduct">
+          <option value="Langues" ${d.product === 'Langues' ? 'selected' : ''}>Langues</option>
+          <option value="Coaching" ${d.product === 'Coaching' ? 'selected' : ''}>Coaching</option>
+        </select>
+        <label>Catégorie</label>
+        <select id="${prefix}EditCat">
+          <option value="CAC 40" ${d.cat === 'CAC 40' ? 'selected' : ''}>CAC 40</option>
+          <option value="Entreprise privée" ${d.cat === 'Entreprise privée' ? 'selected' : ''}>Entreprise privée</option>
+          <option value="Ecoles / Public / UE" ${d.cat === 'Ecoles / Public / UE' ? 'selected' : ''}>Ecoles / Public / UE</option>
+        </select>
+        <label>Owner / BDR</label>
+        <input id="${prefix}EditOwner" value="${escapeHtml(d.owner || '')}" />
+        <label>Notes</label>
+        <textarea id="${prefix}EditNotes" placeholder="Notes libres…">${escapeHtml(d.notes || '')}</textarea>
+        <div class="editor-actions">
+          <button type="submit" class="editor-save">Enregistrer</button>
+          <button type="button" id="${prefix}EditClose" class="editor-close">Fermer</button>
+        </div>
+      </form>
+    `;
+    const form = document.getElementById(`${prefix}CompanyEditForm`);
+    const closeBtn = document.getElementById(`${prefix}EditClose`);
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveCompanyEditor(prefix, d.id);
+      });
+    }
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        selectedCompanyId = null;
+        renderAllCompanyEditors();
+        clearHighlight();
+      });
+    }
+  }
+
+  function saveCompanyEditor(prefix, id){
+    const d = getCompanyById(id);
+    if (!d) return;
+    d.name = document.getElementById(`${prefix}EditName`).value.trim();
+    d.year = Number(document.getElementById(`${prefix}EditYear`).value) || new Date().getFullYear();
+    d.revenue = Number(document.getElementById(`${prefix}EditRevenue`).value || 0);
+    d.product = document.getElementById(`${prefix}EditProduct`).value;
+    d.cat = document.getElementById(`${prefix}EditCat`).value;
+    d.color = colorForCategory(d.cat);
+    d.owner = document.getElementById(`${prefix}EditOwner`).value.trim() || null;
+    d.owner_missing = !(d.owner && String(d.owner).trim());
+    d.notes = document.getElementById(`${prefix}EditNotes`).value;
+    d.y = computeYFromRevenue(d.revenue, d.product);
+    selectedCompanyId = d.id;
+    rebuildAfterDataChange({persist:true, message:`Fiche mise à jour : ${d.name}.`});
+    renderAllCompanyEditors();
+    renderCompanyTable();
+    highlight(d.id);
+  }
+
+  function selectCompany(id, options={}){
+    selectedCompanyId = Number(id);
+    renderAllCompanyEditors();
+    highlight(id);
+    if (options.switchToList) switchTab('list');
+  }
+
+  function renderCompanyTable(){
+    const wrap = document.getElementById('companyTableWrap');
+    if (!wrap) return;
+    const input = document.getElementById('companyTableSearch');
+    const q = input ? input.value.trim().toLowerCase() : '';
+    const rows = data.slice()
+      .filter(d => !q || [d.name,d.product,d.cat,d.owner,d.year,d.revenue,d.notes].some(v => String(v ?? '').toLowerCase().includes(q)))
+      .sort((a,b)=>String(a.name).localeCompare(String(b.name),'fr',{sensitivity:'base'}));
+    wrap.innerHTML = `
+      <table class="company-table">
+        <thead>
+          <tr>
+            <th>Entreprise</th><th>Année</th><th>Produit</th><th>Estimated €</th><th>Catégorie</th><th>Owner / BDR</th><th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(d => `
+            <tr data-company-id="${d.id}" class="${Number(d.id) === Number(selectedCompanyId) ? 'selected' : ''}">
+              <td><b>${escapeHtml(d.name)}</b></td>
+              <td>${escapeHtml(d.year)}</td>
+              <td>${escapeHtml(d.product)}</td>
+              <td>${Math.round(Number(d.revenue)||0).toLocaleString('fr-FR')} €</td>
+              <td>${escapeHtml(d.cat)}</td>
+              <td>${escapeHtml(ownerLabel(d))}</td>
+              <td class="notes-cell">${escapeHtml(d.notes || '')}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+    wrap.querySelectorAll('tr[data-company-id]').forEach(tr => {
+      tr.addEventListener('click', () => selectCompany(tr.dataset.companyId));
+    });
+  }
+
+  function markSelectedTableRow(){
+    document.querySelectorAll('tr[data-company-id]').forEach(tr => {
+      tr.classList.toggle('selected', Number(tr.dataset.companyId) === Number(selectedCompanyId));
+    });
+  }
+
+  function setupTabsAndTable(){
+    const dashBtn = document.getElementById('tabDashboardBtn');
+    const listBtn = document.getElementById('tabListBtn');
+    const tableSearch = document.getElementById('companyTableSearch');
+    if (dashBtn) dashBtn.addEventListener('click', () => switchTab('dashboard'));
+    if (listBtn) listBtn.addEventListener('click', () => switchTab('list'));
+    if (tableSearch) tableSearch.addEventListener('input', renderCompanyTable);
+    renderCompanyTable();
+    renderAllCompanyEditors();
+  }
+
+  setupTabsAndTable();
+
+    // ✅ Lecture robuste des ranges envoyées par plotly_relayout
   function extractAxisRange(ev, axisName){
     const k0 = `${axisName}.range[0]`;
     const k1 = `${axisName}.range[1]`;
@@ -1302,7 +1543,7 @@ function applySmartLabelPositions(points, fontSize, xRange, yRange){
       x: pts.map(p=>p.plotYear),
       y: pts.map(p=>p.plotY),
       text: pts.map(p=>p.name),
-      customdata: pts.map(p => [p.product, p.revenue, p.year, ownerLabel(p)]),
+      customdata: pts.map(p => [p.product, p.revenue, p.year, ownerLabel(p), p.id]),
       hovertemplate:
         '<b>%{text}</b><br>' +
         'Année : %{customdata[2]}<br>' +
@@ -1723,6 +1964,12 @@ graphDiv.on('plotly_legendclick', (ev) => {
               // ⛔ on bloque aussi le double-clic Plotly
               // (qui isole normalement une seule catégorie)
               return false;
+            });
+
+            graphDiv.on('plotly_click', (ev) => {
+              const pt = ev && ev.points && ev.points[0];
+              const id = pt && pt.customdata ? pt.customdata[4] : null;
+              if (id != null) selectCompany(id);
             });
 
             // Fullscreen change → resize Plotly
