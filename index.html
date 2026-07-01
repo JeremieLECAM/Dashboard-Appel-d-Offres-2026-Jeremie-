@@ -1,2015 +1,1571 @@
-
 <!doctype html>
-<html lang="fr" xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882">
+<html lang="fr">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-
-  <title> AO France 2026 (Jeremie) </title>
- 
-<link rel="icon" type="image/png" sizes="32x32" href="./favicon.png?v=2">
-<link rel="shortcut icon" href="./favicon.ico?v=2">
-<link rel="apple-touch-icon" sizes="180x180" href="./favicon-180x180.png?v=2">
-
-
+  <title>AO France 2026 - Dashboard</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicon.png?v=2">
+  <link rel="shortcut icon" href="./favicon.ico?v=2">
+  <link rel="apple-touch-icon" sizes="180x180" href="./favicon-180x180.png?v=2">
   <script>
-    (function () {
-      const PLOTLY_LOCAL = "plotly-2.27.0.min.js";
-      const PLOTLY_CDN   = "https://cdn.plot.ly/plotly-2.27.0.min.js";
-
-      function setEnvWarning(html, kind) {
-        const el = document.getElementById('envWarning');
-        if (!el) return;
-        el.style.display = 'block';
-        el.className = 'envwarn ' + (kind || '');
-        el.innerHTML = html;
-      }
-
-      function loadScript(src, onload, onerror) {
-        const s = document.createElement('script');
-        s.src = src;
-        s.async = true;
-        s.onload = onload;
-        s.onerror = onerror;
-        document.head.appendChild(s);
-      }
-
-      // Expose un petit état global (debug)
-      window.__PLOTLY_LOAD_SOURCE__ = null;
-
-      // Essai local d'abord
-      loadScript(
-        PLOTLY_LOCAL,
-        () => {
-          window.__PLOTLY_LOAD_SOURCE__ = "local";
-          console.log("✅ Plotly chargé (LOCAL) :", PLOTLY_LOCAL);
-        },
-        () => {
-          console.warn("⚠ Plotly local introuvable :", PLOTLY_LOCAL, "→ fallback CDN");
-          loadScript(
-            PLOTLY_CDN,
-            () => {
-              window.__PLOTLY_LOAD_SOURCE__ = "cdn";
-              console.log("✅ Plotly chargé (CDN) :", PLOTLY_CDN);
-            },
-            () => {
-              // Si CDN bloqué : message clair (pas d'écran blanc)
-              window.__PLOTLY_LOAD_SOURCE__ = "failed";
-              document.body.innerHTML = `
-                <div style="padding:20px;font-family:Segoe UI, Arial, sans-serif">
-                  <h2 style="margin:0 0 10px 0;">Erreur de chargement</h2>
-                  <p style="margin:0 0 8px 0;">
-                    Le graphique n’a pas pu se charger : <b>Plotly est bloqué</b> (réseau/proxy) ou indisponible.
-                  </p>
-                  <p style="margin:0 0 8px 0;">
-                    ✅ Solution recommandée : placez le fichier <b>plotly-2.27.0.min.js</b> dans le même dossier que ce HTML
-                    (version offline), puis ré-ouvrez le fichier.
-                  </p>
-                  <p style="margin:0;">
-                    Autre solution : ouvrir le fichier depuis un réseau non restreint.
-                  </p>
-                </div>
-              `;
-            }
-          );
-        }
-      );
-    })();
+    window.__PLOTLY_READY__ = false;
+    function loadScript(src, onload, onerror){
+      const s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      s.onload = onload;
+      s.onerror = onerror;
+      document.head.appendChild(s);
+    }
+    function loadPlotly(){
+      loadScript('plotly-2.27.0.min.js', () => { window.__PLOTLY_READY__ = true; initApp(); }, () => {
+        loadScript('https://cdn.plot.ly/plotly-2.27.0.min.js', () => { window.__PLOTLY_READY__ = true; initApp(); }, () => {
+          document.body.innerHTML = '<div style="padding:20px;font-family:Segoe UI,Arial,sans-serif"><h2>Erreur de chargement</h2><p>Plotly est introuvable. Place <b>plotly-2.27.0.min.js</b> dans le même dossier que ce fichier ou ouvre-le avec accès Internet.</p></div>';
+        });
+      });
+    }
   </script>
-
   <style>
-    body{font-family:Segoe UI, Arial, sans-serif; margin:0; background:#f7f7fb;}
-    .wrap{display:grid; grid-template-columns:180px 1fr; gap:12px; padding:12px; height:100vh; box-sizing:border-box; align-items:stretch;}
-    .panel{background:white; border-radius:16px; padding:10px; box-shadow:0 8px 24px rgba(0,0,0,.08); overflow:auto;}
-    .title{font-size:11px; font-weight:700; margin:0 0 6px 0;}
-    .panel-logo{
-  display:block;
-  width:100%;
-  max-width:90px;
-  height:auto;
-  margin:0 auto 10px auto;
-  border-radius:18px;
-}
-    .sub{font-size:10px; color:#666; margin:0 0 10px 0; line-height:1.35;}
-    #search{width:100%; padding:8px 10px; border:1px solid #ddd; border-radius:12px; font-size:11px; box-sizing:border-box;}
-    .item{
-      padding:5px 10px;
-      border-radius:3px;
-      cursor:pointer;
-      margin-top:4px;
-      border:0.5px solid transparent;
-      font-size:9px;
-      line-height:1.25;
+    :root{
+      --orange:#FF7900;
+      --black:#000000;
+      --white:#FFFFFF;
+      --bg:#FFFFFF;
+      --soft:#f7f7f7;
+      --line:#e8e8e8;
+      --muted:#666;
+      --shadow:0 8px 24px rgba(0,0,0,.10);
+      --red:#E53935; --blue:#1E88E5; --green:#43A047;
     }
-    #filters{
-  font-size:9px;
-  line-height:1;
-  margin-bottom:6px;
-}
-
-#filters b{
-  font-size:9px;
-}
-
-#filters label{
-  display:block;
-  margin:0;
-  padding:0;
-  font-size:9px;
-  line-height:1;
-}
-
-#filters input[type="number"]{
-  font-size:9px;
-  padding:2px 4px;
-  height:13px;
-}
-    .badge{display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; margin-left:6px; color:white;}
-    .b-red{background:#E53935;}
-    .b-blue{background:#1E88E5;}
-    .b-green{background:#43A047;}
-    .small{font-size:10px; color:#333;}
-
-    /* ✅ Police filtre Owner taille 9 */
-    #ownerFilterSection{font-size:9px; line-height:1.15;}
-    #ownerFilterSection b{font-size:9px;}
-    #ownerFilters label{font-size:9px; margin:1px 0; display:block;}
-
-#ownerBulkActions{
-  margin-top:4px;
-  margin-bottom:4px;
-}
-
-.owner-mini-btn{
-  border:1px solid rgba(0,0,0,.12);
-  background:#f7f7f7;
-  color:#222;
-  padding:3px 6px;
-  border-radius:8px;
-  font-size:9px;
-  line-height:1.1;
-  cursor:pointer;
-}
-
-.owner-mini-btn:hover{
-  background:#ffffff;
-}
-
-    #chartPanel{
-      background:white;
-      border-radius:16px;
-      box-shadow:0 8px 24px rgba(0,0,0,.08);
-      position:relative;
-      overflow:hidden;
-      height:calc(100vh - 24px);
-      display:flex;
-      flex-direction:column;
-    }
-    #chartWrap{flex:1; min-height:0; position:relative;}
-    #chart{width:100%; height:100%;}
-
-    #fsBtn{
-      position:absolute; top:10px; right:10px; z-index:30;
-      border:1px solid rgba(0,0,0,.12);
-      background:rgba(255,255,255,.92);
-      backdrop-filter: blur(6px);
-      padding:8px 10px;
-      border-radius:12px;
-      font-size:12px;
-      cursor:pointer;
-      box-shadow:0 6px 16px rgba(0,0,0,.10);
-    }
-    #fsBtn:hover{background:#ffffff;}
-
-    #bottomBar{
-      background:#fff;
-      padding:8px 10px 12px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      border-top:1px solid rgba(0,0,0,.06);
-    }
-    #labelBtn{
-      border:1px solid rgba(0,0,0,.12);
-      background:rgba(255,255,255,.95);
-      padding:8px 14px;
-      border-radius:12px;
-      font-size:12px;
-      cursor:pointer;
-      box-shadow:0 6px 16px rgba(0,0,0,.10);
-    }
-    #labelBtn:hover{background:#ffffff;}
-
-    #chartPanel:fullscreen{border-radius:0; width:100vw; height:100vh;}
-    #chartPanel:fullscreen #fsBtn{top:14px; right:14px;}
-
-    .legend{font-size:12px; color:#444; margin-top:10px; line-height:1.5;}
-
-    /* ✅ Bandeau d'alerte environnement (preview Teams/Outlook/SharePoint, plotly bloqué, etc.) */
-    .envwarn{
-      display:none;
-      position:fixed;
-      left:12px;
-      right:12px;
-      top:10px;
-      z-index:9999;
-      padding:10px 12px;
-      border-radius:12px;
-      background:#fff7e6;
-      border:1px solid rgba(255,165,0,.35);
-      color:#5a3b00;
-      box-shadow:0 10px 26px rgba(0,0,0,.10);
-      font-size:12px;
-      line-height:1.35;
-    }
-    .envwarn.info{background:#eef6ff; border-color:rgba(30,136,229,.30); color:#063a63;}
-    .envwarn.error{background:#fff0f0; border-color:rgba(229,57,53,.30); color:#6b0d0d;}
-    .envwarn b{font-weight:700;}
-    .envwarn .closebtn{
-      float:right;
-      cursor:pointer;
-      padding:0 6px;
-      border-radius:10px;
-      border:1px solid rgba(0,0,0,.12);
-      background:#fff;
-      margin-left:10px;
-    }
-
-/* ✅ Décale la barre d'outils Plotly pour éviter le bouton Plein écran */
-#chart .modebar{
-  right: 120px !important;   /* décale la toolbar vers la gauche */
-  top: 10px !important;
-}
-
-#chart .modebar-btn{
-  margin-left: 2px;
-}
-
-
-    /* ✅ V3 : bouton nouvelle entreprise + filtres repliables + import/export data */
-    .collapsible-section{
-      border:1px solid rgba(0,0,0,.08);
-      border-radius:12px;
-      margin-bottom:7px;
-      background:#fff;
-      overflow:hidden;
-    }
-    .collapsible-head{
-      width:100%;
-      border:0;
-      background:#f6f7fb;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:8px;
-      padding:6px 8px;
-      font-size:10px;
-      font-weight:800;
-      cursor:pointer;
-      color:#222;
-      text-align:left;
-      box-sizing:border-box;
-    }
-    .collapsible-head:hover{background:#eef1f8;}
-    .collapsible-body{padding:7px 8px;display:none;}
-    .collapsible-section.open .collapsible-body{display:block;}
-    .collapsible-arrow{font-size:10px;line-height:1;}
-    #newCompanySection,#dataToolsSection{margin-bottom:8px;}
-    #newCompanyForm label{
-      display:block;
-      font-size:9px;
-      font-weight:700;
-      color:#333;
-      margin:5px 0 2px;
-    }
-    #newCompanyForm input,#newCompanyForm select{
-      width:100%;
-      box-sizing:border-box;
-      border:1px solid #ddd;
-      border-radius:9px;
-      padding:5px 7px;
-      font-size:10px;
-      background:#fff;
-    }
-    #newCompanyForm .row2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-    .primary-mini-btn,.data-mini-btn{
-      width:100%;
-      border:1px solid rgba(30,136,229,.25);
-      background:#1E88E5;
-      color:#fff;
-      padding:7px 8px;
-      border-radius:10px;
-      font-size:10px;
-      font-weight:800;
-      cursor:pointer;
-      margin-top:7px;
-      box-sizing:border-box;
-    }
-    .data-mini-btn{background:#343a40;border-color:rgba(0,0,0,.15);}
-    .data-mini-btn.secondary{background:#ffffff;color:#222;border-color:rgba(0,0,0,.16);}
-    .primary-mini-btn:hover,.data-mini-btn:hover{filter:brightness(.96);}
-    .secondary-mini-note{font-size:9px;line-height:1.25;margin-top:6px;color:#666;}
-    .tool-grid{display:grid;grid-template-columns:1fr;gap:4px;}
-
-
-
-    /* ✅ V4 : onglets, liste complète, fiche entreprise éditable, notes */
-    .app-tabs{
-      display:flex;
-      gap:8px;
-      padding:10px 12px 0 12px;
-      box-sizing:border-box;
-      background:#f7f7fb;
-    }
-    .tab-btn{
-      border:1px solid rgba(0,0,0,.12);
-      background:#fff;
-      color:#222;
-      border-radius:12px 12px 0 0;
-      padding:8px 14px;
-      font-size:12px;
-      font-weight:800;
-      cursor:pointer;
-      box-shadow:0 4px 12px rgba(0,0,0,.06);
-    }
-    .tab-btn.active{background:#1E88E5;color:#fff;border-color:#1E88E5;}
-    .tab-content{display:none;height:calc(100vh - 44px);}
+    *{box-sizing:border-box}
+    body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:var(--white);color:var(--black);}
+    .topbar{height:46px;display:flex;align-items:end;gap:8px;padding:8px 12px 0;border-bottom:3px solid var(--orange);background:var(--black);}
+    .tab-btn{border:1px solid var(--orange);border-bottom:0;background:var(--black);color:var(--white);border-radius:13px 13px 0 0;padding:9px 15px;font-size:12px;font-weight:900;cursor:pointer;}
+    .tab-btn.active{background:var(--orange);color:var(--black);}
+    .tab-content{display:none;height:calc(100vh - 46px);background:var(--white);}
     .tab-content.active{display:block;}
-    .tab-content .wrap{height:100%;}
-    .company-editor{
-      display:none;
-      border:1px solid rgba(30,136,229,.22);
-      background:#f8fbff;
-      border-radius:12px;
-      padding:8px;
-      margin-top:8px;
-      font-size:10px;
-      line-height:1.25;
-    }
+    .dashboard-grid{height:100%;display:grid;grid-template-columns:220px 1fr;gap:12px;padding:12px;}
+    .panel,.chart-panel,.list-main,.list-side{background:var(--white);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:auto;}
+    .panel{padding:10px;}
+    .panel-logo{display:block;width:100%;max-width:88px;height:auto;margin:0 auto 10px;border-radius:18px;}
+    .section{border:1px solid var(--line);border-radius:12px;margin-bottom:7px;background:var(--white);overflow:hidden;}
+    .section-head{width:100%;border:0;background:var(--black);color:var(--white);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 8px;font-size:10px;font-weight:900;cursor:pointer;text-align:left;}
+    .section-head:hover{background:#111;}
+    .section.open .section-head{background:var(--orange);color:var(--black);}
+    .section-body{display:none;padding:8px;}
+    .section.open .section-body{display:block;}
+    label{font-size:9px;line-height:1.15;display:block;margin:2px 0;}
+    input,select,textarea{font-family:inherit;}
+    .field-label{font-size:9px;font-weight:900;margin:6px 0 3px;color:var(--black);}
+    input[type="text"],input[type="number"],select,textarea,#search,#companyTableSearch{width:100%;border:1px solid #d8d8d8;border-radius:9px;padding:6px 8px;font-size:10px;background:var(--white);color:var(--black);}
+    textarea{min-height:70px;resize:vertical;line-height:1.25;}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+    .btn{width:100%;border:1px solid var(--orange);background:var(--orange);color:var(--black);font-weight:900;border-radius:10px;padding:7px 8px;font-size:10px;cursor:pointer;margin-top:7px;}
+    .btn.secondary{background:var(--white);color:var(--black);border-color:var(--black);}
+    .btn:hover{filter:brightness(.96)}
+    .mini-note{font-size:9px;color:var(--muted);line-height:1.25;margin-top:6px;}
+    .owner-actions{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0;}
+    .owner-mini-btn{border:1px solid var(--black);background:var(--white);color:var(--black);font-size:9px;border-radius:8px;padding:3px 6px;cursor:pointer;}
+    #search{margin:6px 0;}
+    .item{padding:6px 8px;border-radius:8px;cursor:pointer;margin-top:4px;border:1px solid transparent;font-size:9px;line-height:1.25;}
+    .item:hover,.item.selected{border-color:var(--orange);background:#fff6ee;}
+    .small{font-size:10px;color:#333;}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;margin-left:5px;color:#fff;}
+    .b-red{background:var(--red);} .b-blue{background:var(--blue);} .b-green{background:var(--green);} /* Ne pas modifier les couleurs métier */
+    .legend{font-size:11px;line-height:1.5;margin-top:10px;color:#333;}
+    .company-editor{display:none;border:2px solid var(--orange);border-radius:13px;background:#fffaf5;padding:9px;margin-top:9px;font-size:10px;}
     .company-editor.open{display:block;}
-    .company-editor h3{font-size:11px;margin:0 0 6px 0;line-height:1.2;}
-    .company-editor label{display:block;font-weight:800;font-size:9px;margin:5px 0 2px;color:#333;}
-    .company-editor input,.company-editor select,.company-editor textarea{
-      width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:9px;padding:5px 7px;font-size:10px;background:#fff;
-    }
-    .company-editor textarea{min-height:78px;resize:vertical;line-height:1.25;}
-    .editor-row2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+    .company-editor h3{font-size:12px;margin:0 0 6px;line-height:1.25;}
     .editor-actions{display:flex;gap:6px;margin-top:8px;}
-    .editor-actions button{flex:1;border:1px solid rgba(0,0,0,.12);border-radius:9px;padding:6px 7px;font-size:10px;font-weight:800;cursor:pointer;}
-    .editor-save{background:#1E88E5;color:#fff;}
-    .editor-close{background:#fff;color:#222;}
-    .list-page{height:100%;padding:12px;box-sizing:border-box;display:grid;grid-template-columns:1fr 300px;gap:12px;}
-    .list-main,.list-side{background:#fff;border-radius:16px;padding:12px;box-shadow:0 8px 24px rgba(0,0,0,.08);overflow:auto;}
-    .list-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:10px;}
-    .list-toolbar h2{font-size:14px;margin:0;white-space:nowrap;}
-    #companyTableSearch{width:260px;max-width:100%;border:1px solid #ddd;border-radius:10px;padding:7px 9px;font-size:11px;}
+    .editor-actions button{flex:1;border-radius:9px;padding:7px 8px;font-size:10px;font-weight:900;cursor:pointer;}
+    .editor-save{border:1px solid var(--orange);background:var(--orange);color:var(--black);}
+    .editor-close{border:1px solid var(--black);background:var(--white);color:var(--black);}
+    .chart-panel{height:100%;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+    #chartWrap{flex:1;min-height:0;position:relative;}
+    #chart{width:100%;height:100%;}
+    #fsBtn{position:absolute;top:10px;right:10px;z-index:20;border:1px solid var(--black);background:var(--white);color:var(--black);border-radius:12px;padding:8px 10px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.10);}
+    #bottomBar{border-top:1px solid var(--line);padding:8px 10px;display:flex;justify-content:center;background:var(--white);}
+    #labelBtn{border:1px solid var(--black);background:var(--black);color:var(--white);border-radius:12px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;}
+    #chart .modebar{right:120px!important;top:10px!important;}
+    .list-page{height:100%;display:grid;grid-template-columns:1fr 320px;gap:12px;padding:12px;}
+    .list-main,.list-side{padding:12px;}
+    .list-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:10px;}
+    .list-toolbar h2{font-size:15px;margin:0;white-space:nowrap;}
     .company-table{width:100%;border-collapse:collapse;font-size:10px;}
-    .company-table th{position:sticky;top:0;background:#f6f7fb;z-index:1;text-align:left;border-bottom:1px solid #ddd;padding:7px 6px;font-size:10px;white-space:nowrap;}
-    .company-table td{border-bottom:1px solid #eee;padding:6px;vertical-align:top;}
+    .company-table th{position:sticky;top:0;background:var(--black);color:var(--white);z-index:1;text-align:left;padding:8px 6px;font-size:10px;white-space:nowrap;border-bottom:3px solid var(--orange);}
+    .company-table td{border-bottom:1px solid var(--line);padding:7px 6px;vertical-align:top;}
     .company-table tr{cursor:pointer;}
-    .company-table tr:hover{background:#f8fbff;}
-    .company-table tr.selected{background:#eef6ff;}
-    .notes-cell{max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#555;}
-    #newCompanyNotes{min-height:58px;resize:vertical;line-height:1.25;}
-
+    .company-table tr:hover{background:#fff6ee;}
+    .company-table tr.selected{background:#ffead6;}
+    .notes-cell{max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#555;}
+    .envwarn{display:none;position:fixed;left:12px;right:12px;top:56px;z-index:9999;padding:10px 12px;border-radius:12px;background:#fff7e6;border:1px solid rgba(255,121,0,.45);color:#000;box-shadow:var(--shadow);font-size:12px;line-height:1.35;}
+    .envwarn.error{background:#fff0f0;border-color:rgba(229,57,53,.30);}
+    .closebtn{float:right;cursor:pointer;padding:0 6px;border-radius:10px;border:1px solid rgba(0,0,0,.12);background:#fff;margin-left:10px;}
+    @media(max-width:1150px){.dashboard-grid{grid-template-columns:220px 1fr}.list-page{grid-template-columns:1fr}.list-side{min-height:280px}}
   </style>
-
-<!--[if gte mso 9]><xml>
-<mso:CustomDocumentProperties>
-<mso:_dlc_DocId msdt:dt="string">SPEEXX-1335365678-194060</mso:_dlc_DocId>
-<mso:_dlc_DocIdItemGuid msdt:dt="string">7591349f-1e84-4880-811c-28f101fabfbc</mso:_dlc_DocIdItemGuid>
-<mso:_dlc_DocIdUrl msdt:dt="string">https://speexx.sharepoint.com/_layouts/15/DocIdRedir.aspx?ID=SPEEXX-1335365678-194060, SPEEXX-1335365678-194060</mso:_dlc_DocIdUrl>
-</mso:CustomDocumentProperties>
-</xml><![endif]-->
 </head>
-
-<body>
-  <!-- Bandeau env (auto) -->
-  <div id="envWarning" class="envwarn" style="display:none;">
-    <span class="closebtn" onclick="document.getElementById('envWarning').style.display='none'">✕</span>
-    <span id="envWarningText"></span>
-  </div>
-
-  <div class="app-tabs">
+<body onload="loadPlotly()">
+  <div id="envWarning" class="envwarn"><span class="closebtn" onclick="document.getElementById('envWarning').style.display='none'">✕</span><span id="envWarningText"></span></div>
+  <div class="topbar">
     <button type="button" id="tabDashboardBtn" class="tab-btn active">Dashboard</button>
-    <button type="button" id="tabListBtn" class="tab-btn">Liste entreprises</button>
+    <button type="button" id="tabListBtn" class="tab-btn">2. Liste</button>
   </div>
+
   <div id="tabDashboard" class="tab-content active">
-  <div class="wrap">
-    <div class="panel">
-      <img src="./favicon-180x180.png" alt="AO Appel d'Offres" class="panel-logo" />
+    <div class="dashboard-grid">
+      <aside class="panel">
+        <img src="./favicon-180x180.png" alt="AO Appel d'Offres" class="panel-logo" />
 
-
-      <div id="newCompanySection" class="collapsible-section">
-        <button type="button" id="newCompanyToggle" class="collapsible-head">
-          <span>➕ Nouvelle entreprise</span><span class="collapsible-arrow">▶</span>
-        </button>
-        <div id="newCompanyBody" class="collapsible-body">
-          <form id="newCompanyForm">
-            <label for="newCompanyName">Entreprise</label>
-            <input id="newCompanyName" required placeholder="Ex: Air Liquide" />
-            <div class="row2">
-              <div>
-                <label for="newCompanyYear">Année</label>
-                <input id="newCompanyYear" type="number" min="2012" max="2035" required placeholder="2026" />
+        <div id="newCompanySection" class="section">
+          <button type="button" class="section-head">➕ Nouvelle entreprise <span>▶</span></button>
+          <div class="section-body">
+            <form id="newCompanyForm">
+              <div class="field-label">Entreprise</div><input id="newCompanyName" type="text" required placeholder="Ex: Air Liquide" />
+              <div class="row2">
+                <div><div class="field-label">Année</div><input id="newCompanyYear" type="number" min="2012" max="2035" required /></div>
+                <div><div class="field-label">Estimated €</div><input id="newCompanyRevenue" type="number" min="0" step="1" value="0" /></div>
               </div>
-              <div>
-                <label for="newCompanyRevenue">Estimated €</label>
-                <input id="newCompanyRevenue" type="number" min="0" step="1" placeholder="0" />
-              </div>
-            </div>
-            <label for="newCompanyProduct">Produit</label>
-            <select id="newCompanyProduct">
-              <option value="Langues">Langues</option>
-              <option value="Coaching">Coaching</option>
-            </select>
-            <label for="newCompanyCat">Catégorie</label>
-            <select id="newCompanyCat">
-              <option value="CAC 40">CAC 40</option>
-              <option value="Entreprise privée" selected>Entreprise privée</option>
-              <option value="Ecoles / Public / UE">Ecoles / Public / UE</option>
-            </select>
-            <label for="newCompanyOwner">Owner / BDR</label>
-            <input id="newCompanyOwner" placeholder="Ex: Jérémie Lecamus" />
-            <label for="newCompanyNotes">Notes</label>
-            <textarea id="newCompanyNotes" placeholder="Notes libres sur l’entreprise, contexte AO, contacts, prochaines actions…"></textarea>
-            <button type="submit" class="primary-mini-btn">Ajouter au dashboard</button>
-            <div id="newCompanyStatus" class="secondary-mini-note">L’ajout est immédiat. Utilise ensuite “Exporter const_data” ou “Export CSV” pour conserver/partager les données.</div>
-          </form>
-        </div>
-      </div>
-
-      <div id="dataToolsSection" class="collapsible-section">
-        <button type="button" id="dataToolsToggle" class="collapsible-head">
-          <span>💾 Données</span><span class="collapsible-arrow">▶</span>
-        </button>
-        <div id="dataToolsBody" class="collapsible-body">
-          <div class="tool-grid">
-            <button type="button" id="exportConstDataBtn" class="data-mini-btn">Exporter const_data</button>
-            <button type="button" id="exportCsvBtn" class="data-mini-btn secondary">Export CSV</button>
-            <button type="button" id="importCsvBtn" class="data-mini-btn secondary">Import CSV</button>
-            <input id="importCsvInput" type="file" accept=".csv,text/csv" style="display:none" />
+              <div class="field-label">Produit</div><select id="newCompanyProduct"><option>Langues</option><option>Coaching</option></select>
+              <div class="field-label">Catégorie</div><select id="newCompanyCat"><option>CAC 40</option><option selected>Entreprise privée</option><option>Ecoles / Public / UE</option></select>
+              <div class="field-label">Owner / BDR</div><input id="newCompanyOwner" type="text" placeholder="Ex: Jérémie Lecamus" />
+              <div class="field-label">Notes</div><textarea id="newCompanyNotes" placeholder="Notes libres sur l’entreprise…"></textarea>
+              <button class="btn" type="submit">Ajouter au dashboard</button>
+              <div id="newCompanyStatus" class="mini-note">L’ajout est immédiat. Utilise ensuite export CSV ou const_data pour conserver/partager.</div>
+            </form>
           </div>
-          <div id="dataToolsStatus" class="secondary-mini-note">CSV attendu : id,name,year,product,revenue,y,cat,color,outline,owner,owner_missing,notes.</div>
-        </div>
-      </div>
-      <div id="filters" style="margin-bottom:10px;font-size:11px;">
-        <div style="margin-bottom:6px;">
-  <b>Catégorie</b><br>
-  <label style="color:#E53935;"><input type="checkbox" class="f-cat" value="CAC 40" checked> CAC 40</label>
-  <label style="color:#1E88E5;"><input type="checkbox" class="f-cat" value="Entreprise privée" checked> Entreprise privée</label>
-  <label style="color:#43A047;"><input type="checkbox" class="f-cat" value="Ecoles / Public / UE" checked> Public / Ecoles</label>
-</div>
-
-        <div style="margin-bottom:6px;">
-          <b>Produit</b><br>
-          <label><input type="checkbox" class="f-prod" value="Langues" checked> Langues</label>
-          <label><input type="checkbox" class="f-prod" value="Coaching" checked> Coaching</label>
         </div>
 
-        <div style="margin-bottom:6px;">
-  <b>Année</b><br>
-  <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-    <input id="yearMin" type="number" value="2012" style="width:58px;">
-    <span>–</span>
-    <input id="yearMax" type="number" value="2028" style="width:58px;">
-  </div>
-</div>
-
-        <!-- ✅ Filtre Owner -->
-        <div id="ownerFilterSection" style="margin-bottom:6px;">
-  <div id="ownerToggle" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
-    <b>Owner / BDR</b>
-    <span id="ownerArrow">▼</span>
-  </div>
-
-  <div id="ownerBulkActions" style="margin-top:4px; display:flex; gap:4px; flex-wrap:wrap;">
-    <button type="button" id="ownerSelectAllBtn" class="owner-mini-btn">Tout sélectionner</button>
-    <button type="button" id="ownerDeselectAllBtn" class="owner-mini-btn">Tout désélectionner</button>
-  </div>
-
-  <div id="ownerFilters" style="margin-top:4px;"></div>
-</div>
-      </div>
-
-      <input id="search" placeholder="Rechercher… (ex: Air Liquide)" />
-
-      <div id="listSection">
-        <div id="listToggle" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
-          <b style="font-size:11px;">Liste des entreprises</b>
-          <span id="listArrow">▼</span>
+        <div id="dataToolsSection" class="section">
+          <button type="button" class="section-head">💾 Données <span>▶</span></button>
+          <div class="section-body">
+            <button type="button" id="exportConstDataBtn" class="btn">Exporter const_data</button>
+            <button type="button" id="exportCsvBtn" class="btn secondary">Export CSV</button>
+            <button type="button" id="importCsvBtn" class="btn secondary">Import CSV</button>
+            <input id="importCsvInput" type="file" accept=".csv,text/csv" style="display:none" />
+            <div id="dataToolsStatus" class="mini-note">CSV : id,name,year,product,revenue,y,cat,color,outline,owner,owner_missing,notes.</div>
+          </div>
         </div>
 
-        <div id="list"></div>
-      </div>
+        <div id="filters">
+          <div class="section open"><button type="button" class="section-head">Catégorie <span>▼</span></button><div class="section-body">
+            <label style="color:#E53935"><input type="checkbox" class="f-cat" value="CAC 40" checked> CAC 40</label>
+            <label style="color:#1E88E5"><input type="checkbox" class="f-cat" value="Entreprise privée" checked> Entreprise privée</label>
+            <label style="color:#43A047"><input type="checkbox" class="f-cat" value="Ecoles / Public / UE" checked> Public / Ecoles</label>
+          </div></div>
+          <div class="section"><button type="button" class="section-head">Produit <span>▶</span></button><div class="section-body">
+            <label><input type="checkbox" class="f-prod" value="Langues" checked> Langues</label>
+            <label><input type="checkbox" class="f-prod" value="Coaching" checked> Coaching</label>
+          </div></div>
+          <div class="section"><button type="button" class="section-head">Année <span>▶</span></button><div class="section-body">
+            <div class="row2"><input id="yearMin" type="number" value="2012"><input id="yearMax" type="number" value="2028"></div>
+          </div></div>
+          <div id="ownerFilterSection" class="section"><button id="ownerToggle" type="button" class="section-head">Owner / BDR <span id="ownerArrow">▶</span></button><div id="ownerFilterBody" class="section-body">
+            <div class="owner-actions"><button type="button" id="ownerSelectAllBtn" class="owner-mini-btn">Tout</button><button type="button" id="ownerDeselectAllBtn" class="owner-mini-btn">Aucun</button></div>
+            <div id="ownerFilters"></div>
+          </div></div>
+        </div>
 
-      <div id="companyEditor" class="company-editor"></div>
-      <div class="legend">
-        <b>Légende</b><br/>
-        1) <span class="badge b-red">Rouge</span> CAC 40<br/>
-        2) <span class="badge b-blue">Bleu</span> Entreprise privée<br/>
-        3) <span class="badge b-green">Vert</span> Écoles supérieures / Public / Européen
-      </div>
+        <input id="search" type="text" placeholder="Rechercher… (ex: Air Liquide)" />
+        <div id="listSection" class="section open"><button type="button" id="listToggle" class="section-head">Liste des entreprises <span id="listArrow">▼</span></button><div id="list" class="section-body" style="display:block"></div></div>
+        <div id="companyEditor" class="company-editor"></div>
+        <div class="legend"><b>Légende</b><br>1) <span class="badge b-red">Rouge</span> CAC 40<br>2) <span class="badge b-blue">Bleu</span> Entreprise privée<br>3) <span class="badge b-green">Vert</span> Écoles supérieures / Public / Européen</div>
+      </aside>
+
+      <main id="chartPanel" class="chart-panel">
+        <div id="chartWrap"><button id="fsBtn" type="button">⛶ Plein écran</button><div id="chart"></div></div>
+        <div id="bottomBar"><button id="labelBtn" type="button">👁️ Afficher les noms</button></div>
+      </main>
     </div>
+  </div>
 
-    <div id="chartPanel">
-      <div id="chartWrap">
-        <button id="fsBtn" title="Plein écran">⛶ Plein écran</button>
-        <div id="chart"></div>
+  <div id="tabList" class="tab-content">
+    <div class="list-page">
+      <div class="list-main">
+        <div class="list-toolbar"><h2>Liste complète des entreprises</h2><input id="companyTableSearch" type="text" placeholder="Rechercher une entreprise, owner, produit, notes…" /></div>
+        <div id="companyTableWrap"></div>
       </div>
-      <div id="bottomBar">
-        <button id="labelBtn" title="Afficher / Masquer les noms">👁️ Afficher les noms</button>
-      </div>
+      <div class="list-side"><div id="companyEditorList" class="company-editor"></div></div>
     </div>
   </div>
 
 <script>
-  /* ============================================================
-     ✅ Protections "partage"
-     - Si la page est ouverte dans une preview iframe (Teams/Outlook/SharePoint),
-       certaines politiques peuvent bloquer le JS ou le fullscreen.
-     ============================================================ */
-  (function envChecks(){
-    const envWarning = document.getElementById('envWarning');
-    const setEnvWarning = (html, kind) => {
-      envWarning.style.display = 'block';
-      envWarning.className = 'envwarn ' + (kind || '');
-      document.getElementById('envWarningText').innerHTML = html;
-    };
-
-    // Ouverture en iframe / preview
-    try {
-      if (window.self !== window.top) {
-        setEnvWarning(
-          "⚠️ <b>Ouverture en mode aperçu (iframe)</b> : certaines fonctions peuvent être bloquées. " +
-          "👉 Recommandé : <b>télécharger le fichier .html</b> puis l’ouvrir dans <b>Chrome/Edge</b>.",
-          "info"
-        );
-      }
-    } catch(e){
-      // accès à window.top peut être bloqué → on affiche pareil
-      setEnvWarning(
-        "⚠️ <b>Ouverture en mode aperçu</b> : certaines fonctions peuvent être bloquées. " +
-        "👉 Recommandé : <b>télécharger le fichier .html</b> puis l’ouvrir dans <b>Chrome/Edge</b>.",
-        "info"
-      );
-    }
-  })();
-
-  // ============================================================
-  // ✅ Etat Plotly (évite tout crash tant que Plotly n'est pas prêt)
-  // ============================================================
-  let plotlyReady = false;
-  function canUsePlotly() { return (typeof Plotly !== "undefined") && plotlyReady; }
-
-  function showHardError(html){
-    const envWarning = document.getElementById('envWarning');
-    envWarning.style.display = 'block';
-    envWarning.className = 'envwarn error';
-    document.getElementById('envWarningText').innerHTML = html;
+const SEED_DATA = [
+  {
+    "id": 1,
+    "name": "Aéroport International de Genève",
+    "year": 2024,
+    "product": "Langues",
+    "revenue": 20000,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 2,
+    "name": "Aéroports de Paris - ADP",
+    "year": 2023,
+    "product": "Langues",
+    "revenue": 2703,
+    "y": 1,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 3,
+    "name": "Air Liquide SA",
+    "year": 2025,
+    "product": "Langues",
+    "revenue": 240000,
+    "y": 5,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 4,
+    "name": "Airbus SE",
+    "year": 2019,
+    "product": "Langues",
+    "revenue": 66000,
+    "y": 3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 5,
+    "name": "Alstom University",
+    "year": 2012,
+    "product": "Langues",
+    "revenue": 0,
+    "y": 1,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Stéphanie Rousseau",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 6,
+    "name": "ArianeGroup France",
+    "year": 2023,
+    "product": "Langues",
+    "revenue": 45000,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 7,
+    "name": "Axian group",
+    "year": 2024,
+    "product": "Langues",
+    "revenue": 53592,
+    "y": 3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 8,
+    "name": "Banque de France",
+    "year": 2024,
+    "product": "Langues",
+    "revenue": 33500,
+    "y": 2,
+    "cat": "Ecoles / Public / UE",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 9,
+    "name": "BCL - Banque Centrale du Luxembourg",
+    "year": 2016,
+    "product": "Langues",
+    "revenue": 42500,
+    "y": 2,
+    "cat": "Ecoles / Public / UE",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 10,
+    "name": "BNP Paribas SA",
+    "year": 2025,
+    "product": "Langues",
+    "revenue": 201000,
+    "y": 5,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 11,
+    "name": "BNP Paribas SA",
+    "year": 2025,
+    "product": "Coaching",
+    "revenue": 201000,
+    "y": 5,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 12,
+    "name": "Bobst Group SA",
+    "year": 2024,
+    "product": "Langues",
+    "revenue": 13507,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 13,
+    "name": "Bouygues Construction S.A",
+    "year": 2024,
+    "product": "Langues",
+    "revenue": 79000,
+    "y": 3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 14,
+    "name": "Bpost",
+    "year": 2025,
+    "product": "Langues",
+    "revenue": 93000,
+    "y": 3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 15,
+    "name": "CACEIS",
+    "year": 2023,
+    "product": "Langues",
+    "revenue": 37500,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 16,
+    "name": "Capgemini SE",
+    "year": 2024,
+    "product": "Langues",
+    "revenue": 148000,
+    "y": 4,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 17,
+    "name": "Cargolux Airlines",
+    "year": 2026,
+    "product": "Langues",
+    "revenue": 0,
+    "y": 1,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 18,
+    "name": "Carrefour France",
+    "year": 2024,
+    "product": "Langues",
+    "revenue": 0,
+    "y": 1,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 19,
+    "name": "CGI France SAS",
+    "year": 2021,
+    "product": "Langues",
+    "revenue": 120000,
+    "y": 4,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 20,
+    "name": "CMA CGM S.A.",
+    "year": 2022,
+    "product": "Langues",
+    "revenue": 30000,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 21,
+    "name": "CMA CGM S.A.",
+    "year": 2026,
+    "product": "Langues",
+    "revenue": 0,
+    "y": 1,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 22,
+    "name": "CNP Assurances SA",
+    "year": 2025,
+    "product": "Coaching",
+    "revenue": 86400,
+    "y": -2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 23,
+    "name": "Cofidis S.A",
+    "year": 2022,
+    "product": "Langues",
+    "revenue": 12000,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 24,
+    "name": "Continental Automotive France",
+    "year": 2023,
+    "product": "Langues",
+    "revenue": 17500,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Stéphanie Rousseau",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 25,
+    "name": "Covéa Mutual Insurance Group Company",
+    "year": 2020,
+    "product": "Langues",
+    "revenue": 85000,
+    "y": 3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 26,
+    "name": "Danone SA",
+    "year": 2022,
+    "product": "Langues",
+    "revenue": 100000,
+    "y": 4,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 27,
+    "name": "Dassault Systemes SE",
+    "year": 2024,
+    "product": "Langues",
+    "revenue": 74500,
+    "y": 3,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 28,
+    "name": "Deloitte France",
+    "year": 2024,
+    "product": "Langues",
+    "revenue": 53000,
+    "y": 3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 29,
+    "name": "DEVOTEAM G CLOUD",
+    "year": 2020,
+    "product": "Langues",
+    "revenue": 47000,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 30,
+    "name": "ELECTRICITE DE FRANCE",
+    "year": 2021,
+    "product": "Langues",
+    "revenue": 90000,
+    "y": 3,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 31,
+    "name": "EM Lyon",
+    "year": 2021,
+    "product": "Langues",
+    "revenue": 35000,
+    "y": 2,
+    "cat": "Ecoles / Public / UE",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 32,
+    "name": "EM NORMANDIE",
+    "year": 2024,
+    "product": "Langues",
+    "revenue": 20000,
+    "y": 2,
+    "cat": "Ecoles / Public / UE",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 33,
+    "name": "ENGIE SA",
+    "year": 2026,
+    "product": "Langues",
+    "revenue": 42500,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 34,
+    "name": "Europcar France",
+    "year": 2019,
+    "product": "Langues",
+    "revenue": 36100,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 35,
+    "name": "Eviden FRANCE",
+    "year": 2025,
+    "product": "Coaching",
+    "revenue": 70000,
+    "y": -2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Thierry Le Boeuf",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 36,
+    "name": "Ferrero France",
+    "year": 2020,
+    "product": "Langues",
+    "revenue": 23700,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 37,
+    "name": "Generali France",
+    "year": 2017,
+    "product": "Langues",
+    "revenue": 62242.72,
+    "y": 3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 38,
+    "name": "Groupama Holding",
+    "year": 2020,
+    "product": "Langues",
+    "revenue": 42500,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 39,
+    "name": "Groupe AFNOR",
+    "year": 2022,
+    "product": "Langues",
+    "revenue": 4500,
+    "y": 1,
+    "cat": "Ecoles / Public / UE",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 40,
+    "name": "Groupe Air France KLM",
+    "year": 2014,
+    "product": "Langues",
+    "revenue": 297500,
+    "y": 5,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 41,
+    "name": "Groupe BPCE",
+    "year": 2024,
+    "product": "Langues",
+    "revenue": 21700,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 42,
+    "name": "Groupe Limagrain Holding SA",
+    "year": 2022,
+    "product": "Langues",
+    "revenue": 50000,
+    "y": 3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 43,
+    "name": "Groupe Rocher",
+    "year": 2021,
+    "product": "Langues",
+    "revenue": 46000,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 44,
+    "name": "Groupe Roquette",
+    "year": 2021,
+    "product": "Langues",
+    "revenue": 5000,
+    "y": 1,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Stéphanie Rousseau",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 45,
+    "name": "Groupe Roquette",
+    "year": 2026,
+    "product": "Langues",
+    "revenue": 0,
+    "y": 1,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Stéphanie Rousseau",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 46,
+    "name": "Groupe SEB",
+    "year": 2020,
+    "product": "Langues",
+    "revenue": 50000,
+    "y": 3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 47,
+    "name": "Groupe SNCF ",
+    "year": 2024,
+    "product": "Coaching",
+    "revenue": 84000,
+    "y": -2,
+    "cat": "Ecoles / Public / UE",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Julie Pirroni",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 48,
+    "name": "Groupe SNCF ",
+    "year": 2026,
+    "product": "Coaching",
+    "revenue": 50000,
+    "y": 2,
+    "cat": "Ecoles / Public / UE",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Julie Pirroni",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 49,
+    "name": "Groupe SNCF ",
+    "year": 2022,
+    "product": "Langues",
+    "revenue": 30000,
+    "y": 2,
+    "cat": "Ecoles / Public / UE",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Julie Pirroni",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 50,
+    "name": "Ipsen S.A.",
+    "year": 2025,
+    "product": "Langues",
+    "revenue": 60000,
+    "y": 3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 51,
+    "name": "JCDecaux SA",
+    "year": 2022,
+    "product": "Langues",
+    "revenue": 15000,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 52,
+    "name": "Kedge",
+    "year": 2026,
+    "product": "Langues",
+    "revenue": 0,
+    "y": 1,
+    "cat": "Ecoles / Public / UE",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 53,
+    "name": "Kering SA",
+    "year": 2026,
+    "product": "Langues",
+    "revenue": 40000,
+    "y": 2,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 54,
+    "name": "Kingfisher France",
+    "year": 2022,
+    "product": "Langues",
+    "revenue": 3000,
+    "y": 1,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 55,
+    "name": "La Poste S.A.",
+    "year": 2023,
+    "product": "Langues",
+    "revenue": 30000,
+    "y": 2,
+    "cat": "Ecoles / Public / UE",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 56,
+    "name": "L'Oréal SA",
+    "year": 2024,
+    "product": "Langues",
+    "revenue": 39600,
+    "y": 2,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 57,
+    "name": "M.P.F. Michelin",
+    "year": 2021,
+    "product": "Langues",
+    "revenue": 160000,
+    "y": 4,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 58,
+    "name": "Majorel Africa",
+    "year": 2023,
+    "product": "Langues",
+    "revenue": 65000,
+    "y": 3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 59,
+    "name": "Manpower France",
+    "year": 2016,
+    "product": "Langues",
+    "revenue": 30000,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 60,
+    "name": "Mars Food France",
+    "year": 2020,
+    "product": "Langues",
+    "revenue": 0,
+    "y": 1,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 61,
+    "name": "MBDA Group",
+    "year": 2020,
+    "product": "Langues",
+    "revenue": 148750,
+    "y": 4,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 62,
+    "name": "Naval Group SA",
+    "year": 2021,
+    "product": "Langues",
+    "revenue": 60000,
+    "y": 3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 63,
+    "name": "NEOMA BUSINESS SCHOOL",
+    "year": 2022,
+    "product": "Langues",
+    "revenue": 18500,
+    "y": 2,
+    "cat": "Ecoles / Public / UE",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 64,
+    "name": "OPMobility SE",
+    "year": 2027,
+    "product": "Coaching",
+    "revenue": 36000,
+    "y": -3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 65,
+    "name": "OPMobility SE",
+    "year": 2026,
+    "product": "Langues",
+    "revenue": 18000,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 66,
+    "name": "Orange SA",
+    "year": 2022,
+    "product": "Langues",
+    "revenue": 30000,
+    "y": 2,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 67,
+    "name": "RADIALL",
+    "year": 2026,
+    "product": "Langues",
+    "revenue": 110000,
+    "y": 4,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 68,
+    "name": "RATP Pro",
+    "year": 2021,
+    "product": "Langues",
+    "revenue": 15000,
+    "y": 2,
+    "cat": "Ecoles / Public / UE",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 69,
+    "name": "Safran SA",
+    "year": 2025,
+    "product": "Langues",
+    "revenue": 63750,
+    "y": 3,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 70,
+    "name": "Sanofi SA",
+    "year": 2025,
+    "product": "Langues",
+    "revenue": 10000,
+    "y": 2,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 71,
+    "name": "Schneider Electric SE",
+    "year": 2025,
+    "product": "Langues",
+    "revenue": 203000,
+    "y": 5,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 72,
+    "name": "SNCB Holding S.a.",
+    "year": 2026,
+    "product": "Langues",
+    "revenue": 233000,
+    "y": 5,
+    "cat": "Ecoles / Public / UE",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 73,
+    "name": "Société Générale",
+    "year": 2021,
+    "product": "Langues",
+    "revenue": 176000,
+    "y": 4,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 74,
+    "name": "Solvay SA",
+    "year": 2026,
+    "product": "Coaching",
+    "revenue": 20000,
+    "y": -4,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 75,
+    "name": "Solvay SA",
+    "year": 2025,
+    "product": "Langues",
+    "revenue": 17000,
+    "y": 2,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 76,
+    "name": "Sonepar S.A.",
+    "year": 2025,
+    "product": "Langues",
+    "revenue": 204065,
+    "y": 5,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 77,
+    "name": "Sopra Steria Group SA",
+    "year": 2024,
+    "product": "Langues",
+    "revenue": 50000,
+    "y": 3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 78,
+    "name": "Spie SA",
+    "year": 2022,
+    "product": "Langues",
+    "revenue": 0,
+    "y": 1,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 79,
+    "name": "Teleperformance Limited",
+    "year": 2023,
+    "product": "Langues",
+    "revenue": 0,
+    "y": 1,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 80,
+    "name": "Teleperformance Limited",
+    "year": 2026,
+    "product": "Langues",
+    "revenue": 0,
+    "y": 1,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 81,
+    "name": "Thales SA",
+    "year": 2024,
+    "product": "Langues",
+    "revenue": 95000,
+    "y": 3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 82,
+    "name": "TNT France",
+    "year": 2017,
+    "product": "Langues",
+    "revenue": 185000,
+    "y": 4,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 83,
+    "name": "TotalEnergies SE",
+    "year": 2023,
+    "product": "Langues",
+    "revenue": 30000,
+    "y": 2,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 84,
+    "name": "Unilabs SA",
+    "year": 2023,
+    "product": "Langues",
+    "revenue": 36480,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 85,
+    "name": "Veepee France",
+    "year": 2021,
+    "product": "Langues",
+    "revenue": 57480,
+    "y": 3,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 86,
+    "name": "Verisure France",
+    "year": 2023,
+    "product": "Langues",
+    "revenue": 30000,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 87,
+    "name": "Vinci Construction France",
+    "year": 2022,
+    "product": "Langues",
+    "revenue": 36000,
+    "y": 2,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 88,
+    "name": "Xpo Logistics Europe SA",
+    "year": 2022,
+    "product": "Coaching",
+    "revenue": 0,
+    "y": -5,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 89,
+    "name": "Kering SA",
+    "year": 2022,
+    "product": "Langues",
+    "revenue": 30000,
+    "y": 2,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 90,
+    "name": "Orange SA",
+    "year": 2027,
+    "product": "Coaching",
+    "revenue": 0,
+    "y": 1,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 91,
+    "name": "SCC",
+    "year": 2026,
+    "product": "Langues",
+    "revenue": 0,
+    "y": 1,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 92,
+    "name": "Enabel Sénégal",
+    "year": 2026,
+    "product": "Langues",
+    "revenue": 0,
+    "y": 1,
+    "cat": "Entreprise privée",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "notes": ""
+  },
+  {
+    "id": 93,
+    "name": "TotalEnergies SE",
+    "year": 2028,
+    "product": "Langues",
+    "revenue": 0,
+    "y": 1,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "notes": ""
   }
-
-  function safeResize(){
-    if (canUsePlotly()) {
-      try { Plotly.Plots.resize('chart'); } catch(e) {}
-    }
-  }
-
-  let data = [
-  { id: 1, name: "Aéroport International de Genève", year: 2024, product: "Langues", revenue: 20000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 2, name: "Aéroports de Paris - ADP", year: 2023, product: "Langues", revenue: 2703, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 3, name: "Air Liquide SA", year: 2025, product: "Langues", revenue: 240000, y: 5, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 4, name: "Airbus SE", year: 2019, product: "Langues", revenue: 66000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 5, name: "Alstom University", year: 2012, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Stéphanie Rousseau", owner_missing: false },
-  { id: 6, name: "ArianeGroup France", year: 2023, product: "Langues", revenue: 45000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 7, name: "Axian group", year: 2024, product: "Langues", revenue: 53592, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 8, name: "Banque de France", year: 2024, product: "Langues", revenue: 33500, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 9, name: "BCL - Banque Centrale du Luxembourg", year: 2016, product: "Langues", revenue: 42500, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 10, name: "BNP Paribas SA", year: 2025, product: "Langues", revenue: 201000, y: 5, cat: "CAC 40", color: "#E53935", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 11, name: "BNP Paribas SA", year: 2025, product: "Coaching", revenue: 201000, y: 5, cat: "CAC 40", color: "#E53935", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 12, name: "Bobst Group SA", year: 2024, product: "Langues", revenue: 13507, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 13, name: "Bouygues Construction S.A", year: 2024, product: "Langues", revenue: 79000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 14, name: "Bpost", year: 2025, product: "Langues", revenue: 93000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 15, name: "CACEIS", year: 2023, product: "Langues", revenue: 37500, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 16, name: "Capgemini SE", year: 2024, product: "Langues", revenue: 148000, y: 4, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 17, name: "Cargolux Airlines", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 18, name: "Carrefour France", year: 2024, product: "Langues", revenue: 0, y: 1, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 19, name: "CGI France SAS", year: 2021, product: "Langues", revenue: 120000, y: 4, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 20, name: "CMA CGM S.A.", year: 2022, product: "Langues", revenue: 30000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 21, name: "CMA CGM S.A.", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 22, name: "CNP Assurances SA", year: 2025, product: "Coaching", revenue: 86400, y: -2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 23, name: "Cofidis S.A", year: 2022, product: "Langues", revenue: 12000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 24, name: "Continental Automotive France", year: 2023, product: "Langues", revenue: 17500, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Stéphanie Rousseau", owner_missing: false },
-  { id: 25, name: "Covéa Mutual Insurance Group Company", year: 2020, product: "Langues", revenue: 85000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 26, name: "Danone SA", year: 2022, product: "Langues", revenue: 100000, y: 4, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 27, name: "Dassault Systemes SE", year: 2024, product: "Langues", revenue: 74500, y: 3, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 28, name: "Deloitte France", year: 2024, product: "Langues", revenue: 53000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 29, name: "DEVOTEAM G CLOUD", year: 2020, product: "Langues", revenue: 47000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 30, name: "ELECTRICITE DE FRANCE", year: 2021, product: "Langues", revenue: 90000, y: 3, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 31, name: "EM Lyon", year: 2021, product: "Langues", revenue: 35000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 32, name: "EM NORMANDIE", year: 2024, product: "Langues", revenue: 20000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 33, name: "ENGIE SA", year: 2026, product: "Langues", revenue: 42500, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 34, name: "Europcar France", year: 2019, product: "Langues", revenue: 36100, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 35, name: "Eviden FRANCE", year: 2025, product: "Coaching", revenue: 70000, y: -2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Thierry Le Boeuf", owner_missing: false },
-  { id: 36, name: "Ferrero France", year: 2020, product: "Langues", revenue: 23700, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 37, name: "Generali France", year: 2017, product: "Langues", revenue: 62242.72, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 38, name: "Groupama Holding", year: 2020, product: "Langues", revenue: 42500, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 39, name: "Groupe AFNOR", year: 2022, product: "Langues", revenue: 4500, y: 1, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 40, name: "Groupe Air France KLM", year: 2014, product: "Langues", revenue: 297500, y: 5, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 41, name: "Groupe BPCE", year: 2024, product: "Langues", revenue: 21700, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 42, name: "Groupe Limagrain Holding SA", year: 2022, product: "Langues", revenue: 50000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 43, name: "Groupe Rocher", year: 2021, product: "Langues", revenue: 46000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 44, name: "Groupe Roquette", year: 2021, product: "Langues", revenue: 5000, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Stéphanie Rousseau", owner_missing: false },
-  { id: 45, name: "Groupe Roquette", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Stéphanie Rousseau", owner_missing: false },
-  { id: 46, name: "Groupe SEB", year: 2020, product: "Langues", revenue: 50000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 47, name: "Groupe SNCF ", year: 2024, product: "Coaching", revenue: 84000, y: -2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Julie Pirroni", owner_missing: false },
-  { id: 48, name: "Groupe SNCF ", year: 2026, product: "Coaching", revenue: 50000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Julie Pirroni", owner_missing: false },
-  { id: 49, name: "Groupe SNCF ", year: 2022, product: "Langues", revenue: 30000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Julie Pirroni", owner_missing: false },
-  { id: 50, name: "Ipsen S.A.", year: 2025, product: "Langues", revenue: 60000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 51, name: "JCDecaux SA", year: 2022, product: "Langues", revenue: 15000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 52, name: "Kedge", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 53, name: "Kering SA", year: 2026, product: "Langues", revenue: 40000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 54, name: "Kingfisher France", year: 2022, product: "Langues", revenue: 3000, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 55, name: "La Poste S.A.", year: 2023, product: "Langues", revenue: 30000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 56, name: "L'Oréal SA", year: 2024, product: "Langues", revenue: 39600, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 57, name: "M.P.F. Michelin", year: 2021, product: "Langues", revenue: 160000, y: 4, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 58, name: "Majorel Africa", year: 2023, product: "Langues", revenue: 65000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 59, name: "Manpower France", year: 2016, product: "Langues", revenue: 30000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 60, name: "Mars Food France", year: 2020, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 61, name: "MBDA Group", year: 2020, product: "Langues", revenue: 148750, y: 4, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 62, name: "Naval Group SA", year: 2021, product: "Langues", revenue: 60000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 63, name: "NEOMA BUSINESS SCHOOL", year: 2022, product: "Langues", revenue: 18500, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 64, name: "OPMobility SE", year: 2027, product: "Coaching", revenue: 36000, y: -3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 65, name: "OPMobility SE", year: 2026, product: "Langues", revenue: 18000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 66, name: "Orange SA", year: 2022, product: "Langues", revenue: 30000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 67, name: "RADIALL", year: 2026, product: "Langues", revenue: 110000, y: 4, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 68, name: "RATP Pro", year: 2021, product: "Langues", revenue: 15000, y: 2, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 69, name: "Safran SA", year: 2025, product: "Langues", revenue: 63750, y: 3, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 70, name: "Sanofi SA", year: 2025, product: "Langues", revenue: 10000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 71, name: "Schneider Electric SE", year: 2025, product: "Langues", revenue: 203000, y: 5, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 72, name: "SNCB Holding S.a.", year: 2026, product: "Langues", revenue: 233000, y: 5, cat: "Ecoles / Public / UE", color: "#43A047", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 73, name: "Société Générale", year: 2021, product: "Langues", revenue: 176000, y: 4, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 74, name: "Solvay SA", year: 2026, product: "Coaching", revenue: 20000, y: -4, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 75, name: "Solvay SA", year: 2025, product: "Langues", revenue: 17000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 76, name: "Sonepar S.A.", year: 2025, product: "Langues", revenue: 204065, y: 5, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 77, name: "Sopra Steria Group SA", year: 2024, product: "Langues", revenue: 50000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 78, name: "Spie SA", year: 2022, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 79, name: "Teleperformance Limited", year: 2023, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 80, name: "Teleperformance Limited", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "CAC 40", color: "#E53935", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 81, name: "Thales SA", year: 2024, product: "Langues", revenue: 95000, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 82, name: "TNT France", year: 2017, product: "Langues", revenue: 185000, y: 4, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 83, name: "TotalEnergies SE", year: 2023, product: "Langues", revenue: 30000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 84, name: "Unilabs SA", year: 2023, product: "Langues", revenue: 36480, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 85, name: "Veepee France", year: 2021, product: "Langues", revenue: 57480, y: 3, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 86, name: "Verisure France", year: 2023, product: "Langues", revenue: 30000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Anaïs Guicherd", owner_missing: false },
-  { id: 87, name: "Vinci Construction France", year: 2022, product: "Langues", revenue: 36000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Clément Le Roux", owner_missing: false },
-  { id: 88, name: "Xpo Logistics Europe SA", year: 2022, product: "Coaching", revenue: 0, y: -5, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 89, name: "Kering SA", year: 2022, product: "Langues", revenue: 30000, y: 2, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 90, name: "Orange SA", year: 2027, product: "Coaching", revenue: 0, y: 1, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 91, name: "SCC", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
-  { id: 92, name: "Enabel Sénégal", year: 2026, product: "Langues", revenue: 0, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Sarah Kureemun", owner_missing: false },
-  { id: 93, name: "TotalEnergies SE", year: 2028, product: "Langues", revenue:0, y: 1, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
+];
+let data = [];
+let years = [];
+let plotlyReady = false;
+let showNames = false;
+let selectedCompanyId = null;
+const STORAGE_KEY = 'ao_dashboard_data_orange_v1';
+const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','outline','owner','owner_missing','notes'];
+const CAT_COLORS = {'CAC 40':'#E53935','Entreprise privée':'#1E88E5','Ecoles / Public / UE':'#43A047'}; // couleurs métier conservées
+const CAT_ORDER = ['Ecoles / Public / UE','CAC 40','Entreprise privée'];
+const Y_BANDS_LANGUES = [
+  {max:10000,y:1,label:'Langues ≤ 10k€'}, {max:50000,y:2,label:'Langues 10–50k€'}, {max:100000,y:3,label:'Langues 50–100k€'}, {max:200000,y:4,label:'Langues 100–200k€'}, {max:1000000,y:5,label:'Langues > 200k€'}
+];
+const Y_BANDS_COACHING = [
+  {max:10000,y:-5,label:'Coaching ≤ 10k€'}, {max:30000,y:-4,label:'Coaching 10–30k€'}, {max:50000,y:-3,label:'Coaching 30–50k€'}, {max:100000,y:-2,label:'Coaching 50–100k€'}, {max:1000000,y:-1,label:'Coaching > 100k€'}
 ];
 
-  // ✅ Normalisation owner/owner_missing
-  for (const d of data) {
-    if (!('owner' in d)) d.owner = null;
-    if (!('owner_missing' in d)) d.owner_missing = (d.owner == null || String(d.owner).trim() === '');
-  }
-
-  // ✅ Ajout 2028 car présent dans data (sans changer tes inputs)
-  let years = [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028];
-
-  /* =====================================================================================
-     ✅ OPTION 1 : PALIERS Y DISCRETS + POSITIONNEMENT AUTOMATIQUE DES BULLES (revenue -> y)
-  ====================================================================================== */
-  const USE_AUTO_Y = true;
-
-  const Y_BANDS_LANGUES = [
-    { max: 10000,   y: 1, label: 'Langues ≤ 10k€' },
-    { max: 50000,   y: 2, label: 'Langues 10–50k€' },
-    { max: 100000,  y: 3, label: 'Langues 50–100k€' },
-    { max: 200000,  y: 4, label: 'Langues 100–200k€' },
-    { max: 1000000, y: 5, label: 'Langues > 200k€' }
-  ];
-
-  const Y_BANDS_COACHING = [
-    { max: 10000,   y: -5, label: 'Coaching ≤ 10k€' },
-    { max: 30000,   y: -4, label: 'Coaching 10–30k€' },
-    { max: 50000,   y: -3, label: 'Coaching 30–50k€' },
-    { max: 100000,  y: -2, label: 'Coaching 50–100k€' },
-    { max: 1000000, y: -1, label: 'Coaching > 100k€' }
-  ];
-
-  function computeYFromRevenue(revenue, product){
-    const r = Number(revenue);
-    const val = Number.isFinite(r) ? r : 0;
-    const bands = (String(product).toLowerCase() === 'coaching') ? Y_BANDS_COACHING : Y_BANDS_LANGUES;
-    for (const b of bands) if (val <= b.max) return b.y;
-    return bands[bands.length - 1].y;
-  }
-
-  function buildYAxisTicks(){
-    const all = [...Y_BANDS_COACHING, ...Y_BANDS_LANGUES].slice().sort((a,b)=>a.y-b.y);
-    const vals = all.map(b=>b.y);
-    const texts = all.map(b=>b.label);
-    return { vals, texts, minY: Math.min(...vals), maxY: Math.max(...vals) };
-  }
-
-  if (USE_AUTO_Y) {
-    for (const d of data) d.y = computeYFromRevenue(d.revenue, d.product);
-  }
-
-  const { vals: yTickVals, texts: yTickText, minY, maxY } = buildYAxisTicks();
-  /* ===================================================================================== */
-
-  function catBadge(cat){
-    if(cat==='CAC 40') return 'b-red';
-    if(cat==='Entreprise privée') return 'b-blue';
-    return 'b-green';
-  }
-
-  function bubbleSizeByCat(cat){
-    if (cat === 'CAC 40') return 27;
-    if (cat === 'Entreprise privée') return 15;
-    return 9;
-  }
-
-  function ownerLabel(d){
-    const o = (d && d.owner != null && String(d.owner).trim() !== '') ? String(d.owner).trim() : 'Owner / BDR manquant';
-    return o;
-  }
-
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-  }
-
-
-
-  /* ============================================================
-     ✅ Gestion locale des données : ajout, const_data, CSV import/export
-     ============================================================ */
-  const AO_STORAGE_KEY = 'ao_dashboard_data_v3';
-  const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','outline','owner','owner_missing','notes'];
-
-  function colorForCategory(cat){
-    if(cat === 'CAC 40') return '#E53935';
-    if(cat === 'Entreprise privée') return '#1E88E5';
-    return '#43A047';
-  }
-
-  function normalizePoint(row){
-    const cat = row.cat || row.category || 'Entreprise privée';
-    const product = row.product || 'Langues';
-    const revenue = Number(row.revenue ?? 0);
-    const year = Number(row.year ?? new Date().getFullYear());
-    const owner = (row.owner == null || String(row.owner).trim() === '') ? null : String(row.owner).trim();
-    return {
-      id: Number(row.id) || nextDataId(),
-      name: String(row.name || row.entreprise || '').trim(),
-      year: Number.isFinite(year) ? year : new Date().getFullYear(),
-      product,
-      revenue: Number.isFinite(revenue) ? revenue : 0,
-      y: computeYFromRevenue(revenue, product),
-      cat,
-      color: row.color || colorForCategory(cat),
-      outline: row.outline || '',
-      owner,
-      owner_missing: (owner == null || String(owner).trim() === ''),
-      notes: row.notes == null ? '' : String(row.notes)
-    };
-  }
-
-  function nextDataId(){
-    return data.reduce((max, d) => Math.max(max, Number(d.id) || 0), 0) + 1;
-  }
-
-  function refreshYearsFromData(){
-    const set = new Set(years);
-    for (const d of data) {
-      const y = Number(d.year);
-      if (Number.isFinite(y)) set.add(y);
-    }
-    years = [...set].sort((a,b)=>a-b);
-  }
-
-  function normalizeAllData(){
-    data = data.map(d => normalizePoint(d)).filter(d => d.name);
-    refreshYearsFromData();
-  }
-
-  function syncYearInputsToData(){
-    const yearMinEl = document.getElementById('yearMin');
-    const yearMaxEl = document.getElementById('yearMax');
-    if (!yearMinEl || !yearMaxEl || !years.length) return;
-    const minDataYear = Math.min(...years);
-    const maxDataYear = Math.max(...years);
-    const currentMin = parseInt(yearMinEl.value, 10);
-    const currentMax = parseInt(yearMaxEl.value, 10);
-    if (Number.isNaN(currentMin) || currentMin > minDataYear) yearMinEl.value = minDataYear;
-    if (Number.isNaN(currentMax) || currentMax < maxDataYear) yearMaxEl.value = maxDataYear;
-  }
-
-  function saveDataToLocalStorage(){
-    try { localStorage.setItem(AO_STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
-  }
-
-  function loadDataFromLocalStorage(){
-    try {
-      const raw = localStorage.getItem(AO_STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length) data = parsed.map(normalizePoint).filter(d => d.name);
-    } catch(e) {
-      console.warn('LocalStorage data ignorée :', e);
-    }
-  }
-
-  function rebuildAfterDataChange({persist=true, message='Données mises à jour.'} = {}){
-    normalizeAllData();
-    syncYearInputsToData();
-    renderOwnerFilters();
-    wireFilterListeners();
-    applyNoOffset(data);
-    if (persist) saveDataToLocalStorage();
-    const st = document.getElementById('dataToolsStatus');
-    if (st) st.textContent = message;
-    updateChart();
-  }
-
-  function downloadTextFile(filename, text, mime='text/plain;charset=utf-8'){
-    const blob = new Blob([text], {type:mime});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
-  function exportConstData(){
-    normalizeAllData();
-    const payload = 'const data = ' + JSON.stringify(data.map(d => ({
-      id:d.id, name:d.name, year:d.year, product:d.product, revenue:d.revenue, y:d.y,
-      cat:d.cat, color:d.color, outline:d.outline || '', owner:d.owner, owner_missing:d.owner_missing, notes:d.notes || ''
-    })), null, 2) + ';\n';
-    downloadTextFile('const_data_AO_dashboard.js', payload, 'application/javascript;charset=utf-8');
-    const st = document.getElementById('dataToolsStatus');
-    if (st) st.textContent = 'Export const_data généré.';
-  }
-
-  function csvEscape(value){
-    if (value == null) return '';
-    const s = String(value);
-    if (/[";\n\r,]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
-    return s;
-  }
-
-  function exportCsv(){
-    normalizeAllData();
-    const rows = [CSV_HEADERS.join(';')].concat(data.map(d => CSV_HEADERS.map(h => csvEscape(d[h])).join(';')));
-    downloadTextFile('ao_dashboard_data.csv', '\ufeff' + rows.join('\n'), 'text/csv;charset=utf-8');
-    const st = document.getElementById('dataToolsStatus');
-    if (st) st.textContent = 'Export CSV généré.';
-  }
-
-  function parseCsvLine(line, delimiter){
-    const out = [];
-    let cur = '';
-    let inQuotes = false;
-    for (let i=0; i<line.length; i++) {
-      const ch = line[i];
-      const next = line[i+1];
-      if (ch === '"' && inQuotes && next === '"') { cur += '"'; i++; continue; }
-      if (ch === '"') { inQuotes = !inQuotes; continue; }
-      if (ch === delimiter && !inQuotes) { out.push(cur); cur = ''; continue; }
-      cur += ch;
-    }
-    out.push(cur);
-    return out;
-  }
-
-  function parseCsv(text){
-    const clean = String(text || '').replace(/^\ufeff/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
-    if (!clean) return [];
-    const lines = clean.split('\n').filter(l => l.trim() !== '');
-    const delimiter = (lines[0].split(';').length >= lines[0].split(',').length) ? ';' : ',';
-    const headers = parseCsvLine(lines[0], delimiter).map(h => h.trim());
-    return lines.slice(1).map(line => {
-      const cells = parseCsvLine(line, delimiter);
-      const obj = {};
-      headers.forEach((h, i) => obj[h] = cells[i] ?? '');
-      return obj;
-    });
-  }
-
-  function upsertImportedRows(rows){
-    let added = 0, updated = 0;
-    rows.map(normalizePoint).filter(d => d.name).forEach(row => {
-      const idxById = data.findIndex(d => Number(d.id) === Number(row.id));
-      const idxByKey = data.findIndex(d => String(d.name).trim().toLowerCase() === row.name.toLowerCase() && Number(d.year) === Number(row.year) && String(d.product) === String(row.product));
-      const idx = idxById >= 0 ? idxById : idxByKey;
-      if (idx >= 0) { data[idx] = {...data[idx], ...row, id: data[idx].id}; updated++; }
-      else { row.id = nextDataId(); data.push(row); added++; }
-    });
-    return {added, updated};
-  }
-
-  async function importCsvFile(file){
-    const text = await file.text();
-    const rows = parseCsv(text);
-    const result = upsertImportedRows(rows);
-    rebuildAfterDataChange({persist:true, message:`Import CSV terminé : ${result.added} ajout(s), ${result.updated} mise(s) à jour.`});
-  }
-
-  function setupTopControls(){
-    function setupCollapsibleSection(sectionId, toggleId, bodyId, defaultOpen=false){
-      const section = document.getElementById(sectionId);
-      const toggle = document.getElementById(toggleId);
-      const body = document.getElementById(bodyId);
-      if (!section || !toggle || !body) return;
-      const arrow = toggle.querySelector('.collapsible-arrow') || toggle.querySelector('span:last-child');
-      function setState(open){
-        section.classList.toggle('open', !!open);
-        body.style.display = open ? 'block' : 'none';
-        if (arrow) arrow.textContent = open ? '▼' : '▶';
-      }
-      setState(defaultOpen);
-      toggle.addEventListener('click', (e)=>{ e.preventDefault(); setState(!section.classList.contains('open')); });
-    }
-
-    setupCollapsibleSection('newCompanySection', 'newCompanyToggle', 'newCompanyBody', false);
-    setupCollapsibleSection('dataToolsSection', 'dataToolsToggle', 'dataToolsBody', false);
-
-    const form = document.getElementById('newCompanyForm');
-    if (form) {
-      const currentYear = new Date().getFullYear();
-      const yearInput = document.getElementById('newCompanyYear');
-      if (yearInput && !yearInput.value) yearInput.value = currentYear;
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const company = normalizePoint({
-          id: nextDataId(),
-          name: document.getElementById('newCompanyName').value,
-          year: document.getElementById('newCompanyYear').value,
-          revenue: document.getElementById('newCompanyRevenue').value || 0,
-          product: document.getElementById('newCompanyProduct').value,
-          cat: document.getElementById('newCompanyCat').value,
-          owner: document.getElementById('newCompanyOwner').value,
-          notes: document.getElementById('newCompanyNotes').value,
-          outline: ''
-        });
-        if (!company.name) return;
-        data.push(company);
-        form.reset();
-        if (yearInput) yearInput.value = currentYear;
-        const st = document.getElementById('newCompanyStatus');
-        if (st) st.textContent = `Entreprise ajoutée : ${company.name}. Pense à exporter const_data ou CSV pour conserver la version.`;
-        rebuildAfterDataChange({persist:true, message:`Entreprise ajoutée : ${company.name}.`});
-      });
-    }
-
-    const exportConstBtn = document.getElementById('exportConstDataBtn');
-    const exportCsvBtn = document.getElementById('exportCsvBtn');
-    const importCsvBtn = document.getElementById('importCsvBtn');
-    const importCsvInput = document.getElementById('importCsvInput');
-    if (exportConstBtn) exportConstBtn.addEventListener('click', exportConstData);
-    if (exportCsvBtn) exportCsvBtn.addEventListener('click', exportCsv);
-    if (importCsvBtn && importCsvInput) importCsvBtn.addEventListener('click', () => importCsvInput.click());
-    if (importCsvInput) importCsvInput.addEventListener('change', async (e) => {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-      try { await importCsvFile(file); }
-      catch(err) {
-        console.error(err);
-        const st = document.getElementById('dataToolsStatus');
-        if (st) st.textContent = 'Erreur import CSV : ' + (err && err.message ? err.message : err);
-      }
-      importCsvInput.value = '';
-    });
-  }
-
-  function makeStandardFiltersCollapsible(){
-    const filters = document.getElementById('filters');
-    if (!filters || filters.dataset.collapsibleReady === '1') return;
-    filters.dataset.collapsibleReady = '1';
-    const blocks = [...filters.children].filter(el => el.tagName === 'DIV' && el.id !== 'ownerFilterSection');
-    blocks.forEach((block, idx) => {
-      const b = block.querySelector('b');
-      const title = b ? b.textContent.trim() : ('Filtre ' + (idx+1));
-      if (b) b.remove();
-      block.classList.add('collapsible-section');
-      const bodyHtml = block.innerHTML;
-      block.innerHTML = `<button type="button" class="collapsible-head"><span>${escapeHtml(title)}</span><span class="collapsible-arrow">▶</span></button><div class="collapsible-body">${bodyHtml}</div>`;
-      const btn = block.querySelector('.collapsible-head');
-      const body = block.querySelector('.collapsible-body');
-      btn.addEventListener('click', () => {
-        const open = block.classList.toggle('open');
-        body.style.display = open ? 'block' : 'none';
-        btn.querySelector('.collapsible-arrow').textContent = open ? '▼' : '▶';
-      });
-    });
-    const ownerSection = document.getElementById('ownerFilterSection');
-    const ownerToggleEl = document.getElementById('ownerToggle');
-    if (ownerSection && ownerToggleEl) {
-      ownerSection.classList.add('collapsible-section');
-      ownerToggleEl.classList.add('collapsible-head');
-    }
-  }
-
-  loadDataFromLocalStorage();
-  normalizeAllData();
-  setupTopControls();
-  makeStandardFiltersCollapsible();
-  // ✅ UI filtre Owner (checkbox)
-  function renderOwnerFilters(){
-    const box = document.getElementById('ownerFilters');
-    const uniq = new Set();
-    for (const d of data) uniq.add(ownerLabel(d));
-    const owners = [...uniq].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'}));
-    box.innerHTML = owners.map(o => {
-      const v = escapeHtml(o);
-      return `<label><input type="checkbox" class="f-owner" value="${v}" checked> ${v}</label>`;
-    }).join('');
-  }
-
-  renderOwnerFilters();
-
-  let ownerOpen = false;
-
-  const ownerToggle = document.getElementById('ownerToggle');
-  const ownerFilters = document.getElementById('ownerFilters');
-  const ownerArrow = document.getElementById('ownerArrow');
-
-const ownerSelectAllBtn = document.getElementById('ownerSelectAllBtn');
-const ownerDeselectAllBtn = document.getElementById('ownerDeselectAllBtn');
-
-function setAllOwnerCheckboxes(checked){
-  document.querySelectorAll('.f-owner').forEach(cb => {
-    cb.checked = checked;
-  });
-  updateChart();
+function escapeHtml(s){ return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+function computeYFromRevenue(revenue, product){ const v = Number.isFinite(Number(revenue)) ? Number(revenue) : 0; const bands = String(product).toLowerCase()==='coaching' ? Y_BANDS_COACHING : Y_BANDS_LANGUES; return (bands.find(b=>v<=b.max) || bands[bands.length-1]).y; }
+function colorForCategory(cat){ return CAT_COLORS[cat] || '#1E88E5'; }
+function ownerLabel(d){ return d && d.owner && String(d.owner).trim() ? String(d.owner).trim() : 'Owner / BDR manquant'; }
+function catBadge(cat){ return cat==='CAC 40'?'b-red':cat==='Entreprise privée'?'b-blue':'b-green'; }
+function bubbleSizeByCat(cat){ return cat==='CAC 40'?27:cat==='Entreprise privée'?15:9; }
+function nextDataId(){ return data.reduce((m,d)=>Math.max(m, Number(d.id)||0),0)+1; }
+function normalizePoint(row){
+  const cat = row.cat || 'Entreprise privée'; const product = row.product || 'Langues'; const revenue = Number(row.revenue ?? 0); const year = Number(row.year ?? new Date().getFullYear()); const owner = row.owner == null || String(row.owner).trim()==='' ? null : String(row.owner).trim();
+  return { id:Number(row.id)||nextDataId(), name:String(row.name||row.entreprise||'').trim(), year:Number.isFinite(year)?year:new Date().getFullYear(), product, revenue:Number.isFinite(revenue)?revenue:0, y:computeYFromRevenue(revenue, product), cat, color:colorForCategory(cat), outline:row.outline||'', owner, owner_missing:!(owner&&String(owner).trim()), notes:row.notes==null?'':String(row.notes) };
 }
+function normalizeAllData(){ data = data.map(normalizePoint).filter(d=>d.name); years = [...new Set(data.map(d=>Number(d.year)).filter(Number.isFinite))].sort((a,b)=>a-b); syncYearInputs(); }
+function saveData(){ try{localStorage.setItem(STORAGE_KEY, JSON.stringify(data));}catch(e){} }
+function loadData(){ try{ const raw=localStorage.getItem(STORAGE_KEY); data = raw ? JSON.parse(raw).map(normalizePoint) : SEED_DATA.map(normalizePoint); }catch(e){ data = SEED_DATA.map(normalizePoint); } normalizeAllData(); }
+function syncYearInputs(){ const min=document.getElementById('yearMin'), max=document.getElementById('yearMax'); if(!min||!max||!years.length)return; if(!min.value || Number(min.value)>Math.min(...years)) min.value=Math.min(...years); if(!max.value || Number(max.value)<Math.max(...years)) max.value=Math.max(...years); }
 
-ownerSelectAllBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  setAllOwnerCheckboxes(true);
-});
-
-ownerDeselectAllBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  setAllOwnerCheckboxes(false);
-});
-
-
-  ownerToggle.addEventListener('click', () => {
-  ownerOpen = !ownerOpen;
-
-  if (ownerOpen) {
-    ownerFilters.style.display = 'block';
-    document.getElementById('ownerBulkActions').style.display = 'flex';
-    ownerArrow.textContent = '▼';
-  } else {
-    ownerFilters.style.display = 'none';
-    document.getElementById('ownerBulkActions').style.display = 'none';
-    ownerArrow.textContent = '▶';
-  }
-});
-
-
-  // ✅ Owner replié par défaut pour gagner de la place
-  ownerFilters.style.display = 'none';
-  document.getElementById('ownerBulkActions').style.display = 'none';
-  ownerArrow.textContent = '▶';
-
-  let listOpen = true;
-
-  const listToggle = document.getElementById('listToggle');
-  const listElContainer = document.getElementById('list');
-  const listArrow = document.getElementById('listArrow');
-
-  listToggle.addEventListener('click', () => {
-    listOpen = !listOpen;
-
-    if (listOpen) {
-      listElContainer.style.display = 'block';
-      listArrow.textContent = '▼';
-    } else {
-      listElContainer.style.display = 'none';
-      listArrow.textContent = '▶';
-    }
-  });
-
-  let showNames = false;
-
-  function applyNoOffset(points){
-  const DX = 0.18;
-
-  const groups = new Map();
-  for (const p of points) {
-    const key = `${p.year}|${p.y}|${p.color}`;
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(p);
-  }
-
-  for (const group of groups.values()) {
-    const n = group.length;
-
-    if (n === 1) {
-      const p = group[0];
-      p.plotYear = p.year;
-      p.plotY    = p.y;
-
-      // valeurs par défaut du label
-      p.labelX   = p.plotYear;
-      p.labelY   = p.plotY;
-      p.textPos  = 'middle center';
-    } else {
-      const startX = -((n - 1) / 2) * DX;
-
-      for (let i = 0; i < n; i++) {
-        const p = group[i];
-        p.plotYear = p.year + (startX + i * DX);
-        p.plotY    = p.y;
-
-        // valeurs par défaut du label
-        p.labelX   = p.plotYear;
-        p.labelY   = p.plotY;
-        p.textPos  = 'middle center';
-      }
-    }
-  }
+function initApp(){
+  if(plotlyReady) return; plotlyReady = true; loadData(); wireUI(); renderOwners(); updateAll();
 }
-
-
-  // init global (sans plotly)
-  applyNoOffset(data);
-
-  function computeLabelFontSize(n){
-    if (n >= 140) return 7;
-    if (n >= 100) return 8;
-    if (n >= 70)  return 9;
-    return 10;
-  }
-
-
-function dataToPixelX(x, xRange, plotWidth){
-  return ((x - xRange[0]) / (xRange[1] - xRange[0])) * plotWidth;
+function wireUI(){
+  document.querySelectorAll('.section-head').forEach(btn=>btn.addEventListener('click', e=>{ if(btn.id==='ownerToggle' || btn.id==='listToggle') return; const sec=btn.closest('.section'); const span=btn.querySelector('span:last-child'); const open=sec.classList.toggle('open'); if(span)span.textContent=open?'▼':'▶'; }));
+  document.getElementById('tabDashboardBtn').onclick=()=>switchTab('dashboard'); document.getElementById('tabListBtn').onclick=()=>switchTab('list');
+  document.getElementById('fsBtn').onclick=()=>{ const p=document.getElementById('chartPanel'); if(document.fullscreenElement) document.exitFullscreen(); else p.requestFullscreen && p.requestFullscreen(); };
+  document.addEventListener('fullscreenchange',()=>{document.getElementById('fsBtn').textContent=document.fullscreenElement?'⤫ Quitter plein écran':'⛶ Plein écran'; setTimeout(resizeChart,60);});
+  window.addEventListener('resize', resizeChart);
+  document.getElementById('labelBtn').onclick=()=>{ showNames=!showNames; document.getElementById('labelBtn').textContent=showNames?'🙈 Masquer les noms':'👁️ Afficher les noms'; updateChart(); };
+  document.querySelectorAll('.f-cat,.f-prod,#yearMin,#yearMax').forEach(el=>el.addEventListener('change', updateAll));
+  document.getElementById('search').addEventListener('input', updateAll);
+  document.getElementById('companyTableSearch').addEventListener('input', renderCompanyTable);
+  document.getElementById('ownerToggle').onclick=()=>{ const s=document.getElementById('ownerFilterSection'); const open=s.classList.toggle('open'); document.getElementById('ownerArrow').textContent=open?'▼':'▶'; };
+  document.getElementById('listToggle').onclick=()=>{ const body=document.getElementById('list'); const open=body.style.display==='none'; body.style.display=open?'block':'none'; document.getElementById('listArrow').textContent=open?'▼':'▶'; };
+  document.getElementById('ownerSelectAllBtn').onclick=()=>{document.querySelectorAll('.f-owner').forEach(cb=>cb.checked=true); updateAll();};
+  document.getElementById('ownerDeselectAllBtn').onclick=()=>{document.querySelectorAll('.f-owner').forEach(cb=>cb.checked=false); updateAll();};
+  document.getElementById('newCompanyYear').value = new Date().getFullYear(); document.getElementById('newCompanyForm').addEventListener('submit', addCompanyFromForm);
+  document.getElementById('exportConstDataBtn').onclick=exportConstData; document.getElementById('exportCsvBtn').onclick=exportCsv; document.getElementById('importCsvBtn').onclick=()=>document.getElementById('importCsvInput').click(); document.getElementById('importCsvInput').addEventListener('change', importCsv);
 }
-
-function dataToPixelY(y, yRange, plotHeight){
-  return plotHeight - ((y - yRange[0]) / (yRange[1] - yRange[0])) * plotHeight;
-}
-
-function pixelToDataX(px, xRange, plotWidth){
-  return xRange[0] + (px / plotWidth) * (xRange[1] - xRange[0]);
-}
-
-function pixelToDataY(py, yRange, plotHeight){
-  return yRange[0] + ((plotHeight - py) / plotHeight) * (yRange[1] - yRange[0]);
-}
-
-function rectsOverlap(a, b, pad = 2){
-  return !(
-    a.right + pad < b.left ||
-    a.left  - pad > b.right ||
-    a.bottom + pad < b.top ||
-    a.top    - pad > b.bottom
-  );
-}
-
-function estimateLabelRect(point, fontSize, centerX, centerY){
-  const text = String(point.name || '');
-  const width = Math.max(28, Math.min(240, text.length * fontSize * 0.58));
-  const height = fontSize + 6;
-
-  return {
-    left: centerX - width / 2,
-    right: centerX + width / 2,
-    top: centerY - height / 2,
-    bottom: centerY + height / 2,
-    width,
-    height
-  };
-}
-
-function applySmartLabelPositions(points, fontSize, xRange, yRange){
-  const plotWidth = Math.max(320, graphDiv.clientWidth - layoutBase.margin.l - layoutBase.margin.r);
-  const plotHeight = Math.max(240, graphDiv.clientHeight - layoutBase.margin.t - layoutBase.margin.b);
-
-  const candidates = [
-    { dx:  0, dy: -14 },
-    { dx:  0, dy:   0 },
-    { dx:  0, dy:  14 },
-
-    { dx: 12, dy: -12 },
-    { dx:-12, dy: -12 },
-    { dx: 12, dy:   0 },
-    { dx:-12, dy:   0 },
-    { dx: 12, dy:  12 },
-    { dx:-12, dy:  12 },
-
-    { dx:  0, dy: -26 },
-    { dx:  0, dy:  26 },
-
-    { dx: 18, dy:  -8 },
-    { dx:-18, dy:  -8 },
-    { dx: 18, dy:   8 },
-    { dx:-18, dy:   8 }
-  ];
-
-  const ordered = points.slice().sort((a, b) => {
-    if (a.plotYear !== b.plotYear) return a.plotYear - b.plotYear;
-    if (a.plotY !== b.plotY) return a.plotY - b.plotY;
-    return String(a.name).localeCompare(String(b.name), 'fr', { sensitivity: 'base' });
-  });
-
-  const placedRects = [];
-
-  for (const p of ordered) {
-    const pointPx = dataToPixelX(p.plotYear, xRange, plotWidth);
-    const pointPy = dataToPixelY(p.plotY, yRange, plotHeight);
-
-    let chosen = null;
-
-    for (const c of candidates) {
-      const cx = pointPx + c.dx;
-      const cy = pointPy + c.dy;
-
-      const rect = estimateLabelRect(p, fontSize, cx, cy);
-      const overlaps = placedRects.some(r => rectsOverlap(rect, r, 2));
-
-      if (!overlaps) {
-        chosen = { cx, cy, rect };
-        break;
-      }
-    }
-
-    if (!chosen) {
-      for (let step = 1; step <= 4; step++) {
-        const extra = 26 + step * 10;
-
-        const fallbackPositions = [
-          { dx: 0, dy: -extra },
-          { dx: 0, dy:  extra },
-          { dx: 12, dy: -extra },
-          { dx:-12, dy: -extra },
-          { dx: 12, dy:  extra },
-          { dx:-12, dy:  extra }
-        ];
-
-        for (const c of fallbackPositions) {
-          const cx = pointPx + c.dx;
-          const cy = pointPy + c.dy;
-
-          const rect = estimateLabelRect(p, fontSize, cx, cy);
-          const overlaps = placedRects.some(r => rectsOverlap(rect, r, 2));
-
-          if (!overlaps) {
-            chosen = { cx, cy, rect };
-            break;
-          }
-        }
-
-        if (chosen) break;
-      }
-    }
-
-    if (!chosen) {
-      const rect = estimateLabelRect(p, fontSize, pointPx, pointPy);
-      chosen = { cx: pointPx, cy: pointPy, rect };
-    }
-
-    p.labelX = pixelToDataX(chosen.cx, xRange, plotWidth);
-    p.labelY = pixelToDataY(chosen.cy, yRange, plotHeight);
-    p.textPos = 'middle center';
-
-    placedRects.push(chosen.rect);
-  }
-}
-
-
-  function getFilterState(){
-    const q = document.getElementById('search').value.trim().toLowerCase();
-    const selectedCats = [...document.querySelectorAll('.f-cat:checked')].map(e=>e.value);
-    const selectedProds = [...document.querySelectorAll('.f-prod:checked')].map(e=>e.value);
-    const selectedOwners = [...document.querySelectorAll('.f-owner:checked')].map(e=>e.value);
-
-    let yearMin = parseInt(document.getElementById('yearMin').value,10);
-    let yearMax = parseInt(document.getElementById('yearMax').value,10);
-    if (Number.isNaN(yearMin)) yearMin = Math.min(...years);
-    if (Number.isNaN(yearMax)) yearMax = Math.max(...years);
-    if (yearMin > yearMax) { const t = yearMin; yearMin = yearMax; yearMax = t; }
-
-    return { q, selectedCats, selectedProds, selectedOwners, yearMin, yearMax };
-  }
-
-  function getFilteredPoints(){
-    const { q, selectedCats, selectedProds, selectedOwners, yearMin, yearMax } = getFilterState();
-    return data.filter(d =>
-      (!q || d.name.toLowerCase().includes(q)) &&
-      selectedCats.includes(d.cat) &&
-      selectedProds.includes(d.product) &&
-      selectedOwners.includes(ownerLabel(d)) &&
-      d.year >= yearMin &&
-      d.year <= yearMax
-    );
-  }
-
-  function renderListFromPoints(points, filterText=''){
-    const el = document.getElementById('list');
-    el.innerHTML = '';
-    const q = filterText.trim().toLowerCase();
-
-    (points || [])
-      .filter(d => (!q || d.name.toLowerCase().includes(q)))
-      .sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}))
-      .forEach(d=>{
-        const div=document.createElement('div');
-        div.className='item';
-        const own = ownerLabel(d);
-
-        div.innerHTML = `
-          <div>
-            <b>${escapeHtml(d.name)}</b>
-            <span class="badge ${catBadge(d.cat)}">${escapeHtml(d.cat)}</span>
-          </div>
-          <div class="small">
-            ${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(own)}
-          </div>
-        `;
-        div.onmouseenter=()=>highlight(d.id);
-        div.onclick=()=>selectCompany(d.id);
-        el.appendChild(div);
-      });
-  }
-
-
-
-  /* ============================================================
-     ✅ Sélection + fiche éditable + onglet liste complète
-     ============================================================ */
-  let selectedCompanyId = null;
-
-  function getCompanyById(id){
-    return data.find(d => Number(d.id) === Number(id));
-  }
-
-  function switchTab(tabName){
-    const isList = tabName === 'list';
-    document.getElementById('tabDashboard').classList.toggle('active', !isList);
-    document.getElementById('tabList').classList.toggle('active', isList);
-    document.getElementById('tabDashboardBtn').classList.toggle('active', !isList);
-    document.getElementById('tabListBtn').classList.toggle('active', isList);
-    if (isList) renderCompanyTable();
-    setTimeout(() => safeResize(), 50);
-  }
-
-  function renderAllCompanyEditors(){
-    renderCompanyEditor('companyEditor', selectedCompanyId, 'dash');
-    renderCompanyEditor('companyEditorList', selectedCompanyId, 'list');
-    markSelectedTableRow();
-  }
-
-  function renderCompanyEditor(containerId, id, prefix){
-    const box = document.getElementById(containerId);
-    if (!box) return;
-    const d = getCompanyById(id);
-    if (!d) {
-      box.classList.remove('open');
-      box.innerHTML = '<div class="secondary-mini-note">Clique sur une entreprise pour ouvrir sa fiche.</div>';
-      return;
-    }
-    box.classList.add('open');
-    box.innerHTML = `
-      <h3>Fiche entreprise<br><span style="font-weight:600;color:#555;">${escapeHtml(d.name)}</span></h3>
-      <form id="${prefix}CompanyEditForm">
-        <label>Entreprise</label>
-        <input id="${prefix}EditName" value="${escapeHtml(d.name)}" />
-        <div class="editor-row2">
-          <div>
-            <label>Année</label>
-            <input id="${prefix}EditYear" type="number" value="${Number(d.year) || ''}" />
-          </div>
-          <div>
-            <label>Estimated €</label>
-            <input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${Number(d.revenue) || 0}" />
-          </div>
-        </div>
-        <label>Produit</label>
-        <select id="${prefix}EditProduct">
-          <option value="Langues" ${d.product === 'Langues' ? 'selected' : ''}>Langues</option>
-          <option value="Coaching" ${d.product === 'Coaching' ? 'selected' : ''}>Coaching</option>
-        </select>
-        <label>Catégorie</label>
-        <select id="${prefix}EditCat">
-          <option value="CAC 40" ${d.cat === 'CAC 40' ? 'selected' : ''}>CAC 40</option>
-          <option value="Entreprise privée" ${d.cat === 'Entreprise privée' ? 'selected' : ''}>Entreprise privée</option>
-          <option value="Ecoles / Public / UE" ${d.cat === 'Ecoles / Public / UE' ? 'selected' : ''}>Ecoles / Public / UE</option>
-        </select>
-        <label>Owner / BDR</label>
-        <input id="${prefix}EditOwner" value="${escapeHtml(d.owner || '')}" />
-        <label>Notes</label>
-        <textarea id="${prefix}EditNotes" placeholder="Notes libres…">${escapeHtml(d.notes || '')}</textarea>
-        <div class="editor-actions">
-          <button type="submit" class="editor-save">Enregistrer</button>
-          <button type="button" id="${prefix}EditClose" class="editor-close">Fermer</button>
-        </div>
-      </form>
-    `;
-    const form = document.getElementById(`${prefix}CompanyEditForm`);
-    const closeBtn = document.getElementById(`${prefix}EditClose`);
-    if (form) {
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        saveCompanyEditor(prefix, d.id);
-      });
-    }
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => {
-        selectedCompanyId = null;
-        renderAllCompanyEditors();
-        clearHighlight();
-      });
-    }
-  }
-
-  function saveCompanyEditor(prefix, id){
-    const d = getCompanyById(id);
-    if (!d) return;
-    d.name = document.getElementById(`${prefix}EditName`).value.trim();
-    d.year = Number(document.getElementById(`${prefix}EditYear`).value) || new Date().getFullYear();
-    d.revenue = Number(document.getElementById(`${prefix}EditRevenue`).value || 0);
-    d.product = document.getElementById(`${prefix}EditProduct`).value;
-    d.cat = document.getElementById(`${prefix}EditCat`).value;
-    d.color = colorForCategory(d.cat);
-    d.owner = document.getElementById(`${prefix}EditOwner`).value.trim() || null;
-    d.owner_missing = !(d.owner && String(d.owner).trim());
-    d.notes = document.getElementById(`${prefix}EditNotes`).value;
-    d.y = computeYFromRevenue(d.revenue, d.product);
-    selectedCompanyId = d.id;
-    rebuildAfterDataChange({persist:true, message:`Fiche mise à jour : ${d.name}.`});
-    renderAllCompanyEditors();
-    renderCompanyTable();
-    highlight(d.id);
-  }
-
-  function selectCompany(id, options={}){
-    selectedCompanyId = Number(id);
-    renderAllCompanyEditors();
-    highlight(id);
-    if (options.switchToList) switchTab('list');
-  }
-
-  function renderCompanyTable(){
-    const wrap = document.getElementById('companyTableWrap');
-    if (!wrap) return;
-    const input = document.getElementById('companyTableSearch');
-    const q = input ? input.value.trim().toLowerCase() : '';
-    const rows = data.slice()
-      .filter(d => !q || [d.name,d.product,d.cat,d.owner,d.year,d.revenue,d.notes].some(v => String(v ?? '').toLowerCase().includes(q)))
-      .sort((a,b)=>String(a.name).localeCompare(String(b.name),'fr',{sensitivity:'base'}));
-    wrap.innerHTML = `
-      <table class="company-table">
-        <thead>
-          <tr>
-            <th>Entreprise</th><th>Année</th><th>Produit</th><th>Estimated €</th><th>Catégorie</th><th>Owner / BDR</th><th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows.map(d => `
-            <tr data-company-id="${d.id}" class="${Number(d.id) === Number(selectedCompanyId) ? 'selected' : ''}">
-              <td><b>${escapeHtml(d.name)}</b></td>
-              <td>${escapeHtml(d.year)}</td>
-              <td>${escapeHtml(d.product)}</td>
-              <td>${Math.round(Number(d.revenue)||0).toLocaleString('fr-FR')} €</td>
-              <td>${escapeHtml(d.cat)}</td>
-              <td>${escapeHtml(ownerLabel(d))}</td>
-              <td class="notes-cell">${escapeHtml(d.notes || '')}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
-    wrap.querySelectorAll('tr[data-company-id]').forEach(tr => {
-      tr.addEventListener('click', () => selectCompany(tr.dataset.companyId));
-    });
-  }
-
-  function markSelectedTableRow(){
-    document.querySelectorAll('tr[data-company-id]').forEach(tr => {
-      tr.classList.toggle('selected', Number(tr.dataset.companyId) === Number(selectedCompanyId));
-    });
-  }
-
-  function setupTabsAndTable(){
-    const dashBtn = document.getElementById('tabDashboardBtn');
-    const listBtn = document.getElementById('tabListBtn');
-    const tableSearch = document.getElementById('companyTableSearch');
-    if (dashBtn) dashBtn.addEventListener('click', () => switchTab('dashboard'));
-    if (listBtn) listBtn.addEventListener('click', () => switchTab('list'));
-    if (tableSearch) tableSearch.addEventListener('input', renderCompanyTable);
-    renderCompanyTable();
-    renderAllCompanyEditors();
-  }
-
-  setupTabsAndTable();
-
-    // ✅ Lecture robuste des ranges envoyées par plotly_relayout
-  function extractAxisRange(ev, axisName){
-    const k0 = `${axisName}.range[0]`;
-    const k1 = `${axisName}.range[1]`;
-    if (ev && ev[k0] != null && ev[k1] != null) return [Number(ev[k0]), Number(ev[k1])];
-
-    const k = `${axisName}.range`;
-    if (ev && Array.isArray(ev[k]) && ev[k].length === 2) return [Number(ev[k][0]), Number(ev[k][1])];
-
-    const ka = `${axisName}.autorange`;
-    if (ev && ev[ka]) return null;
-
-    return undefined;
-  }
-
-  function buildMarkerTrace(cat, ptsAll){
-    const pts = (ptsAll || data).filter(d=>d.cat===cat);
-    return {
-      type:'scatter',
-      mode:'markers',
-      name:cat,
-      showlegend:false,
-      legendgroup: cat,
-      x: pts.map(p=>p.plotYear),
-      y: pts.map(p=>p.plotY),
-      text: pts.map(p=>p.name),
-      customdata: pts.map(p => [p.product, p.revenue, p.year, ownerLabel(p), p.id]),
-      hovertemplate:
-        '<b>%{text}</b><br>' +
-        'Année : %{customdata[2]}<br>' +
-        'Produit : %{customdata[0]}<br>' +
-        'Estimated revenue : %{customdata[1]:,.0f} €<br>' +
-        'Owner / BDR : %{customdata[3]}' +
-        '<extra></extra>',
-      marker: {
-        size: pts.map(p => bubbleSizeByCat(p.cat)),
-        color: pts.map(p=>p.color),
-        opacity: 1,
-        line: { width: 1, color: '#111111' }
-      }
-    };
-  }
-
-  function buildTextTrace(cat, ptsAll){
-    const ptsAllArr = (ptsAll || data);
-    const pts = ptsAllArr.filter(d=>d.cat===cat);
-    const fontSize = computeLabelFontSize(ptsAllArr.length);
-    return {
-      type:'scatter',
-      mode:'text',
-      name:cat + ' (labels)',
-      showlegend:false,
-      legendgroup: cat,
-      hoverinfo:'skip',
-      x: pts.map(p=>p.labelX ?? p.plotYear),
-      y:pts.map(p=>p.labelY??p.plotY),
-      text: pts.map(p=>p.name),
-      textposition: pts.map(p=>p.textPos),
-      textfont:{size:fontSize, color:'#111', family:'Segoe UI, Arial'},
-      cliponaxis:false,
-      visible: showNames
-    };
-  }
-
-  function isCategoryChecked(cat){
-    const cb = [...document.querySelectorAll('.f-cat')].find(el => el.value === cat);
-    return !!(cb && cb.checked);
-  }
-
-  function buildLegendProxy(name, color){
-    const active = isCategoryChecked(name);
-
-    return {
-      type:'scatter',
-      mode:'markers',
-      name,
-      legendgroup: name,
-      showlegend:true,
-      hoverinfo:'skip',
-      x:[null],
-      y:[null],
-      marker:{
-        size:12,
-        color:color,
-        opacity: active ? 1 : 0.25,
-        line:{ width:1, color:'#111111' }
-      }
-    };
-  }
-
-  function toggleCategoryCheckbox(cat){
-    const cb = [...document.querySelectorAll('.f-cat')].find(el => el.value === cat);
-    if (!cb) return false;
-
-    cb.checked = !cb.checked;
-    return true;
-  }
-
-
-  // Trace highlight (anneau)
-  const traceHi = {
-    type:'scatter',
-    mode:'markers',
-    showlegend:false,
-    x:[null],
-    y:[null],
-    hoverinfo:'skip',
-    marker:{ size:[46], color:['#ffffff'], opacity:0.0, line:{ color:'#111111', width:4 } }
-  };
-
-  const layoutBase = {
-    uirevision: 'keep',
-    margin:{l:110,r:30,t:40,b:45},
-    paper_bgcolor:'#ffffff',
-    plot_bgcolor:'#ffffff',
-    xaxis:{
-      title:'Année',
-      tickmode:'array',
-      tickvals: years,
-      ticktext: years.map(String)
-    },
-    yaxis:{
-      title:'Produit + Estimated €',
-      tickmode:'array',
-      tickvals: yTickVals,
-      ticktext: yTickText,
-      zeroline:true,
-      zerolinecolor:'#9e9e9e',
-      zerolinewidth:2,
-      gridwidth: 1.5,
-      gridcolor: 'rgba(0,0,0,0.08)',
-      range:[minY - 0.8, maxY + 0.8],
-      dtick:1,
-      automargin: true
-    },
-    legend:{
-      orientation:'h',
-      yanchor:'bottom',
-      y:1.02,
-      xanchor:'left',
-      x:-0.1,
-      font: {color:'#444'},
-      bgcolor: 'rgba(255,255,255,0)',
-      borderwidth: 0,
-      itemsizing: 'constant',
-      itemwidth: 60
-    },
-    annotations: [{
-      xref:'paper', yref:'paper',
-      x:0.01, y:0.99,
-      xanchor:'left', yanchor:'top',
-      text:'',
-      showarrow:false,
-      align:'left',
-      bgcolor:'rgba(255,255,255,0.96)',
-      bordercolor:'rgba(0,0,0,0.18)',
-      borderwidth:1,
-      borderpad:8,
-      font:{size:12, color:'#111', family:'Segoe UI, Arial'},
-      visible:false
-    }]
-  };
-
-  // Indices stables car ordre stable
-  const IDX_HI = 6;
-
-  // ✅ state zoom courant (pour filtrer la liste selon fenêtre visible)
-  let currentRanges = { xr: null, yr: null };
-
-  // ✅ dernier set affiché (utile pour highlight fiable)
-  let lastPts = [];
-  let lastPtsById = new Map();
-
-  function setInfoBox(html, visible){
-    if (!canUsePlotly()) return;
-    Plotly.relayout('chart', {
-      'annotations[0].text': html || '',
-      'annotations[0].visible': !!visible
-    });
-  }
-
-  function updateLastPts(pts){
-    lastPts = pts.slice();
-    lastPtsById = new Map(pts.map(p => [p.id, p]));
-  }
-
-  function updateListAccordingToView(){
-    const searchEl = document.getElementById('search');
-    const base = getFilteredPoints();
-
-    // s'assurer qu'on a plotYear/plotY sur base
-    applyNoOffset(base);
-
-    const xr = currentRanges.xr;
-    const yr = currentRanges.yr;
-
-    let visible = base;
-
-    if (xr || yr) {
-      const xMin = xr ? Math.min(xr[0], xr[1]) : null;
-      const xMax = xr ? Math.max(xr[0], xr[1]) : null;
-      const yMin = yr ? Math.min(yr[0], yr[1]) : null;
-      const yMax = yr ? Math.max(yr[0], yr[1]) : null;
-
-      visible = base.filter(p => {
-        const x = (p.plotYear ?? p.year);
-        const y = (p.plotY ?? p.y);
-
-        const inX = (xr == null) ? true : (x >= xMin && x <= xMax);
-        const inY = (yr == null) ? true : (y >= yMin && y <= yMax);
-        return inX && inY;
-      });
-    }
-
-    renderListFromPoints(visible, searchEl.value);
-  }
-
-  function highlight(id){
-    if (!canUsePlotly()) return;
-
-    // priorité au point réellement affiché (post-offset)
-    let d = lastPtsById.get(id);
-    if (!d) d = data.find(x => x.id === id);
-    if(!d) return;
-
-    const own = ownerLabel(d);
-    const html =
-      `<b>${escapeHtml(d.name)}</b><br>` +
-      `${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(own)}`;
-
-    Plotly.restyle('chart',
-      {
-        x: [[d.plotYear ?? d.year]],
-        y: [[d.plotY ?? d.y]],
-        'marker.color': [[d.color]],
-        'marker.size': [[46]],
-        'marker.opacity': [[0.98]],
-        'marker.line.color': [['#111111']],
-        'marker.line.width': [[4]]
-      },
-      [IDX_HI]
-    );
-
-    setInfoBox(html, true);
-  }
-
-  function clearHighlight(){
-    if (!canUsePlotly()) return;
-    Plotly.restyle('chart', {x:[null], y:[null], 'marker.opacity':[0.0]}, [IDX_HI]);
-    setInfoBox('', false);
-  }
-
-  function updateChart(){
-  if (!canUsePlotly()) return;
-
-  const pts = getFilteredPoints();
-
-  // 1) On place d'abord les bulles
-  applyNoOffset(pts);
-  updateLastPts(pts);
-
-  const { yearMin, yearMax } = getFilterState();
-
-  // 2) On détermine les ranges visibles du graphique
-  const xRangeForLabels = currentRanges.xr
-    ? [Math.min(currentRanges.xr[0], currentRanges.xr[1]), Math.max(currentRanges.xr[0], currentRanges.xr[1])]
-    : [yearMin - 1.6, yearMax + 1.6];
-
-  const yRangeForLabels = currentRanges.yr
-    ? [Math.min(currentRanges.yr[0], currentRanges.yr[1]), Math.max(currentRanges.yr[0], currentRanges.yr[1])]
-    : [minY - 0.8, maxY + 0.8];
-
-  // 3) Taille actuelle des labels
-  const fontSize = computeLabelFontSize(pts.length);
-
-  // 4) Positionnement intelligent des labels
-  applySmartLabelPositions(pts, fontSize, xRangeForLabels, yRangeForLabels);
-
-  const tMkGreen = buildMarkerTrace('Ecoles / Public / UE', pts);
-  const tMkRed   = buildMarkerTrace('CAC 40', pts);
-  const tMkBlue  = buildMarkerTrace('Entreprise privée', pts);
-
-  const tTxGreen = buildTextTrace('Ecoles / Public / UE', pts);
-  const tTxRed   = buildTextTrace('CAC 40', pts);
-  const tTxBlue  = buildTextTrace('Entreprise privée', pts);
-
- const legGreen = buildLegendProxy('Ecoles / Public / UE', '#43A047');
-  const legRed   = buildLegendProxy('CAC 40', '#E53935');
-  const legBlue  = buildLegendProxy('Entreprise privée', '#1E88E5');
-
-
-  // ✅ si l'utilisateur est zoomé, on ne force pas le range x
-  const layoutDyn = {
-    ...layoutBase,
-    xaxis: {
-      ...layoutBase.xaxis,
-      ...(currentRanges.xr ? {} : { range: [yearMin - 1.6, yearMax + 1.6] })
-    }
-  };
-
-  Plotly.react(
-    'chart',
-    [
-      tMkGreen, legGreen,
-      tMkRed,   legRed,
-      tMkBlue,  legBlue,
-      traceHi,
-      tTxGreen, tTxRed, tTxBlue
-    ],
-    layoutDyn,
-    {displaylogo:false, responsive:true}
-  );
-
-  clearHighlight();
-  updateListAccordingToView();
-}
-
-  const graphDiv = document.getElementById('chart');
-
-  // ✅ Plein écran (sécurisé)
-  const chartPanel = document.getElementById('chartPanel');
-  const fsBtn = document.getElementById('fsBtn');
-
-  function setFsLabel(){
-    fsBtn.textContent = document.fullscreenElement ? '⤫ Quitter plein écran' : '⛶ Plein écran';
-  }
-
-  fsBtn.addEventListener('click', () => {
-    try {
-      if (document.fullscreenElement) document.exitFullscreen();
-      else (chartPanel.requestFullscreen ? chartPanel.requestFullscreen() : (chartPanel.webkitRequestFullscreen && chartPanel.webkitRequestFullscreen()));
-    } catch(e) {
-      // si bloqué (preview), on ne casse rien
-    }
-  });
-
-  // ✅ Search + filtres
-  const searchEl = document.getElementById('search');
-  const listEl = document.getElementById('list');
-
-  searchEl.addEventListener('input', () => {
-    updateChart();
-  });
-
-  listEl.addEventListener('mouseleave', () => clearHighlight());
-
-  function wireFilterListeners(){  
-    document  
-      .querySelectorAll('.f-cat, .f-prod, .f-owner, #yearMin, #yearMax')  
-      .forEach(el => {  
-        if (el.dataset.wiredFilter === '1') return;  
-        el.dataset.wiredFilter = '1';  
-        el.addEventListener('change', () => {  
-          updateChart();  
-        });  
-      });  
-  }
-
-  wireFilterListeners();
-
-  // ✅ Toggle labels
-  const labelBtn = document.getElementById('labelBtn');
-
-  function setLabelBtn(){
-    labelBtn.textContent = showNames ? '🙈 Masquer les noms' : '👁️ Afficher les noms';
-  }
-
-  labelBtn.addEventListener('click', () => {
-    showNames = !showNames;
-    setLabelBtn();
-    updateChart();
-    safeResize();
-  });
-
-  setLabelBtn();
-
-  // ============================================================
-  // ✅ INIT Plotly ROBUSTE (attend Plotly + timeout + branchements)
-  // ============================================================
-  function waitForPlotlyAndInit() {
-    const START = Date.now();
-    const MAX_WAIT_MS = 12000; // timeout robuste
-
-    (function tick(){
-      if (typeof Plotly !== "undefined") {
-        // Plotly présent → on init
-        Plotly.newPlot('chart', [], layoutBase, {displaylogo:false, responsive:true})
-          .then(() => {
-            plotlyReady = true;
-
-            // Info source Plotly
-            const src = window.__PLOTLY_LOAD_SOURCE__ || "unknown";
-            if (src === "local") {
-              // Optionnel : message discret
-              console.log("ℹ Plotly source : LOCAL (offline)");
-            } else if (src === "cdn") {
-              console.log("ℹ Plotly source : CDN");
-            }
-
-            // ✅ Brancher les events Plotly UNIQUEMENT maintenant (sinon crash)
-            graphDiv.on('plotly_relayout', (ev) => {
-              const xr = extractAxisRange(ev, 'xaxis');
-              const yr = extractAxisRange(ev, 'yaxis');
-
-              // Reset (double-clic)
-              if ((ev && ev['xaxis.autorange']) || (ev && ev['yaxis.autorange'])) {
-                currentRanges = { xr: null, yr: null };
-                updateListAccordingToView();
-                return;
-              }
-
-              // Si pas d'info de range, on ignore
-              const hasRangeInfo = (xr !== undefined) || (yr !== undefined);
-              if (!hasRangeInfo) return;
-
-              // xr/yr peuvent être null (autorange)
-              currentRanges = {
-                xr: (xr === undefined ? currentRanges.xr : xr),
-                yr: (yr === undefined ? currentRanges.yr : yr)
-              };
-
-              updateListAccordingToView();
-            });
-
-graphDiv.on('plotly_legendclick', (ev) => {
-  const trace =
-    (ev && ev.data && typeof ev.curveNumber === 'number')
-      ? ev.data[ev.curveNumber]
-      : null;
-
-  const cat = trace ? (trace.legendgroup || trace.name) : null;
-  if (!cat) return false;
-
-  const changed = toggleCategoryCheckbox(cat);
-  if (!changed) return false;
-
-  clearHighlight();
-  updateChart();
-
-  // on bloque le comportement natif de Plotly
-  return false;
-});
-
-            graphDiv.on('plotly_legenddoubleclick', () => {
-              // ⛔ on bloque aussi le double-clic Plotly
-              // (qui isole normalement une seule catégorie)
-              return false;
-            });
-
-            graphDiv.on('plotly_click', (ev) => {
-              const pt = ev && ev.points && ev.points[0];
-              const id = pt && pt.customdata ? pt.customdata[4] : null;
-              if (id != null) selectCompany(id);
-            });
-
-            // Fullscreen change → resize Plotly
-            document.addEventListener('fullscreenchange', () => {
-              setFsLabel();
-              safeResize();
-            });
-
-            window.addEventListener('resize', () => safeResize());
-            setFsLabel();
-
-            // ✅ first render
-            updateChart();
-          })
-          .catch((e) => {
-            showHardError(
-              "❌ <b>Erreur Plotly</b> : impossible d’initialiser le graphique.<br>" +
-              "Détail : <code>" + escapeHtml(String(e && e.message ? e.message : e)) + "</code>"
-            );
-          });
-        return;
-      }
-
-      // Timeout
-      if (Date.now() - START > MAX_WAIT_MS) {
-        showHardError(
-          "❌ <b>Plotly non chargé</b> après attente.<br>" +
-          "👉 Vérifie si le réseau/proxy bloque le CDN.<br>" +
-          "✅ Recommandé : placer <b>plotly-2.27.0.min.js</b> dans le même dossier (mode offline)."
-        );
-        return;
-      }
-
-      // retry
-      setTimeout(tick, 100);
-    })();
-  }
-
-  waitForPlotlyAndInit();
-
+function switchTab(tab){ const list=tab==='list'; document.getElementById('tabDashboard').classList.toggle('active',!list); document.getElementById('tabList').classList.toggle('active',list); document.getElementById('tabDashboardBtn').classList.toggle('active',!list); document.getElementById('tabListBtn').classList.toggle('active',list); if(list) renderCompanyTable(); setTimeout(resizeChart,60); }
+function resizeChart(){ if(window.Plotly) try{Plotly.Plots.resize('chart');}catch(e){} }
+function getFilterState(){ const q=document.getElementById('search').value.trim().toLowerCase(); const cats=[...document.querySelectorAll('.f-cat:checked')].map(e=>e.value); const prods=[...document.querySelectorAll('.f-prod:checked')].map(e=>e.value); const owners=[...document.querySelectorAll('.f-owner:checked')].map(e=>e.value); let yMin=parseInt(document.getElementById('yearMin').value,10), yMax=parseInt(document.getElementById('yearMax').value,10); if(Number.isNaN(yMin)) yMin=Math.min(...years); if(Number.isNaN(yMax)) yMax=Math.max(...years); if(yMin>yMax){const t=yMin;yMin=yMax;yMax=t;} return {q,cats,prods,owners,yMin,yMax}; }
+function filteredData(){ const f=getFilterState(); return data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); }
+function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.map(ownerLabel))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); }
+function updateAll(){ normalizeAllData(); renderList(); renderCompanyTable(); renderEditors(); updateChart(); saveData(); }
+function renderList(){ const pts=filteredData().sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'})); document.getElementById('list').innerHTML=pts.map(d=>`<div class="item ${Number(d.id)===Number(selectedCompanyId)?'selected':''}" data-id="${d.id}"><div><b>${escapeHtml(d.name)}</b><span class="badge ${catBadge(d.cat)}">${escapeHtml(d.cat)}</span></div><div class="small">${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(ownerLabel(d))}${d.notes?`<br><span style="color:#666">📝 ${escapeHtml(d.notes).slice(0,90)}</span>`:''}</div></div>`).join(''); document.querySelectorAll('#list .item').forEach(el=>el.addEventListener('click',()=>selectCompany(el.dataset.id))); }
+function renderCompanyTable(){ const wrap=document.getElementById('companyTableWrap'); if(!wrap) return; const q=(document.getElementById('companyTableSearch').value||'').trim().toLowerCase(); const rows=data.slice().filter(d=>!q||[d.name,d.year,d.product,d.revenue,d.cat,d.owner,d.notes].some(v=>String(v??'').toLowerCase().includes(q))).sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'})); wrap.innerHTML=`<table class="company-table"><thead><tr><th>Entreprise</th><th>Année</th><th>Produit</th><th>Estimated €</th><th>Catégorie</th><th>Owner / BDR</th><th>Notes</th></tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" class="${Number(d.id)===Number(selectedCompanyId)?'selected':''}"><td><b>${escapeHtml(d.name)}</b></td><td>${d.year}</td><td>${escapeHtml(d.product)}</td><td>${Math.round(d.revenue).toLocaleString('fr-FR')} €</td><td>${escapeHtml(d.cat)}</td><td>${escapeHtml(ownerLabel(d))}</td><td class="notes-cell">${escapeHtml(d.notes||'')}</td></tr>`).join('')}</tbody></table>`; wrap.querySelectorAll('tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>selectCompany(tr.dataset.id))); }
+function updateChart(){ if(!window.Plotly || !plotlyReady) return; const pts=filteredData(); const groups=new Map(); pts.forEach(p=>{p.plotYear=p.year; p.plotY=p.y; const k=p.year+'|'+p.y+'|'+p.color; if(!groups.has(k))groups.set(k,[]); groups.get(k).push(p);}); groups.forEach(g=>{ const dx=.18; const start=-((g.length-1)/2)*dx; g.forEach((p,i)=>p.plotYear=p.year+start+i*dx);}); const traces=[]; CAT_ORDER.forEach(cat=>{ const cpts=pts.filter(p=>p.cat===cat); traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:false,x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),customdata:cpts.map(p=>[p.id,p.product,p.revenue,p.year,ownerLabel(p),p.notes||'']),hovertemplate:'<b>%{text}</b><br>Année : %{customdata[3]}<br>Produit : %{customdata[1]}<br>Estimated revenue : %{customdata[2]:,.0f} €<br>Owner / BDR : %{customdata[4]}<extra></extra>',marker:{size:cpts.map(p=>bubbleSizeByCat(p.cat)),color:cpts.map(p=>p.color),opacity:1,line:{width:1,color:'#111'}}}); traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:true,hoverinfo:'skip',x:[null],y:[null],marker:{size:12,color:colorForCategory(cat),line:{width:1,color:'#111'}}}); }); if(showNames){ CAT_ORDER.forEach(cat=>{ const cpts=pts.filter(p=>p.cat===cat); traces.push({type:'scatter',mode:'text',showlegend:false,hoverinfo:'skip',x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),textfont:{size:pts.length>100?8:10,color:'#000'},textposition:'top center'}); }); } traces.push({type:'scatter',mode:'markers',showlegend:false,hoverinfo:'skip',x:[null],y:[null],marker:{size:[46],color:['#fff'],opacity:0,line:{color:'#000',width:4}}}); const ticks=[...Y_BANDS_COACHING,...Y_BANDS_LANGUES].sort((a,b)=>a.y-b.y); const f=getFilterState(); Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:40,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-1.6,f.yMax+1.6]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.8,5.8],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},legend:{orientation:'h',y:1.02,x:-.1},font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true}); const gd=document.getElementById('chart'); gd.removeAllListeners && gd.removeAllListeners('plotly_click'); gd.on && gd.on('plotly_click', ev=>{ const pt=ev&&ev.points&&ev.points[0]; const id=pt&&pt.customdata?pt.customdata[0]:null; if(id!=null) selectCompany(id); }); }
+function selectCompany(id){ selectedCompanyId=Number(id); renderList(); renderCompanyTable(); renderEditors(); highlightCompany(id); }
+function highlightCompany(id){ if(!window.Plotly||!plotlyReady)return; const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return; Plotly.relayout('chart', {'annotations[0].text':`<b>${escapeHtml(d.name)}</b><br>${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(ownerLabel(d))}`,'annotations[0].visible':true}); }
+function renderEditors(){ ['companyEditor','companyEditorList'].forEach((cid,idx)=>renderEditor(cid, idx?'list':'dash')); }
+function renderEditor(containerId,prefix){ const box=document.getElementById(containerId); if(!box)return; const d=data.find(x=>Number(x.id)===Number(selectedCompanyId)); if(!d){ box.classList.remove('open'); box.innerHTML='<div class="mini-note">Clique sur une entreprise pour ouvrir sa fiche.</div>'; return;} box.classList.add('open'); box.innerHTML=`<h3>Fiche entreprise<br><span style="font-weight:600;color:#444">${escapeHtml(d.name)}</span></h3><form id="${prefix}EditForm"><div class="field-label">Entreprise</div><input id="${prefix}EditName" type="text" value="${escapeHtml(d.name)}"><div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div><div class="field-label">Produit</div><select id="${prefix}EditProduct"><option ${d.product==='Langues'?'selected':''}>Langues</option><option ${d.product==='Coaching'?'selected':''}>Coaching</option></select><div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='Entreprise privée'?'selected':''}>Entreprise privée</option><option ${d.cat==='Ecoles / Public / UE'?'selected':''}>Ecoles / Public / UE</option></select><div class="field-label">Owner / BDR</div><input id="${prefix}EditOwner" type="text" value="${escapeHtml(d.owner||'')}"><div class="field-label">Notes</div><textarea id="${prefix}EditNotes">${escapeHtml(d.notes||'')}</textarea><div class="editor-actions"><button type="submit" class="editor-save">Enregistrer</button><button type="button" id="${prefix}EditClose" class="editor-close">Fermer</button></div></form>`; document.getElementById(`${prefix}EditForm`).onsubmit=e=>{e.preventDefault(); saveEditor(prefix,d.id);}; document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderList();renderCompanyTable();renderEditors();}; }
+function saveEditor(prefix,id){ const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return; d.name=document.getElementById(`${prefix}EditName`).value.trim(); d.year=Number(document.getElementById(`${prefix}EditYear`).value)||new Date().getFullYear(); d.revenue=Number(document.getElementById(`${prefix}EditRevenue`).value||0); d.product=document.getElementById(`${prefix}EditProduct`).value; d.cat=document.getElementById(`${prefix}EditCat`).value; d.color=colorForCategory(d.cat); d.owner=document.getElementById(`${prefix}EditOwner`).value.trim()||null; d.owner_missing=!d.owner; d.notes=document.getElementById(`${prefix}EditNotes`).value; d.y=computeYFromRevenue(d.revenue,d.product); renderOwners(); updateAll(); selectCompany(d.id); }
+function addCompanyFromForm(e){ e.preventDefault(); const d=normalizePoint({id:nextDataId(),name:document.getElementById('newCompanyName').value,year:document.getElementById('newCompanyYear').value,revenue:document.getElementById('newCompanyRevenue').value,product:document.getElementById('newCompanyProduct').value,cat:document.getElementById('newCompanyCat').value,owner:document.getElementById('newCompanyOwner').value,notes:document.getElementById('newCompanyNotes').value}); if(!d.name)return; data.push(d); e.target.reset(); document.getElementById('newCompanyYear').value=new Date().getFullYear(); document.getElementById('newCompanyStatus').textContent='Entreprise ajoutée : '+d.name; renderOwners(); updateAll(); selectCompany(d.id); }
+function downloadTextFile(filename,text,mime='text/plain;charset=utf-8'){ const blob=new Blob([text],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
+function exportConstData(){ const out='const data = '+JSON.stringify(data,null,2)+';\n'; downloadTextFile('const_data_AO_dashboard.js',out,'application/javascript;charset=utf-8'); document.getElementById('dataToolsStatus').textContent='Export const_data généré.'; }
+function csvEscape(v){ if(v==null)return''; const s=String(v); return /[";\n\r,]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
+function exportCsv(){ const rows=[CSV_HEADERS.join(';')].concat(data.map(d=>CSV_HEADERS.map(h=>csvEscape(d[h])).join(';'))); downloadTextFile('ao_dashboard_data.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8'); document.getElementById('dataToolsStatus').textContent='Export CSV généré.'; }
+function parseCsvLine(line,delimiter){ const out=[]; let cur='',q=false; for(let i=0;i<line.length;i++){const ch=line[i],nx=line[i+1]; if(ch==='"'&&q&&nx==='"'){cur+='"';i++;continue;} if(ch==='"'){q=!q;continue;} if(ch===delimiter&&!q){out.push(cur);cur='';continue;} cur+=ch;} out.push(cur); return out; }
+function importCsv(e){ const file=e.target.files&&e.target.files[0]; if(!file)return; file.text().then(text=>{ const clean=String(text||'').replace(/^\ufeff/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim(); if(!clean)return; const lines=clean.split('\n').filter(Boolean); const delim=lines[0].split(';').length>=lines[0].split(',').length?';':','; const headers=parseCsvLine(lines[0],delim).map(h=>h.trim()); const rows=lines.slice(1).map(line=>{const cells=parseCsvLine(line,delim),o={}; headers.forEach((h,i)=>o[h]=cells[i]??''); return normalizePoint(o);}); rows.forEach(row=>{ const idx=data.findIndex(d=>Number(d.id)===Number(row.id) || (d.name.toLowerCase()===row.name.toLowerCase()&&Number(d.year)===Number(row.year)&&d.product===row.product)); if(idx>=0)data[idx]={...data[idx],...row,id:data[idx].id}; else data.push({...row,id:nextDataId()}); }); renderOwners(); updateAll(); document.getElementById('dataToolsStatus').textContent='Import CSV terminé : '+rows.length+' ligne(s).'; e.target.value=''; }); }
 </script>
 </body>
 </html>
