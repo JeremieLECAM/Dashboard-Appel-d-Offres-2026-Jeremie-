@@ -103,11 +103,25 @@
     .closebtn{float:right;cursor:pointer;padding:0 6px;border-radius:10px;border:1px solid rgba(0,0,0,.12);background:#fff;margin-left:10px;}
     @media(max-width:1150px){.dashboard-grid{grid-template-columns:220px 1fr}.list-page{grid-template-columns:1fr}.list-side{min-height:280px}}
   
-/* V6 Advanced Column Filters */
-.filter-trigger{cursor:pointer;color:#FF7900;margin-left:4px;font-weight:700}
-.filter-menu{display:none;position:absolute;background:#fff;border:1px solid #ccc;border-radius:8px;padding:8px;z-index:999;min-width:220px;box-shadow:0 8px 24px rgba(0,0,0,.15)}
-.filter-menu.open{display:block}
-.filter-menu label{font-size:10px;display:block;margin:2px 0}
+/* V6 - Filtres avancés onglet 2 + checklists éditeur */
+.company-table th{position:sticky;top:0;overflow:visible;}
+.th-inner{display:flex;align-items:center;gap:4px;position:relative;}
+.filter-trigger{border:1px solid var(--orange);background:var(--black);color:var(--orange);border-radius:7px;font-size:9px;font-weight:900;padding:1px 5px;cursor:pointer;line-height:1.2;}
+.filter-trigger.active{background:var(--orange);color:var(--black);}
+.filter-menu{display:none;position:absolute;top:22px;left:0;background:#fff;color:#000;border:1px solid #ccc;border-radius:10px;padding:8px;z-index:9999;min-width:230px;box-shadow:0 12px 26px rgba(0,0,0,.18);font-size:10px;white-space:normal;}
+.filter-menu.open{display:block;}
+.filter-menu .fm-title{font-weight:900;margin-bottom:6px;color:#000;}
+.filter-menu label{font-size:10px;color:#000;display:block;margin:3px 0;}
+.filter-menu input[type="text"]{width:100%;border:1px solid #ccc;border-radius:8px;padding:5px 6px;font-size:10px;margin-top:4px;}
+.filter-menu select{width:100%;border:1px solid #ccc;border-radius:8px;padding:5px 6px;font-size:10px;margin-top:4px;}
+.fm-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px;}
+.fm-actions button,.fm-sort button,.fm-bulk button{border:1px solid #000;border-radius:8px;background:#fff;color:#000;padding:5px 6px;font-size:9px;font-weight:800;cursor:pointer;}
+.fm-actions button.primary,.fm-sort button.primary{background:var(--orange);border-color:var(--orange);color:#000;}
+.fm-sort{display:grid;grid-template-columns:1fr;gap:4px;margin:6px 0;}
+.fm-bulk{display:flex;gap:4px;margin:6px 0;}
+.fm-checks{max-height:160px;overflow:auto;border:1px solid #eee;border-radius:8px;padding:5px;background:#fafafa;}
+.choice-list{max-height:130px;overflow:auto;border:1px solid #ddd;border-radius:9px;padding:6px;background:#fff;}
+.choice-list label{display:block;font-size:10px;margin:3px 0;color:#000;}
 
 </style>
 </head>
@@ -1505,6 +1519,15 @@ let years = [];
 let plotlyReady = false;
 let showNames = false;
 let selectedCompanyId = null;
+let tableSort = { col: 'name', dir: 'asc' };
+let tableFilters = {
+  name: { op: 'contains', value: '' },
+  notes: { op: 'contains', value: '' },
+  year: null,
+  product: null,
+  cat: null,
+  owner: null
+};
 const STORAGE_KEY = 'ao_dashboard_data_orange_v1';
 const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','outline','owner','owner_missing','notes'];
 const CAT_COLORS = {'CAC 40':'#E53935','Entreprise privée':'#1E88E5','Ecoles / Public / UE':'#43A047'}; // couleurs métier conservées
@@ -1536,6 +1559,7 @@ function initApp(){
   if(plotlyReady) return; plotlyReady = true; loadData(); wireUI(); renderOwners(); updateAll();
 }
 function wireUI(){
+  document.addEventListener('click', closeFilterMenus);
   document.querySelectorAll('.section-head').forEach(btn=>btn.addEventListener('click', e=>{ if(btn.id==='ownerToggle' || btn.id==='listToggle') return; const sec=btn.closest('.section'); const span=btn.querySelector('span:last-child'); const open=sec.classList.toggle('open'); if(span)span.textContent=open?'▼':'▶'; }));
   document.getElementById('tabDashboardBtn').onclick=()=>switchTab('dashboard'); document.getElementById('tabListBtn').onclick=()=>switchTab('list');
   document.getElementById('fsBtn').onclick=()=>{ const p=document.getElementById('chartPanel'); if(document.fullscreenElement) document.exitFullscreen(); else p.requestFullscreen && p.requestFullscreen(); };
@@ -1559,13 +1583,171 @@ function filteredData(){ const f=getFilterState(); return data.filter(d=>(!f.q||
 function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.map(ownerLabel))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); }
 function updateAll(){ normalizeAllData(); renderList(); renderCompanyTable(); renderEditors(); updateChart(); saveData(); }
 function renderList(){ const pts=filteredData().sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'})); document.getElementById('list').innerHTML=pts.map(d=>`<div class="item ${Number(d.id)===Number(selectedCompanyId)?'selected':''}" data-id="${d.id}"><div><b>${escapeHtml(d.name)}</b><span class="badge ${catBadge(d.cat)}">${escapeHtml(d.cat)}</span></div><div class="small">${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(ownerLabel(d))}${d.notes?`<br><span style="color:#666">📝 ${escapeHtml(d.notes).slice(0,90)}</span>`:''}</div></div>`).join(''); document.querySelectorAll('#list .item').forEach(el=>el.addEventListener('click',()=>selectCompany(el.dataset.id))); }
-function renderCompanyTable(){ const wrap=document.getElementById('companyTableWrap'); if(!wrap) return; const q=(document.getElementById('companyTableSearch').value||'').trim().toLowerCase(); const rows=data.slice().filter(d=>!q||[d.name,d.year,d.product,d.revenue,d.cat,d.owner,d.notes].some(v=>String(v??'').toLowerCase().includes(q))).sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'})); wrap.innerHTML=`<table class="company-table"><thead><tr><th>Entreprise</th><th>Année</th><th>Produit</th><th>Estimated €</th><th>Catégorie</th><th>Owner / BDR</th><th>Notes</th></tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" class="${Number(d.id)===Number(selectedCompanyId)?'selected':''}"><td><b>${escapeHtml(d.name)}</b></td><td>${d.year}</td><td>${escapeHtml(d.product)}</td><td>${Math.round(d.revenue).toLocaleString('fr-FR')} €</td><td>${escapeHtml(d.cat)}</td><td>${escapeHtml(ownerLabel(d))}</td><td class="notes-cell">${escapeHtml(d.notes||'')}</td></tr>`).join('')}</tbody></table>`; wrap.querySelectorAll('tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>selectCompany(tr.dataset.id))); }
+
+function normText(v){ return String(v ?? '').trim().toLowerCase(); }
+function uniqueSortedValues(field){
+  const vals = data.map(d => field === 'owner' ? ownerLabel(d) : d[field])
+    .filter(v => v !== null && v !== undefined && String(v).trim() !== '')
+    .map(v => String(v));
+  return [...new Set(vals)].sort((a,b)=>{
+    if(field === 'year') return Number(a)-Number(b);
+    return a.localeCompare(b,'fr',{sensitivity:'base'});
+  });
+}
+function isFilterActive(col){
+  if(col === 'name') return !!(tableFilters.name && tableFilters.name.value);
+  if(col === 'notes') return !!(tableFilters.notes && tableFilters.notes.value);
+  if(['year','product','cat','owner'].includes(col)) return Array.isArray(tableFilters[col]);
+  if(col === 'revenue') return tableSort && tableSort.col === 'revenue';
+  return tableSort && tableSort.col === col;
+}
+function textFilterPass(value, filter){
+  if(!filter || !filter.value) return true;
+  const v = normText(value);
+  const q = normText(filter.value);
+  return filter.op === 'equals' ? v === q : v.includes(q);
+}
+function checkboxFilterPass(value, col){
+  const selected = tableFilters[col];
+  if(!Array.isArray(selected)) return true;
+  return selected.includes(String(value));
+}
+function sortRows(rows){
+  if(!tableSort || !tableSort.col) return rows;
+  const col = tableSort.col;
+  const dir = tableSort.dir === 'desc' ? -1 : 1;
+  return rows.sort((a,b)=>{
+    let va = col === 'owner' ? ownerLabel(a) : a[col];
+    let vb = col === 'owner' ? ownerLabel(b) : b[col];
+    if(col === 'year' || col === 'revenue') return (Number(va || 0)-Number(vb || 0))*dir;
+    return String(va ?? '').localeCompare(String(vb ?? ''),'fr',{sensitivity:'base'})*dir;
+  });
+}
+function textFilterMenu(col, label){
+  const f = tableFilters[col] || {op:'contains',value:''};
+  const ascTxt = col === 'notes' ? 'A → Z notes' : 'A → Z entreprise';
+  const descTxt = col === 'notes' ? 'Z → A notes' : 'Z → A entreprise';
+  return `<div class="filter-menu" id="filter-${col}">
+    <div class="fm-title">${label}</div>
+    <select id="${col}FilterOp"><option value="contains" ${f.op==='contains'?'selected':''}>Contains</option><option value="equals" ${f.op==='equals'?'selected':''}>Equals</option></select>
+    <input type="text" id="${col}FilterValue" value="${escapeHtml(f.value || '')}" placeholder="Filtrer…">
+    <div class="fm-sort"><button type="button" class="primary" data-sort="${col}" data-dir="asc">${ascTxt}</button><button type="button" data-sort="${col}" data-dir="desc">${descTxt}</button></div>
+    <div class="fm-actions"><button type="button" class="primary" data-apply-text="${col}">Appliquer</button><button type="button" data-reset="${col}">Réinitialiser</button></div>
+  </div>`;
+}
+function checkboxFilterMenu(col, label, options={}){
+  const vals = uniqueSortedValues(col);
+  const selected = Array.isArray(tableFilters[col]) ? tableFilters[col] : vals;
+  const sortBtns = options.sort ? `<div class="fm-sort"><button type="button" class="primary" data-sort="${col}" data-dir="asc">${options.asc}</button><button type="button" data-sort="${col}" data-dir="desc">${options.desc}</button></div>` : '';
+  return `<div class="filter-menu" id="filter-${col}">
+    <div class="fm-title">${label}</div>${sortBtns}
+    <div class="fm-bulk"><button type="button" data-select-all="${col}">Tout sélectionner</button><button type="button" data-deselect-all="${col}">Tout désélectionner</button></div>
+    <div class="fm-checks">${vals.map(v=>`<label><input type="checkbox" class="tf-check" data-col="${col}" value="${escapeHtml(v)}" ${selected.includes(String(v))?'checked':''}> ${escapeHtml(v)}</label>`).join('')}</div>
+    <div class="fm-actions"><button type="button" class="primary" data-apply-check="${col}">Appliquer</button><button type="button" data-reset="${col}">Réinitialiser</button></div>
+  </div>`;
+}
+function revenueFilterMenu(){
+  return `<div class="filter-menu" id="filter-revenue"><div class="fm-title">Estimated €</div><div class="fm-sort"><button type="button" class="primary" data-sort="revenue" data-dir="desc">Plus grand → plus petit</button><button type="button" data-sort="revenue" data-dir="asc">Plus petit → plus grand</button></div><div class="fm-actions"><button type="button" data-reset="revenue">Réinitialiser</button></div></div>`;
+}
+function th(label,col,menu){
+  return `<th><div class="th-inner"><span>${label}</span><button type="button" class="filter-trigger ${isFilterActive(col)?'active':''}" data-filter-trigger="${col}">▾</button>${menu}</div></th>`;
+}
+function closeFilterMenus(){ document.querySelectorAll('.filter-menu.open').forEach(m=>m.classList.remove('open')); }
+function bindTableFilterEvents(){
+  document.querySelectorAll('[data-filter-trigger]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation(); const id='filter-'+btn.dataset.filterTrigger; document.querySelectorAll('.filter-menu').forEach(m=>{ if(m.id!==id) m.classList.remove('open'); }); const menu=document.getElementById(id); if(menu) menu.classList.toggle('open'); }));
+  document.querySelectorAll('.filter-menu').forEach(menu=>menu.addEventListener('click',e=>e.stopPropagation()));
+  document.querySelectorAll('[data-sort]').forEach(btn=>btn.addEventListener('click',()=>{ tableSort={col:btn.dataset.sort,dir:btn.dataset.dir}; renderCompanyTable(); }));
+  document.querySelectorAll('[data-apply-text]').forEach(btn=>btn.addEventListener('click',()=>{ const col=btn.dataset.applyText; tableFilters[col]={op:document.getElementById(col+'FilterOp').value,value:document.getElementById(col+'FilterValue').value}; renderCompanyTable(); }));
+  document.querySelectorAll('[data-select-all]').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll(`.tf-check[data-col="${btn.dataset.selectAll}"]`).forEach(cb=>cb.checked=true); }));
+  document.querySelectorAll('[data-deselect-all]').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll(`.tf-check[data-col="${btn.dataset.deselectAll}"]`).forEach(cb=>cb.checked=false); }));
+  document.querySelectorAll('[data-apply-check]').forEach(btn=>btn.addEventListener('click',()=>{ const col=btn.dataset.applyCheck; tableFilters[col]=[...document.querySelectorAll(`.tf-check[data-col="${col}"]:checked`)].map(cb=>cb.value); renderCompanyTable(); }));
+  document.querySelectorAll('[data-reset]').forEach(btn=>btn.addEventListener('click',()=>{ const col=btn.dataset.reset; if(col==='name'||col==='notes') tableFilters[col]={op:'contains',value:''}; else if(['year','product','cat','owner'].includes(col)) tableFilters[col]=null; if(col==='revenue'||(tableSort&&tableSort.col===col)) tableSort={col:'name',dir:'asc'}; renderCompanyTable(); }));
+}
+function getEditorOwners(currentOwner){
+  const owners = uniqueSortedValues('owner');
+  if(currentOwner && !owners.includes(currentOwner)) owners.push(currentOwner);
+  return owners.sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'}));
+}
+function singleCheckboxGroupHtml(name, values, selected){
+  return `<div class="choice-list" data-single-group="${name}">${values.map(v=>`<label><input type="checkbox" name="${name}" value="${escapeHtml(v)}" ${String(v)===String(selected)?'checked':''}> ${escapeHtml(v)}</label>`).join('')}</div>`;
+}
+function bindSingleCheckboxGroups(scope=document){
+  scope.querySelectorAll('[data-single-group]').forEach(group=>{
+    group.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.addEventListener('change',()=>{
+      if(cb.checked) group.querySelectorAll('input[type="checkbox"]').forEach(other=>{ if(other!==cb) other.checked=false; });
+      if(!group.querySelector('input[type="checkbox"]:checked')) cb.checked=true;
+    }));
+  });
+}
+function selectedGroupValue(groupName, fallback){
+  const checked = document.querySelector(`input[name="${groupName}"]:checked`);
+  return checked ? checked.value : fallback;
+}
+function renderCompanyTable(){
+  const wrap=document.getElementById('companyTableWrap'); if(!wrap) return;
+  const q=(document.getElementById('companyTableSearch').value||'').trim().toLowerCase();
+  let rows=data.slice()
+    .filter(d=>!q||[d.name,d.year,d.product,d.revenue,d.cat,d.owner,d.notes].some(v=>String(v??'').toLowerCase().includes(q)))
+    .filter(d=>textFilterPass(d.name, tableFilters.name))
+    .filter(d=>textFilterPass(d.notes || '', tableFilters.notes))
+    .filter(d=>checkboxFilterPass(d.year, 'year'))
+    .filter(d=>checkboxFilterPass(d.product, 'product'))
+    .filter(d=>checkboxFilterPass(d.cat, 'cat'))
+    .filter(d=>checkboxFilterPass(ownerLabel(d), 'owner'));
+  rows=sortRows(rows);
+  wrap.innerHTML=`<table class="company-table"><thead><tr>
+    ${th('Entreprise','name',textFilterMenu('name','Entreprise'))}
+    ${th('Année','year',checkboxFilterMenu('year','Année',{sort:true,asc:'Plus ancien → récent',desc:'Plus récent → ancien'}))}
+    ${th('Produit','product',checkboxFilterMenu('product','Produit'))}
+    ${th('Estimated €','revenue',revenueFilterMenu())}
+    ${th('Catégorie','cat',checkboxFilterMenu('cat','Catégorie'))}
+    ${th('Owner / BDR','owner',checkboxFilterMenu('owner','Owner / BDR'))}
+    ${th('Notes','notes',textFilterMenu('notes','Notes'))}
+  </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" class="${Number(d.id)===Number(selectedCompanyId)?'selected':''}"><td><b>${escapeHtml(d.name)}</b></td><td>${d.year}</td><td>${escapeHtml(d.product)}</td><td>${Math.round(d.revenue).toLocaleString('fr-FR')} €</td><td>${escapeHtml(d.cat)}</td><td>${escapeHtml(ownerLabel(d))}</td><td class="notes-cell">${escapeHtml(d.notes||'')}</td></tr>`).join('')}</tbody></table>`;
+  wrap.querySelectorAll('tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>selectCompany(tr.dataset.id)));
+  bindTableFilterEvents();
+}  
 function updateChart(){ if(!window.Plotly || !plotlyReady) return; const pts=filteredData(); const groups=new Map(); pts.forEach(p=>{p.plotYear=p.year; p.plotY=p.y; const k=p.year+'|'+p.y+'|'+p.color; if(!groups.has(k))groups.set(k,[]); groups.get(k).push(p);}); groups.forEach(g=>{ const dx=.18; const start=-((g.length-1)/2)*dx; g.forEach((p,i)=>p.plotYear=p.year+start+i*dx);}); const traces=[]; CAT_ORDER.forEach(cat=>{ const cpts=pts.filter(p=>p.cat===cat); traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:false,x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),customdata:cpts.map(p=>[p.id,p.product,p.revenue,p.year,ownerLabel(p),p.notes||'']),hovertemplate:'<b>%{text}</b><br>Année : %{customdata[3]}<br>Produit : %{customdata[1]}<br>Estimated revenue : %{customdata[2]:,.0f} €<br>Owner / BDR : %{customdata[4]}<extra></extra>',marker:{size:cpts.map(p=>bubbleSizeByCat(p.cat)),color:cpts.map(p=>p.color),opacity:1,line:{width:1,color:'#111'}}}); traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:true,hoverinfo:'skip',x:[null],y:[null],marker:{size:12,color:colorForCategory(cat),line:{width:1,color:'#111'}}}); }); if(showNames){ CAT_ORDER.forEach(cat=>{ const cpts=pts.filter(p=>p.cat===cat); traces.push({type:'scatter',mode:'text',showlegend:false,hoverinfo:'skip',x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),textfont:{size:pts.length>100?8:10,color:'#000'},textposition:'top center'}); }); } traces.push({type:'scatter',mode:'markers',showlegend:false,hoverinfo:'skip',x:[null],y:[null],marker:{size:[46],color:['#fff'],opacity:0,line:{color:'#000',width:4}}}); const ticks=[...Y_BANDS_COACHING,...Y_BANDS_LANGUES].sort((a,b)=>a.y-b.y); const f=getFilterState(); Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:40,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-1.6,f.yMax+1.6]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.8,5.8],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},legend:{orientation:'h',y:1.02,x:-.1},font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true}); const gd=document.getElementById('chart'); gd.removeAllListeners && gd.removeAllListeners('plotly_click'); gd.on && gd.on('plotly_click', ev=>{ const pt=ev&&ev.points&&ev.points[0]; const id=pt&&pt.customdata?pt.customdata[0]:null; if(id!=null) selectCompany(id); }); }
 function selectCompany(id){ selectedCompanyId=Number(id); renderList(); renderCompanyTable(); renderEditors(); highlightCompany(id); }
 function highlightCompany(id){ if(!window.Plotly||!plotlyReady)return; const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return; Plotly.relayout('chart', {'annotations[0].text':`<b>${escapeHtml(d.name)}</b><br>${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(ownerLabel(d))}`,'annotations[0].visible':true}); }
 function renderEditors(){ ['companyEditor','companyEditorList'].forEach((cid,idx)=>renderEditor(cid, idx?'list':'dash')); }
-function renderEditor(containerId,prefix){ const box=document.getElementById(containerId); if(!box)return; const d=data.find(x=>Number(x.id)===Number(selectedCompanyId)); if(!d){ box.classList.remove('open'); box.innerHTML='<div class="mini-note">Clique sur une entreprise pour ouvrir sa fiche.</div>'; return;} box.classList.add('open'); box.innerHTML=`<h3>Fiche entreprise<br><span style="font-weight:600;color:#444">${escapeHtml(d.name)}</span></h3><form id="${prefix}EditForm"><div class="field-label">Entreprise</div><input id="${prefix}EditName" type="text" value="${escapeHtml(d.name)}"><div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div><div class="field-label">Produit</div><select id="${prefix}EditProduct"><option ${d.product==='Langues'?'selected':''}>Langues</option><option ${d.product==='Coaching'?'selected':''}>Coaching</option></select><div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='Entreprise privée'?'selected':''}>Entreprise privée</option><option ${d.cat==='Ecoles / Public / UE'?'selected':''}>Ecoles / Public / UE</option></select><div class="field-label">Owner / BDR</div><input id="${prefix}EditOwner" type="text" value="${escapeHtml(d.owner||'')}"><div class="field-label">Notes</div><textarea id="${prefix}EditNotes">${escapeHtml(d.notes||'')}</textarea><div class="editor-actions"><button type="submit" class="editor-save">Enregistrer</button><button type="button" id="${prefix}EditClose" class="editor-close">Fermer</button></div></form>`; document.getElementById(`${prefix}EditForm`).onsubmit=e=>{e.preventDefault(); saveEditor(prefix,d.id);}; document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderList();renderCompanyTable();renderEditors();}; }
-function saveEditor(prefix,id){ const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return; d.name=document.getElementById(`${prefix}EditName`).value.trim(); d.year=Number(document.getElementById(`${prefix}EditYear`).value)||new Date().getFullYear(); d.revenue=Number(document.getElementById(`${prefix}EditRevenue`).value||0); d.product=document.getElementById(`${prefix}EditProduct`).value; d.cat=document.getElementById(`${prefix}EditCat`).value; d.color=colorForCategory(d.cat); d.owner=document.getElementById(`${prefix}EditOwner`).value.trim()||null; d.owner_missing=!d.owner; d.notes=document.getElementById(`${prefix}EditNotes`).value; d.y=computeYFromRevenue(d.revenue,d.product); renderOwners(); updateAll(); selectCompany(d.id); }
+function renderEditor(containerId,prefix){
+  const box=document.getElementById(containerId); if(!box)return;
+  const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));
+  if(!d){ box.classList.remove('open'); box.innerHTML='<div class="mini-note">Clique sur une entreprise pour ouvrir sa fiche.</div>'; return;}
+  const productGroup = `${prefix}EditProductChoice`;
+  const ownerGroup = `${prefix}EditOwnerChoice`;
+  const owners = getEditorOwners(ownerLabel(d));
+  box.classList.add('open');
+  box.innerHTML=`<h3>Fiche entreprise<br><span style="font-weight:600;color:#444">${escapeHtml(d.name)}</span></h3>
+  <form id="${prefix}EditForm">
+    <div class="field-label">Entreprise</div><input id="${prefix}EditName" type="text" value="${escapeHtml(d.name)}">
+    <div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div>
+    <div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching'], d.product)}
+    <div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='Entreprise privée'?'selected':''}>Entreprise privée</option><option ${d.cat==='Ecoles / Public / UE'?'selected':''}>Ecoles / Public / UE</option></select>
+    <div class="field-label">Owner / BDR</div>${singleCheckboxGroupHtml(ownerGroup, owners, ownerLabel(d))}
+    <div class="field-label">Notes</div><textarea id="${prefix}EditNotes">${escapeHtml(d.notes||'')}</textarea>
+    <div class="editor-actions"><button type="submit" class="editor-save">Enregistrer</button><button type="button" id="${prefix}EditClose" class="editor-close">Fermer</button></div>
+  </form>`;
+  bindSingleCheckboxGroups(box);
+  document.getElementById(`${prefix}EditForm`).onsubmit=e=>{e.preventDefault(); saveEditor(prefix,d.id);};
+  document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderList();renderCompanyTable();renderEditors();};
+}
+function saveEditor(prefix,id){
+  const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return;
+  d.name=document.getElementById(`${prefix}EditName`).value.trim();
+  d.year=Number(document.getElementById(`${prefix}EditYear`).value)||new Date().getFullYear();
+  d.revenue=Number(document.getElementById(`${prefix}EditRevenue`).value||0);
+  d.product=selectedGroupValue(`${prefix}EditProductChoice`, d.product);
+  d.cat=document.getElementById(`${prefix}EditCat`).value;
+  d.color=colorForCategory(d.cat);
+  d.owner=selectedGroupValue(`${prefix}EditOwnerChoice`, ownerLabel(d));
+  if(d.owner === 'Owner / BDR manquant') d.owner = null;
+  d.owner_missing=!d.owner;
+  d.notes=document.getElementById(`${prefix}EditNotes`).value;
+  d.y=computeYFromRevenue(d.revenue,d.product);
+  renderOwners(); updateAll(); selectCompany(d.id);
+}
 function addCompanyFromForm(e){ e.preventDefault(); const d=normalizePoint({id:nextDataId(),name:document.getElementById('newCompanyName').value,year:document.getElementById('newCompanyYear').value,revenue:document.getElementById('newCompanyRevenue').value,product:document.getElementById('newCompanyProduct').value,cat:document.getElementById('newCompanyCat').value,owner:document.getElementById('newCompanyOwner').value,notes:document.getElementById('newCompanyNotes').value}); if(!d.name)return; data.push(d); e.target.reset(); document.getElementById('newCompanyYear').value=new Date().getFullYear(); document.getElementById('newCompanyStatus').textContent='Entreprise ajoutée : '+d.name; renderOwners(); updateAll(); selectCompany(d.id); }
 function downloadTextFile(filename,text,mime='text/plain;charset=utf-8'){ const blob=new Blob([text],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
 function exportConstData(){ const out='const data = '+JSON.stringify(data,null,2)+';\n'; downloadTextFile('const_data_AO_dashboard.js',out,'application/javascript;charset=utf-8'); document.getElementById('dataToolsStatus').textContent='Export const_data généré.'; }
@@ -1574,19 +1756,5 @@ function exportCsv(){ const rows=[CSV_HEADERS.join(';')].concat(data.map(d=>CSV_
 function parseCsvLine(line,delimiter){ const out=[]; let cur='',q=false; for(let i=0;i<line.length;i++){const ch=line[i],nx=line[i+1]; if(ch==='"'&&q&&nx==='"'){cur+='"';i++;continue;} if(ch==='"'){q=!q;continue;} if(ch===delimiter&&!q){out.push(cur);cur='';continue;} cur+=ch;} out.push(cur); return out; }
 function importCsv(e){ const file=e.target.files&&e.target.files[0]; if(!file)return; file.text().then(text=>{ const clean=String(text||'').replace(/^\ufeff/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim(); if(!clean)return; const lines=clean.split('\n').filter(Boolean); const delim=lines[0].split(';').length>=lines[0].split(',').length?';':','; const headers=parseCsvLine(lines[0],delim).map(h=>h.trim()); const rows=lines.slice(1).map(line=>{const cells=parseCsvLine(line,delim),o={}; headers.forEach((h,i)=>o[h]=cells[i]??''); return normalizePoint(o);}); rows.forEach(row=>{ const idx=data.findIndex(d=>Number(d.id)===Number(row.id) || (d.name.toLowerCase()===row.name.toLowerCase()&&Number(d.year)===Number(row.year)&&d.product===row.product)); if(idx>=0)data[idx]={...data[idx],...row,id:data[idx].id}; else data.push({...row,id:nextDataId()}); }); renderOwners(); updateAll(); document.getElementById('dataToolsStatus').textContent='Import CSV terminé : '+rows.length+' ligne(s).'; e.target.value=''; }); }
 </script>
-
-<script>
-/* V6 Advanced Filters configuration */
-window.ADVANCED_TABLE_FILTERS={
- entreprise:{operators:['equals','contains'],sort:['az','za']},
- notes:{operators:['equals','contains'],sort:['az','za']},
- annee:{sort:['oldest','newest'],checkbox:true},
- revenue:{sort:['largest','smallest']},
- produit:{checkbox:true},
- cat:{checkbox:true},
- owner:{checkbox:true}
-};
-</script>
-
 </body>
 </html>
