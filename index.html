@@ -128,11 +128,15 @@
 #companyEditor.company-popup{position:absolute;left:215px;top:0;width:340px;z-index:5000;box-shadow:0 18px 40px rgba(0,0,0,.25);background:#fffaf5;}
 
 
-/* V9 popup next to selected company */
-.panel{position:relative;}
-#companyEditor{position:absolute;display:none;z-index:9999;left:210px;width:360px;max-height:85vh;overflow:auto;}
-#companyEditor.open{display:block;}
-
+/* V10 Popup externe + A surveiller */
+.panel{position:relative;overflow:visible!important;}
+#companyEditor{position:fixed!important;display:none;z-index:15000;width:360px;max-height:82vh;overflow:auto;}
+#companyEditor.open{display:block!important;}
+#watchBtn1,#watchBtn2{position:absolute;right:12px;top:10px;border:1px solid var(--orange);background:var(--orange);color:#000;border-radius:10px;padding:6px 10px;font-weight:900;cursor:pointer;}
+#watchBtn2{position:static;}
+#watchModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20000;}
+#watchModal.open{display:block;}
+#watchCard{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(900px,90vw);max-height:80vh;overflow:auto;background:#fff;border-radius:16px;padding:15px;}
 </style>
 </head>
 <body onload="loadPlotly()">
@@ -204,7 +208,7 @@
 
       <main id="chartPanel" class="chart-panel">
         <div id="chartWrap"><button id="fsBtn" type="button">⛶ Plein écran</button><div id="chart"></div></div>
-        <div id="bottomBar"><button id="labelBtn" type="button">👁️ Afficher les noms</button></div>
+        <button id="watchBtn1" type="button">A surveiller</button><div id="bottomBar"><button id="labelBtn" type="button">👁️ Afficher les noms</button></div>
       </main>
     </div>
   </div>
@@ -212,7 +216,7 @@
   <div id="tabList" class="tab-content">
     <div class="list-page">
       <div class="list-main">
-        <div class="list-toolbar"><h2>Liste complète des entreprises</h2><input id="companyTableSearch" type="text" placeholder="Rechercher une entreprise, owner, produit, notes…" /></div>
+        <div class="list-toolbar"><button id="watchBtn2" type="button">A surveiller</button><h2>Liste complète des entreprises</h2><input id="companyTableSearch" type="text" placeholder="Rechercher une entreprise, owner, produit, notes…" /></div>
         <div id="companyTableWrap"></div>
       </div>
       <div class="list-side"><div id="companyEditorList" class="company-editor"></div></div>
@@ -1584,7 +1588,7 @@ function wireUI(){
   document.getElementById('ownerSelectAllBtn').onclick=()=>{document.querySelectorAll('.f-owner').forEach(cb=>cb.checked=true); updateAll();};
   document.getElementById('ownerDeselectAllBtn').onclick=()=>{document.querySelectorAll('.f-owner').forEach(cb=>cb.checked=false); updateAll();};
   document.getElementById('newCompanyYear').value = new Date().getFullYear(); document.getElementById('newCompanyForm').addEventListener('submit', addCompanyFromForm);
-  document.getElementById('exportConstDataBtn').onclick=exportConstData; document.getElementById('exportCsvBtn').onclick=exportCsv; document.getElementById('importCsvBtn').onclick=()=>document.getElementById('importCsvInput').click(); document.getElementById('importCsvInput').addEventListener('change', importCsv);
+  document.getElementById('exportConstDataBtn').onclick=exportConstData; document.getElementById('exportCsvBtn').onclick=exportCsv; document.getElementById('importCsvBtn').onclick=()=>document.getElementById('importCsvInput').click(); document.getElementById('importCsvInput').addEventListener('change', importCsv);document.getElementById('watchBtn1')?.addEventListener('click',renderWatchList);document.getElementById('watchBtn2')?.addEventListener('click',renderWatchList);
 }
 function switchTab(tab){ const list=tab==='list'; document.getElementById('tabDashboard').classList.toggle('active',!list); document.getElementById('tabList').classList.toggle('active',list); document.getElementById('tabDashboardBtn').classList.toggle('active',!list); document.getElementById('tabListBtn').classList.toggle('active',list); if(list) renderCompanyTable(); setTimeout(resizeChart,60); }
 function resizeChart(){ if(window.Plotly) try{Plotly.Plots.resize('chart');}catch(e){} }
@@ -1727,11 +1731,14 @@ function selectCompany(id){
   }
   selectedCompanyId=id;
   renderList(); renderCompanyTable(); renderEditors(); highlightCompany(id);
-  const item=document.querySelector(`#list .item[data-id="${id}"]`);
-  const editor=document.getElementById('companyEditor');
-  if(item && editor){
-    editor.style.top=(item.offsetTop)+'px';
-    editor.style.left='215px';
+  const row=document.querySelector(`#list .item[data-id="${id}"]`);
+  const popup=document.getElementById('companyEditor');
+  const panel=document.querySelector('.panel');
+  if(row&&popup&&panel){
+    const r=row.getBoundingClientRect();
+    const p=panel.getBoundingClientRect();
+    popup.style.top=(row.offsetTop-4)+'px';
+    popup.style.left=(panel.clientWidth+8)+'px';
   }
 }
 function highlightCompany(id){ if(!window.Plotly||!plotlyReady)return; const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return; Plotly.relayout('chart', {'annotations[0].text':`<b>${escapeHtml(d.name)}</b><br>${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(ownerLabel(d))}`,'annotations[0].visible':true}); }
@@ -1775,11 +1782,20 @@ function saveEditor(prefix,id){
 }
 function addCompanyFromForm(e){ e.preventDefault(); const d=normalizePoint({id:nextDataId(),name:document.getElementById('newCompanyName').value,year:document.getElementById('newCompanyYear').value,revenue:document.getElementById('newCompanyRevenue').value,product:document.getElementById('newCompanyProduct').value,cat:document.getElementById('newCompanyCat').value,owner:document.getElementById('newCompanyOwner').value,notes:document.getElementById('newCompanyNotes').value}); if(!d.name)return; data.push(d); e.target.reset(); document.getElementById('newCompanyYear').value=new Date().getFullYear(); document.getElementById('newCompanyStatus').textContent='Entreprise ajoutée : '+d.name; renderOwners(); updateAll(); selectCompany(d.id); }
 function downloadTextFile(filename,text,mime='text/plain;charset=utf-8'){ const blob=new Blob([text],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
+
+function renderWatchList(){
+ const y=new Date().getFullYear();
+ const years=[y-2,y-3,y-4,y-5];
+ const rows=data.filter(d=>years.includes(Number(d.year)) && ['CAC 40','Entreprise privée'].includes(d.cat))
+ .sort((a,b)=>b.year-a.year||a.name.localeCompare(b.name,'fr'));
+ document.getElementById('watchContent').innerHTML='<h2>A surveiller</h2>'+rows.map(d=>`<div style="padding:6px;border-bottom:1px solid #eee"><b>${escapeHtml(d.name)}</b> - ${d.year}<br>${escapeHtml(d.product)} | ${escapeHtml(ownerLabel(d))}</div>`).join('');
+ document.getElementById('watchModal').classList.add('open');
+}
 function exportConstData(){ const out='const data = '+JSON.stringify(data,null,2)+';\n'; downloadTextFile('const_data_AO_dashboard.js',out,'application/javascript;charset=utf-8'); document.getElementById('dataToolsStatus').textContent='Export const_data généré.'; }
 function csvEscape(v){ if(v==null)return''; const s=String(v); return /[";\n\r,]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
 function exportCsv(){ const rows=[CSV_HEADERS.join(';')].concat(data.map(d=>CSV_HEADERS.map(h=>csvEscape(d[h])).join(';'))); downloadTextFile('ao_dashboard_data.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8'); document.getElementById('dataToolsStatus').textContent='Export CSV généré.'; }
 function parseCsvLine(line,delimiter){ const out=[]; let cur='',q=false; for(let i=0;i<line.length;i++){const ch=line[i],nx=line[i+1]; if(ch==='"'&&q&&nx==='"'){cur+='"';i++;continue;} if(ch==='"'){q=!q;continue;} if(ch===delimiter&&!q){out.push(cur);cur='';continue;} cur+=ch;} out.push(cur); return out; }
 function importCsv(e){ const file=e.target.files&&e.target.files[0]; if(!file)return; file.text().then(text=>{ const clean=String(text||'').replace(/^\ufeff/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim(); if(!clean)return; const lines=clean.split('\n').filter(Boolean); const delim=lines[0].split(';').length>=lines[0].split(',').length?';':','; const headers=parseCsvLine(lines[0],delim).map(h=>h.trim()); const rows=lines.slice(1).map(line=>{const cells=parseCsvLine(line,delim),o={}; headers.forEach((h,i)=>o[h]=cells[i]??''); return normalizePoint(o);}); rows.forEach(row=>{ const idx=data.findIndex(d=>Number(d.id)===Number(row.id) || (d.name.toLowerCase()===row.name.toLowerCase()&&Number(d.year)===Number(row.year)&&d.product===row.product)); if(idx>=0)data[idx]={...data[idx],...row,id:data[idx].id}; else data.push({...row,id:nextDataId()}); }); renderOwners(); updateAll(); document.getElementById('dataToolsStatus').textContent='Import CSV terminé : '+rows.length+' ligne(s).'; e.target.value=''; }); }
 </script>
-</body>
+<div id="watchModal"><div id="watchCard"><button onclick="document.getElementById('watchModal').classList.remove('open')">Fermer</button><div id="watchContent"></div></div></div></body>
 </html>
