@@ -244,6 +244,73 @@
 #chart .modebar-btn{
   margin-left: 2px;
 }
+
+
+    /* ✅ V3 : bouton nouvelle entreprise + filtres repliables + import/export data */
+    .collapsible-section{
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:12px;
+      margin-bottom:7px;
+      background:#fff;
+      overflow:hidden;
+    }
+    .collapsible-head{
+      width:100%;
+      border:0;
+      background:#f6f7fb;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      padding:6px 8px;
+      font-size:10px;
+      font-weight:800;
+      cursor:pointer;
+      color:#222;
+      text-align:left;
+      box-sizing:border-box;
+    }
+    .collapsible-head:hover{background:#eef1f8;}
+    .collapsible-body{padding:7px 8px;display:none;}
+    .collapsible-section.open .collapsible-body{display:block;}
+    .collapsible-arrow{font-size:10px;line-height:1;}
+    #newCompanySection,#dataToolsSection{margin-bottom:8px;}
+    #newCompanyForm label{
+      display:block;
+      font-size:9px;
+      font-weight:700;
+      color:#333;
+      margin:5px 0 2px;
+    }
+    #newCompanyForm input,#newCompanyForm select{
+      width:100%;
+      box-sizing:border-box;
+      border:1px solid #ddd;
+      border-radius:9px;
+      padding:5px 7px;
+      font-size:10px;
+      background:#fff;
+    }
+    #newCompanyForm .row2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+    .primary-mini-btn,.data-mini-btn{
+      width:100%;
+      border:1px solid rgba(30,136,229,.25);
+      background:#1E88E5;
+      color:#fff;
+      padding:7px 8px;
+      border-radius:10px;
+      font-size:10px;
+      font-weight:800;
+      cursor:pointer;
+      margin-top:7px;
+      box-sizing:border-box;
+    }
+    .data-mini-btn{background:#343a40;border-color:rgba(0,0,0,.15);}
+    .data-mini-btn.secondary{background:#ffffff;color:#222;border-color:rgba(0,0,0,.16);}
+    .primary-mini-btn:hover,.data-mini-btn:hover{filter:brightness(.96);}
+    .secondary-mini-note{font-size:9px;line-height:1.25;margin-top:6px;color:#666;}
+    .tool-grid{display:grid;grid-template-columns:1fr;gap:4px;}
+
   </style>
 
 <!--[if gte mso 9]><xml>
@@ -267,6 +334,58 @@
       <img src="./favicon-180x180.png" alt="AO Appel d'Offres" class="panel-logo"
       </p>
 
+
+      <div id="newCompanySection" class="collapsible-section">
+        <button type="button" id="newCompanyToggle" class="collapsible-head">
+          <span>➕ Nouvelle entreprise</span><span class="collapsible-arrow">▶</span>
+        </button>
+        <div id="newCompanyBody" class="collapsible-body">
+          <form id="newCompanyForm">
+            <label for="newCompanyName">Entreprise</label>
+            <input id="newCompanyName" required placeholder="Ex: Air Liquide" />
+            <div class="row2">
+              <div>
+                <label for="newCompanyYear">Année</label>
+                <input id="newCompanyYear" type="number" min="2012" max="2035" required placeholder="2026" />
+              </div>
+              <div>
+                <label for="newCompanyRevenue">Estimated €</label>
+                <input id="newCompanyRevenue" type="number" min="0" step="1" placeholder="0" />
+              </div>
+            </div>
+            <label for="newCompanyProduct">Produit</label>
+            <select id="newCompanyProduct">
+              <option value="Langues">Langues</option>
+              <option value="Coaching">Coaching</option>
+            </select>
+            <label for="newCompanyCat">Catégorie</label>
+            <select id="newCompanyCat">
+              <option value="CAC 40">CAC 40</option>
+              <option value="Entreprise privée" selected>Entreprise privée</option>
+              <option value="Ecoles / Public / UE">Ecoles / Public / UE</option>
+            </select>
+            <label for="newCompanyOwner">Owner / BDR</label>
+            <input id="newCompanyOwner" placeholder="Ex: Jérémie Lecamus" />
+            <button type="submit" class="primary-mini-btn">Ajouter au dashboard</button>
+            <div id="newCompanyStatus" class="secondary-mini-note">L’ajout est immédiat. Utilise ensuite “Exporter const_data” ou “Export CSV” pour conserver/partager les données.</div>
+          </form>
+        </div>
+      </div>
+
+      <div id="dataToolsSection" class="collapsible-section">
+        <button type="button" id="dataToolsToggle" class="collapsible-head">
+          <span>💾 Données</span><span class="collapsible-arrow">▶</span>
+        </button>
+        <div id="dataToolsBody" class="collapsible-body">
+          <div class="tool-grid">
+            <button type="button" id="exportConstDataBtn" class="data-mini-btn">Exporter const_data</button>
+            <button type="button" id="exportCsvBtn" class="data-mini-btn secondary">Export CSV</button>
+            <button type="button" id="importCsvBtn" class="data-mini-btn secondary">Import CSV</button>
+            <input id="importCsvInput" type="file" accept=".csv,text/csv" style="display:none" />
+          </div>
+          <div id="dataToolsStatus" class="secondary-mini-note">CSV attendu : id,name,year,product,revenue,y,cat,color,outline,owner,owner_missing.</div>
+        </div>
+      </div>
       <div id="filters" style="margin-bottom:10px;font-size:11px;">
         <div style="margin-bottom:6px;">
   <b>Catégorie</b><br>
@@ -388,7 +507,7 @@
     }
   }
 
-  const data = [
+  let data = [
   { id: 1, name: "Aéroport International de Genève", year: 2024, product: "Langues", revenue: 20000, y: 2, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
   { id: 2, name: "Aéroports de Paris - ADP", year: 2023, product: "Langues", revenue: 2703, y: 1, cat: "Entreprise privée", color: "#1E88E5", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
   { id: 3, name: "Air Liquide SA", year: 2025, product: "Langues", revenue: 240000, y: 5, cat: "CAC 40", color: "#E53935", outline: "", owner: "Jérémie Lecamus", owner_missing: false },
@@ -491,7 +610,7 @@
   }
 
   // ✅ Ajout 2028 car présent dans data (sans changer tes inputs)
-  const years = [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028];
+  let years = [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028];
 
   /* =====================================================================================
      ✅ OPTION 1 : PALIERS Y DISCRETS + POSITIONNEMENT AUTOMATIQUE DES BULLES (revenue -> y)
@@ -557,6 +676,283 @@
     return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
   }
 
+
+
+  /* ============================================================
+     ✅ Gestion locale des données : ajout, const_data, CSV import/export
+     ============================================================ */
+  const AO_STORAGE_KEY = 'ao_dashboard_data_v3';
+  const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','outline','owner','owner_missing'];
+
+  function colorForCategory(cat){
+    if(cat === 'CAC 40') return '#E53935';
+    if(cat === 'Entreprise privée') return '#1E88E5';
+    return '#43A047';
+  }
+
+  function normalizePoint(row){
+    const cat = row.cat || row.category || 'Entreprise privée';
+    const product = row.product || 'Langues';
+    const revenue = Number(row.revenue ?? 0);
+    const year = Number(row.year ?? new Date().getFullYear());
+    const owner = (row.owner == null || String(row.owner).trim() === '') ? null : String(row.owner).trim();
+    return {
+      id: Number(row.id) || nextDataId(),
+      name: String(row.name || row.entreprise || '').trim(),
+      year: Number.isFinite(year) ? year : new Date().getFullYear(),
+      product,
+      revenue: Number.isFinite(revenue) ? revenue : 0,
+      y: computeYFromRevenue(revenue, product),
+      cat,
+      color: row.color || colorForCategory(cat),
+      outline: row.outline || '',
+      owner,
+      owner_missing: (owner == null || String(owner).trim() === '')
+    };
+  }
+
+  function nextDataId(){
+    return data.reduce((max, d) => Math.max(max, Number(d.id) || 0), 0) + 1;
+  }
+
+  function refreshYearsFromData(){
+    const set = new Set(years);
+    for (const d of data) {
+      const y = Number(d.year);
+      if (Number.isFinite(y)) set.add(y);
+    }
+    years = [...set].sort((a,b)=>a-b);
+  }
+
+  function normalizeAllData(){
+    data = data.map(d => normalizePoint(d)).filter(d => d.name);
+    refreshYearsFromData();
+  }
+
+  function syncYearInputsToData(){
+    const yearMinEl = document.getElementById('yearMin');
+    const yearMaxEl = document.getElementById('yearMax');
+    if (!yearMinEl || !yearMaxEl || !years.length) return;
+    const minDataYear = Math.min(...years);
+    const maxDataYear = Math.max(...years);
+    const currentMin = parseInt(yearMinEl.value, 10);
+    const currentMax = parseInt(yearMaxEl.value, 10);
+    if (Number.isNaN(currentMin) || currentMin > minDataYear) yearMinEl.value = minDataYear;
+    if (Number.isNaN(currentMax) || currentMax < maxDataYear) yearMaxEl.value = maxDataYear;
+  }
+
+  function saveDataToLocalStorage(){
+    try { localStorage.setItem(AO_STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+  }
+
+  function loadDataFromLocalStorage(){
+    try {
+      const raw = localStorage.getItem(AO_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length) data = parsed.map(normalizePoint).filter(d => d.name);
+    } catch(e) {
+      console.warn('LocalStorage data ignorée :', e);
+    }
+  }
+
+  function rebuildAfterDataChange({persist=true, message='Données mises à jour.'} = {}){
+    normalizeAllData();
+    syncYearInputsToData();
+    renderOwnerFilters();
+    wireFilterListeners();
+    applyNoOffset(data);
+    if (persist) saveDataToLocalStorage();
+    const st = document.getElementById('dataToolsStatus');
+    if (st) st.textContent = message;
+    updateChart();
+  }
+
+  function downloadTextFile(filename, text, mime='text/plain;charset=utf-8'){
+    const blob = new Blob([text], {type:mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function exportConstData(){
+    normalizeAllData();
+    const payload = 'const data = ' + JSON.stringify(data.map(d => ({
+      id:d.id, name:d.name, year:d.year, product:d.product, revenue:d.revenue, y:d.y,
+      cat:d.cat, color:d.color, outline:d.outline || '', owner:d.owner, owner_missing:d.owner_missing
+    })), null, 2) + ';\n';
+    downloadTextFile('const_data_AO_dashboard.js', payload, 'application/javascript;charset=utf-8');
+    const st = document.getElementById('dataToolsStatus');
+    if (st) st.textContent = 'Export const_data généré.';
+  }
+
+  function csvEscape(value){
+    if (value == null) return '';
+    const s = String(value);
+    if (/[";\n\r,]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  function exportCsv(){
+    normalizeAllData();
+    const rows = [CSV_HEADERS.join(';')].concat(data.map(d => CSV_HEADERS.map(h => csvEscape(d[h])).join(';')));
+    downloadTextFile('ao_dashboard_data.csv', '\ufeff' + rows.join('\n'), 'text/csv;charset=utf-8');
+    const st = document.getElementById('dataToolsStatus');
+    if (st) st.textContent = 'Export CSV généré.';
+  }
+
+  function parseCsvLine(line, delimiter){
+    const out = [];
+    let cur = '';
+    let inQuotes = false;
+    for (let i=0; i<line.length; i++) {
+      const ch = line[i];
+      const next = line[i+1];
+      if (ch === '"' && inQuotes && next === '"') { cur += '"'; i++; continue; }
+      if (ch === '"') { inQuotes = !inQuotes; continue; }
+      if (ch === delimiter && !inQuotes) { out.push(cur); cur = ''; continue; }
+      cur += ch;
+    }
+    out.push(cur);
+    return out;
+  }
+
+  function parseCsv(text){
+    const clean = String(text || '').replace(/^\ufeff/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+    if (!clean) return [];
+    const lines = clean.split('\n').filter(l => l.trim() !== '');
+    const delimiter = (lines[0].split(';').length >= lines[0].split(',').length) ? ';' : ',';
+    const headers = parseCsvLine(lines[0], delimiter).map(h => h.trim());
+    return lines.slice(1).map(line => {
+      const cells = parseCsvLine(line, delimiter);
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = cells[i] ?? '');
+      return obj;
+    });
+  }
+
+  function upsertImportedRows(rows){
+    let added = 0, updated = 0;
+    rows.map(normalizePoint).filter(d => d.name).forEach(row => {
+      const idxById = data.findIndex(d => Number(d.id) === Number(row.id));
+      const idxByKey = data.findIndex(d => String(d.name).trim().toLowerCase() === row.name.toLowerCase() && Number(d.year) === Number(row.year) && String(d.product) === String(row.product));
+      const idx = idxById >= 0 ? idxById : idxByKey;
+      if (idx >= 0) { data[idx] = {...data[idx], ...row, id: data[idx].id}; updated++; }
+      else { row.id = nextDataId(); data.push(row); added++; }
+    });
+    return {added, updated};
+  }
+
+  async function importCsvFile(file){
+    const text = await file.text();
+    const rows = parseCsv(text);
+    const result = upsertImportedRows(rows);
+    rebuildAfterDataChange({persist:true, message:`Import CSV terminé : ${result.added} ajout(s), ${result.updated} mise(s) à jour.`});
+  }
+
+  function setupTopControls(){
+    function setupCollapsibleSection(sectionId, toggleId, bodyId, defaultOpen=false){
+      const section = document.getElementById(sectionId);
+      const toggle = document.getElementById(toggleId);
+      const body = document.getElementById(bodyId);
+      if (!section || !toggle || !body) return;
+      const arrow = toggle.querySelector('.collapsible-arrow') || toggle.querySelector('span:last-child');
+      function setState(open){
+        section.classList.toggle('open', !!open);
+        body.style.display = open ? 'block' : 'none';
+        if (arrow) arrow.textContent = open ? '▼' : '▶';
+      }
+      setState(defaultOpen);
+      toggle.addEventListener('click', (e)=>{ e.preventDefault(); setState(!section.classList.contains('open')); });
+    }
+
+    setupCollapsibleSection('newCompanySection', 'newCompanyToggle', 'newCompanyBody', false);
+    setupCollapsibleSection('dataToolsSection', 'dataToolsToggle', 'dataToolsBody', false);
+
+    const form = document.getElementById('newCompanyForm');
+    if (form) {
+      const currentYear = new Date().getFullYear();
+      const yearInput = document.getElementById('newCompanyYear');
+      if (yearInput && !yearInput.value) yearInput.value = currentYear;
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const company = normalizePoint({
+          id: nextDataId(),
+          name: document.getElementById('newCompanyName').value,
+          year: document.getElementById('newCompanyYear').value,
+          revenue: document.getElementById('newCompanyRevenue').value || 0,
+          product: document.getElementById('newCompanyProduct').value,
+          cat: document.getElementById('newCompanyCat').value,
+          owner: document.getElementById('newCompanyOwner').value,
+          outline: ''
+        });
+        if (!company.name) return;
+        data.push(company);
+        form.reset();
+        if (yearInput) yearInput.value = currentYear;
+        const st = document.getElementById('newCompanyStatus');
+        if (st) st.textContent = `Entreprise ajoutée : ${company.name}. Pense à exporter const_data ou CSV pour conserver la version.`;
+        rebuildAfterDataChange({persist:true, message:`Entreprise ajoutée : ${company.name}.`});
+      });
+    }
+
+    const exportConstBtn = document.getElementById('exportConstDataBtn');
+    const exportCsvBtn = document.getElementById('exportCsvBtn');
+    const importCsvBtn = document.getElementById('importCsvBtn');
+    const importCsvInput = document.getElementById('importCsvInput');
+    if (exportConstBtn) exportConstBtn.addEventListener('click', exportConstData);
+    if (exportCsvBtn) exportCsvBtn.addEventListener('click', exportCsv);
+    if (importCsvBtn && importCsvInput) importCsvBtn.addEventListener('click', () => importCsvInput.click());
+    if (importCsvInput) importCsvInput.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      try { await importCsvFile(file); }
+      catch(err) {
+        console.error(err);
+        const st = document.getElementById('dataToolsStatus');
+        if (st) st.textContent = 'Erreur import CSV : ' + (err && err.message ? err.message : err);
+      }
+      importCsvInput.value = '';
+    });
+  }
+
+  function makeStandardFiltersCollapsible(){
+    const filters = document.getElementById('filters');
+    if (!filters || filters.dataset.collapsibleReady === '1') return;
+    filters.dataset.collapsibleReady = '1';
+    const blocks = [...filters.children].filter(el => el.tagName === 'DIV' && el.id !== 'ownerFilterSection');
+    blocks.forEach((block, idx) => {
+      const b = block.querySelector('b');
+      const title = b ? b.textContent.trim() : ('Filtre ' + (idx+1));
+      if (b) b.remove();
+      block.classList.add('collapsible-section');
+      const bodyHtml = block.innerHTML;
+      block.innerHTML = `<button type="button" class="collapsible-head"><span>${escapeHtml(title)}</span><span class="collapsible-arrow">▶</span></button><div class="collapsible-body">${bodyHtml}</div>`;
+      const btn = block.querySelector('.collapsible-head');
+      const body = block.querySelector('.collapsible-body');
+      btn.addEventListener('click', () => {
+        const open = block.classList.toggle('open');
+        body.style.display = open ? 'block' : 'none';
+        btn.querySelector('.collapsible-arrow').textContent = open ? '▼' : '▶';
+      });
+    });
+    const ownerSection = document.getElementById('ownerFilterSection');
+    const ownerToggleEl = document.getElementById('ownerToggle');
+    if (ownerSection && ownerToggleEl) {
+      ownerSection.classList.add('collapsible-section');
+      ownerToggleEl.classList.add('collapsible-head');
+    }
+  }
+
+  loadDataFromLocalStorage();
+  normalizeAllData();
+  setupTopControls();
+  makeStandardFiltersCollapsible();
   // ✅ UI filtre Owner (checkbox)
   function renderOwnerFilters(){
     const box = document.getElementById('ownerFilters');
@@ -571,7 +967,7 @@
 
   renderOwnerFilters();
 
-  let ownerOpen = true;
+  let ownerOpen = false;
 
   const ownerToggle = document.getElementById('ownerToggle');
   const ownerFilters = document.getElementById('ownerFilters');
@@ -611,6 +1007,12 @@ ownerDeselectAllBtn.addEventListener('click', (e) => {
     ownerArrow.textContent = '▶';
   }
 });
+
+
+  // ✅ Owner replié par défaut pour gagner de la place
+  ownerFilters.style.display = 'none';
+  document.getElementById('ownerBulkActions').style.display = 'none';
+  ownerArrow.textContent = '▶';
 
   let listOpen = true;
 
@@ -1220,14 +1622,16 @@ function applySmartLabelPositions(points, fontSize, xRange, yRange){
 
   listEl.addEventListener('mouseleave', () => clearHighlight());
 
-  function wireFilterListeners(){
-    document
-      .querySelectorAll('.f-cat, .f-prod, .f-owner, #yearMin, #yearMax')
-      .forEach(el =>
-        el.addEventListener('change', () => {
-          updateChart();
-        })
-      );
+  function wireFilterListeners(){  
+    document  
+      .querySelectorAll('.f-cat, .f-prod, .f-owner, #yearMin, #yearMax')  
+      .forEach(el => {  
+        if (el.dataset.wiredFilter === '1') return;  
+        el.dataset.wiredFilter = '1';  
+        el.addEventListener('change', () => {  
+          updateChart();  
+        });  
+      });  
   }
 
   wireFilterListeners();
