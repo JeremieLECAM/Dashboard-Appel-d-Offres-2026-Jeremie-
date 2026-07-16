@@ -1818,7 +1818,7 @@ function normalizePoint(row){
 function normalizeAllData(){ data = data.map(normalizePoint).filter(d=>d.name); years = [...new Set(data.map(d=>Number(d.year)).filter(Number.isFinite))].sort((a,b)=>a-b); syncYearInputs(); }
 function saveData(){ try{localStorage.setItem(STORAGE_KEY, JSON.stringify(data));}catch(e){} }
 function loadData(){ try{ const raw=localStorage.getItem(STORAGE_KEY); data = raw ? JSON.parse(raw).map(normalizePoint) : SEED_DATA.map(normalizePoint); }catch(e){ data = SEED_DATA.map(normalizePoint); } normalizeAllData(); }
-function syncYearInputs(){ const min=document.getElementById('yearMin'), max=document.getElementById('yearMax'); if(!min||!max||!years.length)return; if(!min.value || Number(min.value)>Math.min(...years)) min.value=Math.min(...years); if(!max.value || Number(max.value)<Math.max(...years)) max.value=Math.max(...years); }
+function syncYearInputs(){ const min=document.getElementById('yearMin'), max=document.getElementById('yearMax'); if(!min||!max||!years.length)return; const minYear=Math.min(...years); const maxYear=Math.max(...years); if(!min.value) min.value=minYear; if(!max.value) max.value=maxYear; min.min=minYear; min.max=maxYear; max.min=minYear; max.max=maxYear; }
 
 function initApp(){
   if(plotlyReady) return; plotlyReady = true; loadData(); wireUI(); renderOwners(); updateAll();
