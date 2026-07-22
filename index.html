@@ -194,6 +194,8 @@
 .watch-table .th-inner{position:relative;display:flex;align-items:center;gap:4px;}
 .watch-table .filter-menu{left:0;top:24px;}
 
+.watch-check-cell{ text-align:center; white-space:nowrap; }
+.watch-toggle{ width:16px; height:16px; accent-color:var(--orange); cursor:pointer; }
 </style>
 </head>
 <body onload="loadPlotly()">
@@ -234,7 +236,7 @@
             <button type="button" id="exportCsvBtn" class="btn secondary">Export CSV</button>
             <button type="button" id="importCsvBtn" class="btn secondary">Import CSV</button>
             <input id="importCsvInput" type="file" accept=".csv,text/csv" style="display:none" />
-            <div id="dataToolsStatus" class="mini-note">CSV : id,name,year,product,revenue,y,cat,color,outline,owner,owner_missing,notes.</div>
+            <div id="dataToolsStatus" class="mini-note">CSV : id,name,year,product,revenue,y,cat,color,outline,owner,owner_missing,notes,watch.</div>
           </div>
         </div>
 
@@ -1768,14 +1770,32 @@ const SEED_DATA = [
     "owner_missing": false,
     "notes": "Confirmé oralement",
     "plotYear": 2027.0900000000001,
-    "plotY": -5  
+    "plotY": -5
+  },
+  {
+    "id": 94,
+    "name": "L'Oréal SA",
+    "year": 2027,
+    "product": "Langues",
+    "revenue": 0,
+    "y": 1,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "notes": "Q1 2027 à confirmer",
+    "plotYear": 2027,
+    "plotY": 1
   }
 ];
+
 let data = [];
 let years = [];
 let plotlyReady = false;
 let showNames = false;
 let selectedCompanyId = null;
+let hoveredCompanyId = null;
 let tableSort = { col: 'name', dir: 'asc' };
 let tableFilters = {
   name: { op: 'contains', value: '' },
@@ -1794,7 +1814,7 @@ let watchFilters = {
   owner: null
 };
 const STORAGE_KEY = 'ao_dashboard_data_orange_v1';
-const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','outline','owner','owner_missing','notes'];
+const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','outline','owner','owner_missing','notes','watch'];
 const CAT_COLORS = {'CAC 40':'#E53935','Entreprise privée':'#1E88E5','Ecoles / Public / UE':'#43A047'}; // couleurs métier conservées
 const CAT_ORDER = ['Ecoles / Public / UE','CAC 40','Entreprise privée'];
 const Y_BANDS_LANGUES = [
@@ -1812,8 +1832,14 @@ function catBadge(cat){ return cat==='CAC 40'?'b-red':cat==='Entreprise privée'
 function bubbleSizeByCat(cat){ return cat==='CAC 40'?27:cat==='Entreprise privée'?15:9; }
 function nextDataId(){ return data.reduce((m,d)=>Math.max(m, Number(d.id)||0),0)+1; }
 function normalizePoint(row){
-  const cat = row.cat || 'Entreprise privée'; const product = row.product || 'Langues'; const revenue = Number(row.revenue ?? 0); const year = Number(row.year ?? new Date().getFullYear()); const owner = row.owner == null || String(row.owner).trim()==='' ? null : String(row.owner).trim();
-  return { id:Number(row.id)||nextDataId(), name:String(row.name||row.entreprise||'').trim(), year:Number.isFinite(year)?year:new Date().getFullYear(), product, revenue:Number.isFinite(revenue)?revenue:0, y:computeYFromRevenue(revenue, product), cat, color:colorForCategory(cat), outline:row.outline||'', owner, owner_missing:!(owner&&String(owner).trim()), notes:row.notes==null?'':String(row.notes) };
+  const cat = row.cat || 'Entreprise privée';
+  const product = row.product || 'Langues';
+  const revenue = Number(row.revenue ?? 0);
+  const year = Number(row.year ?? new Date().getFullYear());
+  const owner = row.owner == null || String(row.owner).trim()==='' ? null : String(row.owner).trim();
+  const rawWatch = row.watch ?? row.a_surveille ?? row.aSurveiller ?? row['à surveiller'] ?? row['A surveiller'] ?? false;
+  const watch = rawWatch === true || ['true','1','oui','yes','x'].includes(String(rawWatch).toLowerCase().trim());
+  return { id:Number(row.id)||nextDataId(), name:String(row.name||row.entreprise||'').trim(), year:Number.isFinite(year)?year:new Date().getFullYear(), product, revenue:Number.isFinite(revenue)?revenue:0, y:computeYFromRevenue(revenue, product), cat, color:colorForCategory(cat), outline:row.outline||'', owner, owner_missing:!(owner&&String(owner).trim()), notes:row.notes==null?'':String(row.notes), watch };
 }
 function normalizeAllData(){ data = data.map(normalizePoint).filter(d=>d.name); years = [...new Set(data.map(d=>Number(d.year)).filter(Number.isFinite))].sort((a,b)=>a-b); syncYearInputs(); }
 function saveData(){ try{localStorage.setItem(STORAGE_KEY, JSON.stringify(data));}catch(e){} }
@@ -1863,7 +1889,16 @@ function getFilterState(){ const q=document.getElementById('search').value.trim(
 function filteredData(){ const f=getFilterState(); return data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); }
 function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.map(ownerLabel))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); }
 function updateAll(){ normalizeAllData(); renderList(); renderCompanyTable(); renderEditors(); updateChart(); saveData(); }
-function renderList(){ const pts=filteredData().sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'})); document.getElementById('list').innerHTML=pts.map(d=>`<div class="item ${Number(d.id)===Number(selectedCompanyId)?'selected':''}" data-id="${d.id}"><div><b>${escapeHtml(d.name)}</b><span class="badge ${catBadge(d.cat)}">${escapeHtml(d.cat)}</span></div><div class="small">${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(ownerLabel(d))}${d.notes?`<br><span style="color:#666">📝 ${escapeHtml(d.notes).slice(0,90)}</span>`:''}</div></div>`).join(''); document.querySelectorAll('#list .item').forEach(el=>el.addEventListener('click',()=>selectCompany(el.dataset.id))); syncFloatingPopupPosition(); }
+function renderList(){
+  const pts=filteredData().sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));
+  document.getElementById('list').innerHTML=pts.map(d=>`<div class="item ${Number(d.id)===Number(selectedCompanyId)?'selected':''}" data-id="${d.id}"><div><b>${escapeHtml(d.name)}</b><span class="badge ${catBadge(d.cat)}">${escapeHtml(d.cat)}</span></div><div class="small">${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(ownerLabel(d))}${d.notes?`<br><span style="color:#666">📝 ${escapeHtml(d.notes).slice(0,90)}</span>`:''}</div></div>`).join('');
+  document.querySelectorAll('#list .item').forEach(el=>{
+    el.addEventListener('click',()=>selectCompany(el.dataset.id));
+    el.addEventListener('mouseenter',()=>highlightCompanyFromList(el.dataset.id));
+    el.addEventListener('mouseleave',()=>clearCompanyHighlight());
+  });
+  syncFloatingPopupPosition();
+}
 
 function normText(v){ return String(v ?? '').trim().toLowerCase(); }
 function uniqueSortedValues(field){
@@ -1983,12 +2018,44 @@ function renderCompanyTable(){
     ${th('Estimated €','revenue',revenueFilterMenu())}
     ${th('Catégorie','cat',checkboxFilterMenu('cat','Catégorie'))}
     ${th('Owner / BDR','owner',checkboxFilterMenu('owner','Owner / BDR'))}
+    <th>À surveiller</th>
     ${th('Notes','notes',textFilterMenu('notes','Notes'))}
-  </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" class="${Number(d.id)===Number(selectedCompanyId)?'selected':''}"><td><b>${escapeHtml(d.name)}</b></td><td>${d.year}</td><td>${escapeHtml(d.product)}</td><td>${Math.round(d.revenue).toLocaleString('fr-FR')} €</td><td>${escapeHtml(d.cat)}</td><td>${escapeHtml(ownerLabel(d))}</td><td class="notes-cell">${escapeHtml(d.notes||'')}</td></tr>`).join('')}</tbody></table>`;
+  </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" class="${Number(d.id)===Number(selectedCompanyId)?'selected':''}"><td><b>${escapeHtml(d.name)}</b></td><td>${d.year}</td><td>${escapeHtml(d.product)}</td><td>${Math.round(d.revenue).toLocaleString('fr-FR')} €</td><td>${escapeHtml(d.cat)}</td><td>${escapeHtml(ownerLabel(d))}</td><td class="watch-check-cell"><input type="checkbox" class="watch-toggle" data-watch-id="${d.id}" ${d.watch?'checked':''} title="Ajouter à la liste À surveiller"></td><td class="notes-cell">${escapeHtml(d.notes||'')}</td></tr>`).join('')}</tbody></table>`;
   wrap.querySelectorAll('tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>selectCompany(tr.dataset.id)));
+  wrap.querySelectorAll('.watch-toggle').forEach(cb=>cb.addEventListener('click',e=>e.stopPropagation()));
+  wrap.querySelectorAll('.watch-toggle').forEach(cb=>cb.addEventListener('change',()=>toggleWatch(cb.dataset.watchId, cb.checked)));
   bindTableFilterEvents();
 }  
-function updateChart(){ if(!window.Plotly || !plotlyReady) return; const pts=filteredData(); const groups=new Map(); pts.forEach(p=>{p.plotYear=p.year; p.plotY=p.y; const k=p.year+'|'+p.y+'|'+p.color; if(!groups.has(k))groups.set(k,[]); groups.get(k).push(p);}); groups.forEach(g=>{ const dx=.18; const start=-((g.length-1)/2)*dx; g.forEach((p,i)=>p.plotYear=p.year+start+i*dx);}); const traces=[]; CAT_ORDER.forEach(cat=>{ const cpts=pts.filter(p=>p.cat===cat); traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:false,x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),customdata:cpts.map(p=>[p.id,p.product,p.revenue,p.year,ownerLabel(p),p.notes||'']),hovertemplate:'<b>%{text}</b><br>Année : %{customdata[3]}<br>Produit : %{customdata[1]}<br>Estimated revenue : %{customdata[2]:,.0f} €<br>Owner / BDR : %{customdata[4]}<extra></extra>',marker:{size:cpts.map(p=>bubbleSizeByCat(p.cat)),color:cpts.map(p=>p.color),opacity:1,line:{width:1,color:'#111'}}}); traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:true,hoverinfo:'skip',x:[null],y:[null],marker:{size:12,color:colorForCategory(cat),line:{width:1,color:'#111'}}}); }); if(showNames){ CAT_ORDER.forEach(cat=>{ const cpts=pts.filter(p=>p.cat===cat); traces.push({type:'scatter',mode:'text',showlegend:false,hoverinfo:'skip',x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),textfont:{size:pts.length>100?8:10,color:'#000'},textposition:'top center'}); }); } traces.push({type:'scatter',mode:'markers',showlegend:false,hoverinfo:'skip',x:[null],y:[null],marker:{size:[46],color:['#fff'],opacity:0,line:{color:'#000',width:4}}}); const ticks=[...Y_BANDS_COACHING,...Y_BANDS_LANGUES].sort((a,b)=>a.y-b.y); const f=getFilterState(); Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:40,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-1.6,f.yMax+1.6]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.8,5.8],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},legend:{orientation:'h',y:1.02,x:-.1},font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true}); const gd=document.getElementById('chart'); gd.removeAllListeners && gd.removeAllListeners('plotly_click'); gd.on && gd.on('plotly_click', ev=>{ const pt=ev&&ev.points&&ev.points[0]; const id=pt&&pt.customdata?pt.customdata[0]:null; if(id!=null) selectCompany(id); }); }
+function highlightCompanyFromList(id){ hoveredCompanyId = Number(id); updateChart(); }
+function clearCompanyHighlight(){ hoveredCompanyId = null; updateChart(); }
+function toggleWatch(id, checked){ const d=data.find(x=>Number(x.id)===Number(id)); if(!d) return; d.watch=!!checked; saveData(); renderCompanyTable(); }
+function updateChart(){
+  if(!window.Plotly || !plotlyReady) return;
+  const pts=filteredData();
+  const groups=new Map();
+  pts.forEach(p=>{p.plotYear=p.year; p.plotY=p.y; const k=p.year+'|'+p.y+'|'+p.color; if(!groups.has(k))groups.set(k,[]); groups.get(k).push(p);});
+  groups.forEach(g=>{ const dx=.18; const start=-((g.length-1)/2)*dx; g.forEach((p,i)=>p.plotYear=p.year+start+i*dx);});
+  const traces=[];
+  CAT_ORDER.forEach(cat=>{
+    const cpts=pts.filter(p=>p.cat===cat);
+    traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:false,x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),customdata:cpts.map(p=>[p.id,p.product,p.revenue,p.year,ownerLabel(p),p.notes&&String(p.notes).trim()?p.notes:'—']),hovertemplate:'<b>%{text}</b><br>Année : %{customdata[3]}<br>Produit : %{customdata[1]}<br>Estimated revenue : %{customdata[2]:,.0f} €<br>Owner / BDR : %{customdata[4]}<br>Note : %{customdata[5]}<extra></extra>',marker:{size:cpts.map(p=>bubbleSizeByCat(p.cat)),color:cpts.map(p=>p.color),opacity:1,line:{width:1,color:'#111'}}});
+    traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:true,hoverinfo:'skip',x:[null],y:[null],marker:{size:12,color:colorForCategory(cat),line:{width:1,color:'#111'}}});
+  });
+  if(showNames){ CAT_ORDER.forEach(cat=>{ const cpts=pts.filter(p=>p.cat===cat); traces.push({type:'scatter',mode:'text',showlegend:false,hoverinfo:'skip',x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),textfont:{size:pts.length>100?8:10,color:'#000'},textposition:'top center'}); }); }
+  const hoverPoint = hoveredCompanyId == null ? null : pts.find(p=>Number(p.id)===Number(hoveredCompanyId));
+  if(hoverPoint){
+    traces.push({type:'scatter',mode:'markers+text',showlegend:false,hoverinfo:'skip',x:[hoverPoint.plotYear],y:[hoverPoint.plotY],text:[hoverPoint.name],textposition:'top center',textfont:{size:12,color:'#000',family:'Segoe UI,Arial'},marker:{size:[bubbleSizeByCat(hoverPoint.cat)+12],color:['rgba(255,255,255,0)'],line:{color:'#FFD400',width:5}}});
+  }
+  const ticks=[...Y_BANDS_COACHING,...Y_BANDS_LANGUES].sort((a,b)=>a.y-b.y); const f=getFilterState();
+  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:40,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-1.6,f.yMax+1.6]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.8,5.8],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},legend:{orientation:'h',y:1.02,x:-.1},font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
+  const gd=document.getElementById('chart');
+  gd.removeAllListeners && gd.removeAllListeners('plotly_click');
+  gd.removeAllListeners && gd.removeAllListeners('plotly_hover');
+  gd.removeAllListeners && gd.removeAllListeners('plotly_unhover');
+  gd.on && gd.on('plotly_click', ev=>{ const pt=ev&&ev.points&&ev.points[0]; const id=pt&&pt.customdata?pt.customdata[0]:null; if(id!=null) selectCompany(id); });
+  gd.on && gd.on('plotly_hover', ev=>{ const pt=ev&&ev.points&&ev.points[0]; const id=pt&&pt.customdata?pt.customdata[0]:null; if(id!=null){ hoveredCompanyId=Number(id); updateChart(); }});
+  gd.on && gd.on('plotly_unhover', ()=>{ hoveredCompanyId=null; updateChart(); });
+}
 function selectCompany(id){
   id=Number(id);
   if(selectedCompanyId===id){
@@ -2137,14 +2204,8 @@ function saveFloatingEditor(id){
 }
 
 
-function getWatchYears(){
-  const y=new Date().getFullYear();
-  return [y-2,y-3,y-4,y-5];
-}
-function getWatchBaseRows(){
-  const watchYears=getWatchYears();
-  return data.filter(d=>watchYears.includes(Number(d.year)) && ['CAC 40','Entreprise privée'].includes(d.cat));
-}
+function getWatchYears(){ return []; }
+function getWatchBaseRows(){ return data.filter(d=>d.watch === true); }
 function watchUniqueValues(field){
   const rows=getWatchBaseRows();
   const vals=rows.map(d=>field==='owner'?ownerLabel(d):d[field])
@@ -2241,7 +2302,6 @@ function bindWatchFilterEvents(){
   }));
 }
 function renderWatchTable(){
-  const watchYears=getWatchYears();
   const rows=getFilteredWatchRows();
   const body = rows.length ? `<table class="watch-table"><thead><tr>
     ${watchTh('Année','year',watchCheckboxFilterMenu('year','Année',{sort:true,asc:'Plus ancien → récent',desc:'Plus récent → ancien'}))}
@@ -2249,8 +2309,8 @@ function renderWatchTable(){
     ${watchTh('Catégorie','cat',watchCheckboxFilterMenu('cat','Catégorie'))}
     ${watchTh('Produit','product',watchCheckboxFilterMenu('product','Produit'))}
     ${watchTh('Owner / BDR','owner',watchCheckboxFilterMenu('owner','Owner / BDR'))}
-  </tr></thead><tbody>${rows.map(d=>`<tr><td class="watch-year">${d.year}</td><td><b>${escapeHtml(d.name)}</b></td><td>${escapeHtml(d.cat)}</td><td>${escapeHtml(d.product)}</td><td>${escapeHtml(ownerLabel(d))}</td></tr>`).join('')}</tbody></table>` : '<p>Aucune entreprise CAC 40 ou Entreprise privée trouvée avec les filtres appliqués.</p>';
-  document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">A surveiller</h2><div class="mini-note">Années surveillées : ${watchYears.join(', ')} · catégories : CAC 40 et Entreprise privée</div>${body}`;
+  </tr></thead><tbody>${rows.map(d=>`<tr><td class="watch-year">${d.year}</td><td><b>${escapeHtml(d.name)}</b></td><td>${escapeHtml(d.cat)}</td><td>${escapeHtml(d.product)}</td><td>${escapeHtml(ownerLabel(d))}</td></tr>`).join('')}</tbody></table>` : '<p>Aucune entreprise cochée “À surveiller” pour le moment.</p>';
+  document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">A surveiller</h2><div class="mini-note">Liste manuelle : coche/décoche la case "À surveiller" dans l’onglet 2 pour gérer cette liste.</div>${body}`;
   bindWatchFilterEvents();
 }
 
