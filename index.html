@@ -261,6 +261,10 @@
 .b-dynamic{background:#777;}
 #chartWrap{flex:1.06;min-height:0;}
 #portfolioSummary{padding-top:7px;padding-bottom:7px;}
+
+.summary-pill{transition:transform .15s ease, box-shadow .15s ease;}
+.summary-pill:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.10);}
+.summary-pill.active{box-shadow:0 0 0 2px rgba(255,121,0,.22),0 4px 12px rgba(255,121,0,.20)!important;}
 </style>
 </head>
 <body onload="loadPlotly()">
@@ -1946,7 +1950,7 @@ function updateCockpitMetrics(){
     <div class="kpi-card"><div class="kpi-value">${m.progress}</div><div class="kpi-label">AO en cours</div></div>
     <div class="kpi-card"><div class="kpi-value">${m.watch}</div><div class="kpi-label">À surveiller</div></div>`; }
   const s=document.getElementById('portfolioSummary');
-  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${dashboardKpiFilter===null?'active':''}" data-kpi="all">${m.total} AO</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='cac'?'active':''}" data-cat="cac">${c.cac} CAC40</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='sbf'?'active':''}" data-cat="sbf">${c.sbf} SBF120</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='pub'?'active':''}" data-cat="pub">${c.pub} Public</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='eco'?'active':''}" data-cat="eco">${c.eco} Écoles</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='priv'?'active':''}" data-cat="priv">${c.priv} Privé</span></div><div class="summary-secondary"><span class="summary-pill orange kpi-filter ${dashboardKpiFilter==='upcoming'?'active':''}" data-kpi="upcoming">${m.upcoming} à venir</span><span class="summary-pill green kpi-filter ${dashboardKpiFilter==='confirmed'?'active':''}" data-kpi="confirmed">${m.confirmed} confirmé</span><span class="summary-pill yellow kpi-filter ${dashboardKpiFilter==='progress'?'active':''}" data-kpi="progress">${m.progress} en cours</span><span class="summary-pill kpi-filter ${dashboardKpiFilter==='watch'?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`; s.querySelectorAll('.kpi-filter[data-kpi]').forEach(btn=>btn.onclick=()=>{dashboardKpiFilter=btn.dataset.kpi==='all'?null:btn.dataset.kpi; updateAll();}); s.querySelectorAll('.kpi-filter[data-cat]').forEach(btn=>btn.onclick=()=>{dashboardCategoryFilter=(dashboardCategoryFilter===btn.dataset.cat?null:btn.dataset.cat); updateAll();}); }
+  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${dashboardKpiFilter===null && dashboardCategoryFilter===null?'active':''}" data-kpi="all">${m.total} AO</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='cac'?'active':''}" data-cat="cac">${c.cac} CAC40</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='sbf'?'active':''}" data-cat="sbf">${c.sbf} SBF120</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='pub'?'active':''}" data-cat="pub">${c.pub} Public</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='eco'?'active':''}" data-cat="eco">${c.eco} Écoles</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='priv'?'active':''}" data-cat="priv">${c.priv} Privé</span></div><div class="summary-secondary"><span class="summary-pill orange kpi-filter ${dashboardKpiFilter==='upcoming'?'active':''}" data-kpi="upcoming">${m.upcoming} à venir</span><span class="summary-pill green kpi-filter ${dashboardKpiFilter==='confirmed'?'active':''}" data-kpi="confirmed">${m.confirmed} confirmé</span><span class="summary-pill yellow kpi-filter ${dashboardKpiFilter==='progress'?'active':''}" data-kpi="progress">${m.progress} en cours</span><span class="summary-pill kpi-filter ${dashboardKpiFilter==='watch'?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`; s.querySelectorAll('.kpi-filter[data-kpi]').forEach(btn=>btn.onclick=()=>{ if(btn.dataset.kpi==='all'){ dashboardKpiFilter=null; dashboardCategoryFilter=null; } else { dashboardKpiFilter=(dashboardKpiFilter===btn.dataset.kpi?null:btn.dataset.kpi); } updateAll();}); s.querySelectorAll('.kpi-filter[data-cat]').forEach(btn=>btn.onclick=()=>{dashboardCategoryFilter=(dashboardCategoryFilter===btn.dataset.cat?null:btn.dataset.cat); updateAll();}); }
   document.getElementById('watchTopCount') && (document.getElementById('watchTopCount').textContent=m.watch);
   document.getElementById('watchBtn1') && document.getElementById('watchBtn1').setAttribute('data-count',m.watch);
   document.getElementById('watchBtn2') && document.getElementById('watchBtn2').setAttribute('data-count',m.watch);
@@ -2267,7 +2271,6 @@ function updateChart(){
         line:{width:cpts.map(p=>Number(p.year)>=currentYearNumber()?3:1.4),color:cpts.map(p=>Number(p.year)>=currentYearNumber()?'#FF7900':'#111')}
       }
     });
-    traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:false,hoverinfo:'skip',x:[null],y:[null],marker:{size:12,color:colorForCategory(cat),line:{width:1,color:'#111'}}});
   });
 
   const futurePts = pts.filter(p=>Number(p.year)>=currentYearNumber());
@@ -2309,7 +2312,7 @@ function updateChart(){
     opacity:0.98
   }));
 
-  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:24,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',shapes:[...yearShapes,todayShape],annotations:[todayAnnotation,...labelAnnotations],xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-1.6,f.yMax+1.6]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.95,5.95],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},showlegend:false,font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
+  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:24,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',shapes:[...yearShapes,todayShape],annotations:[todayAnnotation,...labelAnnotations],xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-0.35,f.yMax+0.35]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.95,5.95],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},showlegend:false,font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
   const gd=document.getElementById('chart');
   gd.removeAllListeners && gd.removeAllListeners('plotly_click');
   gd.removeAllListeners && gd.removeAllListeners('plotly_hover');
