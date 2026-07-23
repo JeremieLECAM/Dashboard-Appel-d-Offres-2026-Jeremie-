@@ -1988,7 +1988,7 @@ function arrangeCockpit(){
   if(editor && legend) editor.insertAdjacentElement('afterend', legend);
 }
 
-function bubbleSizeByCat(cat){ return cat==='CAC 40'?27:cat==='SBF 120'?21:cat==='Public / Semi-Public'?18:cat==='Écoles'?16:14; }
+function bubbleSizeByCat(cat){ return 21; }
 function nextDataId(){ return data.reduce((m,d)=>Math.max(m, Number(d.id)||0),0)+1; }
 function normalizePoint(row){
   const cat = CATEGORY_BY_ID[String(row.id)] || row.cat || 'Entreprise privée hors CAC 40/SBF 120';
