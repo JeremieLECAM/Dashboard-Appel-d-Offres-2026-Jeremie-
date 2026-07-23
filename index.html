@@ -329,7 +329,7 @@
       <main id="chartPanel" class="chart-panel">
         <div id="portfolioSummary" class="summary-strip"></div>
         <div id="chartWrap"><button id="fsBtn" type="button">⛶ Plein écran</button><div id="chart"></div></div>
-        <div id="bottomBar"><button id="labelBtn" type="button">👁️ Afficher les noms</button><button id="watchBtn1" type="button">A surveiller</button></div>
+        <div id="bottomBar"><button id="labelBtn" type="button">👁️ Afficher les noms clés</button><button id="watchBtn1" type="button">A surveiller</button></div>
       </main>
     </div>
   </div>
@@ -2000,7 +2000,7 @@ function wireUI(){
   window.addEventListener('resize', ()=>{resizeChart(); syncFloatingPopupPosition();});
   window.addEventListener('scroll', syncFloatingPopupPosition, true);
   document.querySelector('#tabDashboard .panel')?.addEventListener('scroll', syncFloatingPopupPosition);
-  document.getElementById('labelBtn').onclick=()=>{ showNames=!showNames; document.getElementById('labelBtn').textContent=showNames?'🙈 Masquer les noms':'👁️ Afficher les noms'; updateChart(); };
+  document.getElementById('labelBtn').onclick=()=>{ showNames=!showNames; document.getElementById('labelBtn').textContent=showNames?'🙈 Masquer les noms':'👁️ Afficher les noms clés'; updateChart(); };
   document.querySelectorAll('.f-cat,.f-prod,#yearMin,#yearMax').forEach(el=>el.addEventListener('change', updateAll));
   document.getElementById('search').addEventListener('input', updateAll);
   document.getElementById('companyTableSearch').addEventListener('input', renderCompanyTable);
@@ -2172,36 +2172,136 @@ function toggleWatch(id, checked){ const d=data.find(x=>Number(x.id)===Number(id
 function updateChart(){
   if(!window.Plotly || !plotlyReady) return;
   const pts=filteredData();
+
+  // V14 - Constellation des bulles : les AO qui partagent le même bucket année + niveau
+  // sont répartis autour de leur point réel au lieu d'être empilés ou seulement décalés horizontalement.
+  const CONSTELLATION_OFFSETS = [
+    {x:-0.16,y: 0.32,pos:'top left'},
+    {x: 0.16,y: 0.32,pos:'top right'},
+    {x:-0.16,y:-0.32,pos:'bottom left'},
+    {x: 0.16,y:-0.32,pos:'bottom right'},
+    {x: 0.00,y: 0.48,pos:'top center'},
+    {x: 0.00,y:-0.48,pos:'bottom center'},
+    {x:-0.30,y: 0.00,pos:'middle left'},
+    {x: 0.30,y: 0.00,pos:'middle right'},
+    {x:-0.30,y: 0.48,pos:'top left'},
+    {x: 0.30,y: 0.48,pos:'top right'},
+    {x:-0.30,y:-0.48,pos:'bottom left'},
+    {x: 0.30,y:-0.48,pos:'bottom right'}
+  ];
+  function constellationOffset(i,total){
+    if(total<=1) return {x:0,y:0,pos:'top center'};
+    if(i<CONSTELLATION_OFFSETS.length) return CONSTELLATION_OFFSETS[i];
+    const ring = Math.floor(i/CONSTELLATION_OFFSETS.length)+1;
+    const angle = ((i-CONSTELLATION_OFFSETS.length) / Math.max(1,total-CONSTELLATION_OFFSETS.length)) * Math.PI * 2;
+    return {x:Math.cos(angle)*0.22*ring,y:Math.sin(angle)*0.42*ring,pos:'top center'};
+  }
+  function isPriorityLabel(p){
+    const st = statusFromNotes(p.notes).label;
+    return Number(p.year)>=currentYearNumber() || p.watch===true || ['En cours','A confirmer','Confirmé','Attente CDC','A venir'].includes(st) || Number(p.id)===Number(selectedCompanyId) || Number(p.id)===Number(hoveredCompanyId);
+  }
+
   const groups=new Map();
-  pts.forEach(p=>{p.plotYear=p.year; p.plotY=p.y; const k=p.year+'|'+p.y+'|'+p.color; if(!groups.has(k))groups.set(k,[]); groups.get(k).push(p);});
-  groups.forEach(g=>{ const dx=.18; const start=-((g.length-1)/2)*dx; g.forEach((p,i)=>p.plotYear=p.year+start+i*dx);});
+  pts.forEach(p=>{
+    p.baseYear=Number(p.year);
+    p.baseY=Number(p.y);
+    p.plotYear=p.baseYear;
+    p.plotY=p.baseY;
+    const k=p.baseYear+'|'+p.baseY;
+    if(!groups.has(k))groups.set(k,[]);
+    groups.get(k).push(p);
+  });
+  const clusterCenters=[];
+  groups.forEach((g,key)=>{
+    // On garde un ordre stable : important pour que les bulles ne "sautent" pas à chaque rendu.
+    g.sort((a,b)=>String(a.name).localeCompare(String(b.name),'fr',{sensitivity:'base'}));
+    if(g.length>1){
+      const [year,y]=key.split('|').map(Number);
+      clusterCenters.push({year,y,count:g.length,names:g.map(p=>p.name).join(', ')});
+    }
+    g.forEach((p,i)=>{
+      const off=constellationOffset(i,g.length);
+      p.plotYear=p.baseYear+off.x;
+      p.plotY=p.baseY+off.y;
+      p.labelPosition=off.pos;
+    });
+  });
+
   const traces=[];
+
+  // Cercle fantôme central : matérialise le point réel commun dès qu'il y a plusieurs AO dans le même bucket.
+  if(clusterCenters.length){
+    traces.push({
+      type:'scatter',mode:'markers',name:'Points groupés',showlegend:false,hoverinfo:'skip',
+      x:clusterCenters.map(c=>c.year),y:clusterCenters.map(c=>c.y),
+      marker:{symbol:'circle-open',size:clusterCenters.map(c=>Math.min(34,18+c.count*3)),color:'rgba(0,0,0,0)',line:{width:2,color:'rgba(0,0,0,.28)'}}
+    });
+  }
+
   CAT_ORDER.forEach(cat=>{
     const cpts=pts.filter(p=>p.cat===cat);
-    traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:false,x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),customdata:cpts.map(p=>[p.id,p.product,p.revenue,p.year,ownerLabel(p),p.notes&&String(p.notes).trim()?p.notes:'—']),hovertemplate:'<b>%{text}</b><br>Année : %{customdata[3]}<br>Produit : %{customdata[1]}<br>Estimated revenue : %{customdata[2]:,.0f} €<br>Owner / BDR : %{customdata[4]}<br>Note : %{customdata[5]}<extra></extra>',marker:{size:cpts.map(p=>bubbleSizeByCat(p.cat)),color:cpts.map(p=>p.color),opacity:1,line:{width:cpts.map(p=>Number(p.year)>=currentYearNumber()?3:1),color:cpts.map(p=>Number(p.year)>=currentYearNumber()?'#FF7900':'#111')}}});
+    traces.push({
+      type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:false,
+      x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),
+      customdata:cpts.map(p=>[p.id,p.product,p.revenue,p.year,ownerLabel(p),p.notes&&String(p.notes).trim()?p.notes:'—']),
+      hovertemplate:'<b>%{text}</b><br>Année : %{customdata[3]}<br>Produit : %{customdata[1]}<br>Estimated revenue : %{customdata[2]:,.0f} €<br>Owner / BDR : %{customdata[4]}<br>Note : %{customdata[5]}<extra></extra>',
+      marker:{
+        size:cpts.map(p=>bubbleSizeByCat(p.cat)),
+        color:cpts.map(p=>p.color),
+        opacity:0.97,
+        line:{width:cpts.map(p=>Number(p.year)>=currentYearNumber()?3:1.4),color:cpts.map(p=>Number(p.year)>=currentYearNumber()?'#FF7900':'#111')}
+      }
+    });
     traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:true,hoverinfo:'skip',x:[null],y:[null],marker:{size:12,color:colorForCategory(cat),line:{width:1,color:'#111'}}});
   });
+
   const futurePts = pts.filter(p=>Number(p.year)>=currentYearNumber());
-  if(futurePts.length){ traces.unshift({type:'scatter',mode:'markers',name:'AO à venir',showlegend:false,hoverinfo:'skip',x:futurePts.map(p=>p.plotYear),y:futurePts.map(p=>p.plotY),marker:{size:futurePts.map(p=>bubbleSizeByCat(p.cat)+14),color:'rgba(255,121,0,0.10)',line:{width:2,color:'rgba(255,121,0,0.55)'}}}); }
-  if(showNames){ CAT_ORDER.forEach(cat=>{ const cpts=pts.filter(p=>p.cat===cat); traces.push({type:'scatter',mode:'text',showlegend:false,hoverinfo:'skip',x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),textfont:{size:pts.length>100?8:10,color:'#000'},textposition:'top center'}); }); }
+  if(futurePts.length){
+    traces.unshift({
+      type:'scatter',mode:'markers',name:'AO à venir',showlegend:false,hoverinfo:'skip',
+      x:futurePts.map(p=>p.plotYear),y:futurePts.map(p=>p.plotY),
+      marker:{size:futurePts.map(p=>bubbleSizeByCat(p.cat)+14),color:'rgba(255,121,0,0.10)',line:{width:2,color:'rgba(255,121,0,0.55)'}}
+    });
+  }
+
   const hoverPoint = hoveredCompanyId == null ? null : pts.find(p=>Number(p.id)===Number(hoveredCompanyId));
   if(hoverPoint){
-    traces.push({type:'scatter',mode:'markers+text',showlegend:false,hoverinfo:'skip',x:[hoverPoint.plotYear],y:[hoverPoint.plotY],text:[hoverPoint.name],textposition:'top center',textfont:{size:12,color:'#000',family:'Segoe UI,Arial'},marker:{size:[bubbleSizeByCat(hoverPoint.cat)+12],color:['rgba(255,255,255,0)'],line:{color:'#FFD400',width:5}}});
+    traces.push({
+      type:'scatter',mode:'markers',showlegend:false,hoverinfo:'skip',
+      x:[hoverPoint.plotYear],y:[hoverPoint.plotY],
+      marker:{size:[bubbleSizeByCat(hoverPoint.cat)+14],color:['rgba(255,255,255,0)'],line:{color:'#FFD400',width:5}}
+    });
   }
+
   const ticks=[...Y_BANDS_COACHING,...Y_BANDS_LANGUES].sort((a,b)=>a.y-b.y); const f=getFilterState();
   const visibleYears=years.filter(y=>y>=f.yMin && y<=f.yMax);
   const yearShapes=visibleYears.map((y,i)=>({type:'rect',xref:'x',yref:'paper',x0:y-0.5,x1:y+0.5,y0:0,y1:1,fillcolor:i%2===0?'rgba(0,0,0,0.035)':'rgba(255,121,0,0.035)',line:{width:0},layer:'below'}));
   const today=currentDecimalYear();
   const todayShape={type:'line',xref:'x',yref:'paper',x0:today,x1:today,y0:0,y1:1,line:{color:'#FF7900',width:2,dash:'dot'},layer:'above'};
   const todayAnnotation={xref:'x',yref:'paper',x:today,y:1.02,text:'Aujourd’hui',showarrow:false,font:{color:'#FF7900',size:11},xanchor:'left'};
-  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:46,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',shapes:[...yearShapes,todayShape],annotations:[todayAnnotation],xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-1.6,f.yMax+1.6]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.8,5.8],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},legend:{orientation:'h',y:1.08,x:-.1},font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
+
+  // Labels intelligents : on garde le graphique lisible en n'affichant que les AO prioritaires
+  // quand le bouton "Afficher les noms" est actif, plus la bulle survolée / sélectionnée.
+  const labelPts = pts.filter(p=> (showNames && isPriorityLabel(p)) || Number(p.id)===Number(selectedCompanyId) || Number(p.id)===Number(hoveredCompanyId));
+  const labelAnnotations = labelPts.map(p=>({
+    xref:'x',yref:'y',x:p.plotYear,y:p.plotY,
+    text:escapeHtml(p.name),
+    showarrow:true,arrowhead:0,arrowsize:0.35,arrowwidth:1,arrowcolor:'rgba(0,0,0,.25)',
+    ax:p.plotYear>=p.baseYear ? 34 : -34,
+    ay:p.plotY>=p.baseY ? -28 : 28,
+    font:{size:11,color:'#000',family:'Segoe UI,Arial'},
+    bgcolor:'rgba(255,255,255,.88)',bordercolor:'rgba(0,0,0,.14)',borderwidth:1,borderpad:3,
+    opacity:0.98
+  }));
+
+  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:46,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',shapes:[...yearShapes,todayShape],annotations:[todayAnnotation,...labelAnnotations],xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-1.6,f.yMax+1.6]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.95,5.95],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},legend:{orientation:'h',y:1.08,x:-.1},font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
   const gd=document.getElementById('chart');
   gd.removeAllListeners && gd.removeAllListeners('plotly_click');
   gd.removeAllListeners && gd.removeAllListeners('plotly_hover');
   gd.removeAllListeners && gd.removeAllListeners('plotly_unhover');
   gd.on && gd.on('plotly_click', ev=>{ const pt=ev&&ev.points&&ev.points[0]; const id=pt&&pt.customdata?pt.customdata[0]:null; if(id!=null) selectCompany(id); });
-  gd.on && gd.on('plotly_hover', ev=>{ const pt=ev&&ev.points&&ev.points[0]; const id=pt&&pt.customdata?pt.customdata[0]:null; if(id!=null){ hoveredCompanyId=Number(id); updateChart(); }});
-  gd.on && gd.on('plotly_unhover', ()=>{ hoveredCompanyId=null; updateChart(); });
+  gd.on && gd.on('plotly_hover', ev=>{ const pt=ev&&ev.points&&ev.points[0]; const id=pt&&pt.customdata?pt.customdata[0]:null; if(id!=null && Number(id)!==Number(hoveredCompanyId)){ hoveredCompanyId=Number(id); updateChart(); }});
+  gd.on && gd.on('plotly_unhover', ()=>{ if(hoveredCompanyId!=null){ hoveredCompanyId=null; updateChart(); } });
 }
 function selectCompany(id){
   id=Number(id);
