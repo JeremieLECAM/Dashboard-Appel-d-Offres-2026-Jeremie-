@@ -86,7 +86,7 @@
     #fsBtn{position:absolute;top:10px;right:10px;z-index:20;border:1px solid var(--black);background:var(--white);color:var(--black);border-radius:12px;padding:8px 10px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.10);}
     #bottomBar{border-top:1px solid var(--line);padding:8px 10px;display:flex;justify-content:center;background:var(--white);}
     #labelBtn{border:1px solid var(--black);background:var(--black);color:var(--white);border-radius:12px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;}
-    #chart .modebar{right:120px!important;top:10px!important;}
+    #chart .modebar{right:120px!important;top:6px!important;}
     .list-page{height:100%;display:grid;grid-template-columns:1fr 320px;gap:12px;padding:12px;}
     .list-main,.list-side{padding:12px;}
     .list-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:10px;}
@@ -256,6 +256,11 @@
 .company-table .watch-check-cell{font-size:18px;}
 @media(max-width:1150px){.dashboard-grid{grid-template-columns:235px 1fr}.summary-strip{align-items:flex-start;flex-direction:column}.topbar-watch-badge{display:none}}
 
+
+/* V15 - Catégories enrichies depuis Excel + suppression légende Plotly */
+.b-dynamic{background:#777;}
+#chartWrap{flex:1.06;min-height:0;}
+#portfolioSummary{padding-top:7px;padding-bottom:7px;}
 </style>
 </head>
 <body onload="loadPlotly()">
@@ -281,7 +286,7 @@
                 <div><div class="field-label">Estimated €</div><input id="newCompanyRevenue" type="number" min="0" step="1" value="0" /></div>
               </div>
               <div class="field-label">Produit</div><select id="newCompanyProduct"><option>Langues</option><option>Coaching</option></select>
-              <div class="field-label">Catégorie</div><select id="newCompanyCat"><option>CAC 40</option><option selected>Entreprise privée</option><option>Ecoles / Public / UE</option></select>
+              <div class="field-label">Catégorie</div><select id="newCompanyCat"><option>CAC 40</option><option>SBF 120</option><option>Entreprise privée hors CAC 40/SBF 120</option><option>Public / Semi-Public</option><option>Écoles</option></select>
               <div class="field-label">Owner / BDR</div><input id="newCompanyOwner" type="text" placeholder="Ex: Jérémie Lecamus" />
               <div class="field-label">Notes</div><textarea id="newCompanyNotes" placeholder="Notes libres sur l’entreprise…"></textarea>
               <button class="btn" type="submit">Ajouter au dashboard</button>
@@ -304,8 +309,10 @@
         <div id="filters">
           <div class="section open"><button type="button" class="section-head">Catégorie <span>▼</span></button><div class="section-body">
             <label style="color:#E53935"><input type="checkbox" class="f-cat" value="CAC 40" checked> CAC 40</label>
-            <label style="color:#1E88E5"><input type="checkbox" class="f-cat" value="Entreprise privée" checked> Entreprise privée</label>
-            <label style="color:#43A047"><input type="checkbox" class="f-cat" value="Ecoles / Public / UE" checked> Public / Ecoles</label>
+            <label style="color:#8E24AA"><input type="checkbox" class="f-cat" value="SBF 120" checked> SBF 120</label>
+            <label style="color:#1E88E5"><input type="checkbox" class="f-cat" value="Entreprise privée hors CAC 40/SBF 120" checked> Privé hors CAC/SBF</label>
+            <label style="color:#43A047"><input type="checkbox" class="f-cat" value="Public / Semi-Public" checked> Public / Semi-public</label>
+            <label style="color:#00A6A6"><input type="checkbox" class="f-cat" value="Écoles" checked> Écoles</label>
           </div></div>
           <div class="section"><button type="button" class="section-head">Produit <span>▶</span></button><div class="section-body">
             <label><input type="checkbox" class="f-prod" value="Langues" checked> Langues</label>
@@ -323,7 +330,7 @@
         <input id="search" type="text" placeholder="Rechercher… (ex: Air Liquide)" />
         <div id="listSection" class="section open"><button type="button" id="listToggle" class="section-head">Liste des entreprises <span id="listArrow">▼</span></button><div id="list" class="section-body" style="display:block"></div></div>
         <div id="companyEditor" class="company-editor company-popup"></div>
-        <div class="legend"><b>Légende</b><br>1) <span class="badge b-red">Rouge</span> CAC 40<br>2) <span class="badge b-blue">Bleu</span> Entreprise privée<br>3) <span class="badge b-green">Vert</span> Écoles supérieures / Public / Européen</div>
+        <div class="legend"><b>Catégories</b><br>1) <span class="badge" style="background:#E53935">Rouge</span> CAC 40<br>2) <span class="badge" style="background:#8E24AA">Violet</span> SBF 120<br>3) <span class="badge" style="background:#1E88E5">Bleu</span> Privé hors CAC/SBF<br>4) <span class="badge" style="background:#43A047">Vert</span> Public / Semi-public<br>5) <span class="badge" style="background:#00A6A6">Turquoise</span> Écoles</div>
       </aside>
 
       <main id="chartPanel" class="chart-panel">
@@ -353,8 +360,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 20000,
     "y": 2,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "Public / Semi-Public",
+    "color": "#43A047",
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
@@ -369,8 +376,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 2703,
     "y": 1,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "SBF 120",
+    "color": "#8E24AA",
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
@@ -401,8 +408,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 66000,
     "y": 3,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "CAC 40",
+    "color": "#E53935",
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
@@ -417,8 +424,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 0,
     "y": 1,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "SBF 120",
+    "color": "#8E24AA",
     "outline": "",
     "owner": "Stéphanie Rousseau",
     "owner_missing": false,
@@ -433,7 +440,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 45000,
     "y": 2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Anaïs Guicherd",
@@ -449,7 +456,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 53592,
     "y": 3,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Anaïs Guicherd",
@@ -465,7 +472,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 33500,
     "y": 2,
-    "cat": "Ecoles / Public / UE",
+    "cat": "Public / Semi-Public",
     "color": "#43A047",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -481,7 +488,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 42500,
     "y": 2,
-    "cat": "Ecoles / Public / UE",
+    "cat": "Public / Semi-Public",
     "color": "#43A047",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -529,7 +536,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 13507,
     "y": 2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -545,8 +552,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 79000,
     "y": 3,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "CAC 40",
+    "color": "#E53935",
     "outline": "",
     "owner": "Clément Le Roux",
     "owner_missing": false,
@@ -561,7 +568,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 93000,
     "y": 3,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Anaïs Guicherd",
@@ -577,8 +584,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 37500,
     "y": 2,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "SBF 120",
+    "color": "#8E24AA",
     "outline": "",
     "owner": "Anaïs Guicherd",
     "owner_missing": false,
@@ -609,7 +616,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 0,
     "y": 1,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -641,7 +648,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 120000,
     "y": 4,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Clément Le Roux",
@@ -657,7 +664,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 30000,
     "y": 2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Clément Le Roux",
@@ -673,7 +680,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 0,
     "y": 1,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Clément Le Roux",
@@ -689,7 +696,7 @@ const SEED_DATA = [
     "product": "Coaching",
     "revenue": 86400,
     "y": -2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -705,7 +712,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 12000,
     "y": 2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -721,7 +728,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 17500,
     "y": 2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Stéphanie Rousseau",
@@ -737,7 +744,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 85000,
     "y": 3,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -785,7 +792,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 53000,
     "y": 3,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Anaïs Guicherd",
@@ -801,7 +808,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 47000,
     "y": 2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Anaïs Guicherd",
@@ -817,8 +824,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 90000,
     "y": 3,
-    "cat": "CAC 40",
-    "color": "#E53935",
+    "cat": "Public / Semi-Public",
+    "color": "#43A047",
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
@@ -833,8 +840,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 35000,
     "y": 2,
-    "cat": "Ecoles / Public / UE",
-    "color": "#43A047",
+    "cat": "Écoles",
+    "color": "#00A6A6",
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
@@ -849,8 +856,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 20000,
     "y": 2,
-    "cat": "Ecoles / Public / UE",
-    "color": "#43A047",
+    "cat": "Écoles",
+    "color": "#00A6A6",
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
@@ -865,8 +872,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 42500,
     "y": 2,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "CAC 40",
+    "color": "#E53935",
     "outline": "",
     "owner": "Clément Le Roux",
     "owner_missing": false,
@@ -881,7 +888,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 36100,
     "y": 2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Anaïs Guicherd",
@@ -897,7 +904,7 @@ const SEED_DATA = [
     "product": "Coaching",
     "revenue": 70000,
     "y": -2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Thierry Le Boeuf",
@@ -913,7 +920,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 23700,
     "y": 2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Anaïs Guicherd",
@@ -929,7 +936,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 62242.72,
     "y": 3,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Sarah Kureemun",
@@ -945,7 +952,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 42500,
     "y": 2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -961,7 +968,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 4500,
     "y": 1,
-    "cat": "Ecoles / Public / UE",
+    "cat": "Public / Semi-Public",
     "color": "#43A047",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -977,8 +984,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 297500,
     "y": 5,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "SBF 120",
+    "color": "#8E24AA",
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
@@ -993,7 +1000,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 21700,
     "y": 2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -1009,7 +1016,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 50000,
     "y": 2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Anaïs Guicherd",
@@ -1025,7 +1032,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 46000,
     "y": 2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -1041,7 +1048,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 5000,
     "y": 1,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Stéphanie Rousseau",
@@ -1057,7 +1064,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 0,
     "y": 1,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Stéphanie Rousseau",
@@ -1073,8 +1080,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 50000,
     "y": 2,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "SBF 120",
+    "color": "#8E24AA",
     "outline": "",
     "owner": "Sarah Kureemun",
     "owner_missing": false,
@@ -1089,7 +1096,7 @@ const SEED_DATA = [
     "product": "Coaching",
     "revenue": 84000,
     "y": -2,
-    "cat": "Ecoles / Public / UE",
+    "cat": "Public / Semi-Public",
     "color": "#43A047",
     "outline": "",
     "owner": "Julie Pirroni",
@@ -1105,7 +1112,7 @@ const SEED_DATA = [
     "product": "Coaching",
     "revenue": 50000,
     "y": -3,
-    "cat": "Ecoles / Public / UE",
+    "cat": "Public / Semi-Public",
     "color": "#43A047",
     "outline": "",
     "owner": "Julie Pirroni",
@@ -1121,7 +1128,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 30000,
     "y": 2,
-    "cat": "Ecoles / Public / UE",
+    "cat": "Public / Semi-Public",
     "color": "#43A047",
     "outline": "",
     "owner": "Julie Pirroni",
@@ -1137,8 +1144,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 60000,
     "y": 3,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "SBF 120",
+    "color": "#8E24AA",
     "outline": "",
     "owner": "Clément Le Roux",
     "owner_missing": false,
@@ -1153,8 +1160,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 15000,
     "y": 2,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "SBF 120",
+    "color": "#8E24AA",
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
@@ -1169,8 +1176,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 0,
     "y": 1,
-    "cat": "Ecoles / Public / UE",
-    "color": "#43A047",
+    "cat": "Écoles",
+    "color": "#00A6A6",
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
@@ -1201,7 +1208,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 3000,
     "y": 1,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -1217,8 +1224,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 30000,
     "y": 2,
-    "cat": "Ecoles / Public / UE",
-    "color": "#43A047",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
+    "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
@@ -1265,7 +1272,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 65000,
     "y": 3,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -1281,7 +1288,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 30000,
     "y": 2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Anaïs Guicherd",
@@ -1297,7 +1304,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 0,
     "y": 1,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -1313,7 +1320,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 148750,
     "y": 4,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -1329,7 +1336,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 60000,
     "y": 3,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Anaïs Guicherd",
@@ -1345,8 +1352,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 18500,
     "y": 2,
-    "cat": "Ecoles / Public / UE",
-    "color": "#43A047",
+    "cat": "Écoles",
+    "color": "#00A6A6",
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
@@ -1361,8 +1368,8 @@ const SEED_DATA = [
     "product": "Coaching",
     "revenue": 36000,
     "y": -3,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "SBF 120",
+    "color": "#8E24AA",
     "outline": "",
     "owner": "Sarah Kureemun",
     "owner_missing": false,
@@ -1377,8 +1384,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 18000,
     "y": 2,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "SBF 120",
+    "color": "#8E24AA",
     "outline": "",
     "owner": "Sarah Kureemun",
     "owner_missing": false,
@@ -1409,7 +1416,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 110000,
     "y": 4,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Sarah Kureemun",
@@ -1425,7 +1432,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 15000,
     "y": 2,
-    "cat": "Ecoles / Public / UE",
+    "cat": "Public / Semi-Public",
     "color": "#43A047",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -1489,7 +1496,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 233000,
     "y": 5,
-    "cat": "Ecoles / Public / UE",
+    "cat": "Public / Semi-Public",
     "color": "#43A047",
     "outline": "",
     "owner": "Sarah Kureemun",
@@ -1521,8 +1528,8 @@ const SEED_DATA = [
     "product": "Coaching",
     "revenue": 20000,
     "y": -4,
-    "cat": "CAC 40",
-    "color": "#E53935",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
+    "color": "#1E88E5",
     "outline": "",
     "owner": "Sarah Kureemun",
     "owner_missing": false,
@@ -1537,8 +1544,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 17000,
     "y": 2,
-    "cat": "CAC 40",
-    "color": "#E53935",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
+    "color": "#1E88E5",
     "outline": "",
     "owner": "Sarah Kureemun",
     "owner_missing": false,
@@ -1553,7 +1560,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 204065,
     "y": 5,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -1569,8 +1576,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 50000,
     "y": 2,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "SBF 120",
+    "color": "#8E24AA",
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
@@ -1585,8 +1592,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 0,
     "y": 1,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "SBF 120",
+    "color": "#8E24AA",
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
@@ -1601,8 +1608,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 0,
     "y": 1,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "SBF 120",
+    "color": "#8E24AA",
     "outline": "",
     "owner": "Anaïs Guicherd",
     "owner_missing": false,
@@ -1617,8 +1624,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 0,
     "y": 1,
-    "cat": "CAC 40",
-    "color": "#E53935",
+    "cat": "SBF 120",
+    "color": "#8E24AA",
     "outline": "",
     "owner": "Anaïs Guicherd",
     "owner_missing": false,
@@ -1633,8 +1640,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 95000,
     "y": 3,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "CAC 40",
+    "color": "#E53935",
     "outline": "",
     "owner": "Sarah Kureemun",
     "owner_missing": false,
@@ -1649,7 +1656,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 185000,
     "y": 4,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -1681,7 +1688,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 36480,
     "y": 2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -1697,7 +1704,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 57480,
     "y": 3,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -1713,7 +1720,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 30000,
     "y": 2,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Anaïs Guicherd",
@@ -1729,8 +1736,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 36000,
     "y": 2,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "CAC 40",
+    "color": "#E53935",
     "outline": "",
     "owner": "Clément Le Roux",
     "owner_missing": false,
@@ -1745,7 +1752,7 @@ const SEED_DATA = [
     "product": "Coaching",
     "revenue": 0,
     "y": -5,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -1793,7 +1800,7 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 0,
     "y": 1,
-    "cat": "Entreprise privée",
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
     "color": "#1E88E5",
     "outline": "",
     "owner": "Jérémie Lecamus",
@@ -1809,8 +1816,8 @@ const SEED_DATA = [
     "product": "Langues",
     "revenue": 0,
     "y": 1,
-    "cat": "Entreprise privée",
-    "color": "#1E88E5",
+    "cat": "Public / Semi-Public",
+    "color": "#43A047",
     "outline": "",
     "owner": "Sarah Kureemun",
     "owner_missing": false,
@@ -1875,10 +1882,11 @@ let watchFilters = {
   cat: null,
   owner: null
 };
-const STORAGE_KEY = 'ao_dashboard_data_orange_v1';
+const STORAGE_KEY = 'ao_dashboard_data_categories_excel_v2';
 const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','outline','owner','owner_missing','notes','watch'];
-const CAT_COLORS = {'CAC 40':'#E53935','Entreprise privée':'#1E88E5','Ecoles / Public / UE':'#43A047'}; // couleurs métier conservées
-const CAT_ORDER = ['Ecoles / Public / UE','CAC 40','Entreprise privée'];
+const CAT_COLORS = {"CAC 40": "#E53935", "SBF 120": "#8E24AA", "Entreprise privée hors CAC 40/SBF 120": "#1E88E5", "Public / Semi-Public": "#43A047", "Écoles": "#00A6A6"}; // couleurs métier mises à jour depuis classification_entreprises_AO.xlsx
+const CAT_ORDER = ["Public / Semi-Public", "Écoles", "SBF 120", "CAC 40", "Entreprise privée hors CAC 40/SBF 120"];
+const CATEGORY_BY_ID = {"1": "Public / Semi-Public", "2": "SBF 120", "3": "CAC 40", "4": "CAC 40", "5": "SBF 120", "6": "Entreprise privée hors CAC 40/SBF 120", "7": "Entreprise privée hors CAC 40/SBF 120", "8": "Public / Semi-Public", "9": "Public / Semi-Public", "10": "CAC 40", "11": "CAC 40", "12": "Entreprise privée hors CAC 40/SBF 120", "13": "CAC 40", "14": "Entreprise privée hors CAC 40/SBF 120", "15": "SBF 120", "16": "CAC 40", "17": "Entreprise privée hors CAC 40/SBF 120", "18": "CAC 40", "19": "Entreprise privée hors CAC 40/SBF 120", "20": "Entreprise privée hors CAC 40/SBF 120", "21": "Entreprise privée hors CAC 40/SBF 120", "22": "Entreprise privée hors CAC 40/SBF 120", "23": "Entreprise privée hors CAC 40/SBF 120", "24": "Entreprise privée hors CAC 40/SBF 120", "25": "Entreprise privée hors CAC 40/SBF 120", "26": "CAC 40", "27": "CAC 40", "28": "Entreprise privée hors CAC 40/SBF 120", "29": "Entreprise privée hors CAC 40/SBF 120", "30": "Public / Semi-Public", "31": "Écoles", "32": "Écoles", "33": "CAC 40", "34": "Entreprise privée hors CAC 40/SBF 120", "35": "Entreprise privée hors CAC 40/SBF 120", "36": "Entreprise privée hors CAC 40/SBF 120", "37": "Entreprise privée hors CAC 40/SBF 120", "38": "Entreprise privée hors CAC 40/SBF 120", "39": "Public / Semi-Public", "40": "SBF 120", "41": "Entreprise privée hors CAC 40/SBF 120", "42": "Entreprise privée hors CAC 40/SBF 120", "43": "Entreprise privée hors CAC 40/SBF 120", "44": "Entreprise privée hors CAC 40/SBF 120", "45": "Entreprise privée hors CAC 40/SBF 120", "46": "SBF 120", "47": "Public / Semi-Public", "48": "Public / Semi-Public", "49": "Public / Semi-Public", "50": "SBF 120", "51": "SBF 120", "52": "Écoles", "53": "CAC 40", "54": "Entreprise privée hors CAC 40/SBF 120", "55": "Entreprise privée hors CAC 40/SBF 120", "56": "CAC 40", "57": "CAC 40", "58": "Entreprise privée hors CAC 40/SBF 120", "59": "Entreprise privée hors CAC 40/SBF 120", "60": "Entreprise privée hors CAC 40/SBF 120", "61": "Entreprise privée hors CAC 40/SBF 120", "62": "Entreprise privée hors CAC 40/SBF 120", "63": "Écoles", "64": "SBF 120", "65": "SBF 120", "66": "CAC 40", "67": "Entreprise privée hors CAC 40/SBF 120", "68": "Public / Semi-Public", "69": "CAC 40", "70": "CAC 40", "71": "CAC 40", "72": "Public / Semi-Public", "73": "CAC 40", "74": "Entreprise privée hors CAC 40/SBF 120", "75": "Entreprise privée hors CAC 40/SBF 120", "76": "Entreprise privée hors CAC 40/SBF 120", "77": "SBF 120", "78": "SBF 120", "79": "SBF 120", "80": "SBF 120", "81": "CAC 40", "82": "Entreprise privée hors CAC 40/SBF 120", "83": "CAC 40", "84": "Entreprise privée hors CAC 40/SBF 120", "85": "Entreprise privée hors CAC 40/SBF 120", "86": "Entreprise privée hors CAC 40/SBF 120", "87": "CAC 40", "88": "Entreprise privée hors CAC 40/SBF 120", "89": "CAC 40", "90": "CAC 40", "91": "Entreprise privée hors CAC 40/SBF 120", "92": "Public / Semi-Public", "93": "CAC 40", "94": "CAC 40"};
 const Y_BANDS_LANGUES = [
   {max:10000,y:1,label:'Langues ≤ 10k€'}, {max:50000,y:2,label:'Langues 10–50k€'}, {max:100000,y:3,label:'Langues 50–100k€'}, {max:200000,y:4,label:'Langues 100–200k€'}, {max:1000000,y:5,label:'Langues > 200k€'}
 ];
@@ -1889,8 +1897,10 @@ const Y_BANDS_COACHING = [
 function escapeHtml(s){ return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 function computeYFromRevenue(revenue, product){ const v = Number.isFinite(Number(revenue)) ? Number(revenue) : 0; const bands = String(product).toLowerCase()==='coaching' ? Y_BANDS_COACHING : Y_BANDS_LANGUES; return (bands.find(b=>v<=b.max) || bands[bands.length-1]).y; }
 function colorForCategory(cat){ return CAT_COLORS[cat] || '#1E88E5'; }
+function shortCatLabel(cat){ const labels = {"CAC 40": "CAC40", "SBF 120": "SBF120", "Entreprise privée hors CAC 40/SBF 120": "Privé hors CAC/SBF", "Public / Semi-Public": "Public / semi-public", "Écoles": "Écoles"}; return labels[cat] || cat; }
+
 function ownerLabel(d){ return d && d.owner && String(d.owner).trim() ? String(d.owner).trim() : 'Owner / BDR manquant'; }
-function catBadge(cat){ return cat==='CAC 40'?'b-red':cat==='Entreprise privée'?'b-blue':'b-green'; }  
+function catBadge(cat){ return 'b-dynamic'; }  
 function catColor(cat){ return colorForCategory(cat); }
 function categoryIcon(cat){ return `<span class="cat-dot" style="background:${catColor(cat)}"></span>`; }
 function statusFromNotes(notes){
@@ -1919,8 +1929,10 @@ function cockpitMetrics(rows=data){
 function categoryMetrics(rows=data){
   return {
     cac: rows.filter(d=>d.cat==='CAC 40').length,
-    pub: rows.filter(d=>d.cat==='Ecoles / Public / UE').length,
-    priv: rows.filter(d=>d.cat==='Entreprise privée').length
+    sbf: rows.filter(d=>d.cat==='SBF 120').length,
+    priv: rows.filter(d=>d.cat==='Entreprise privée hors CAC 40/SBF 120').length,
+    pub: rows.filter(d=>d.cat==='Public / Semi-Public').length,
+    eco: rows.filter(d=>d.cat==='Écoles').length
   };
 }
 function updateCockpitMetrics(){
@@ -1932,7 +1944,7 @@ function updateCockpitMetrics(){
     <div class="kpi-card"><div class="kpi-value">${m.progress}</div><div class="kpi-label">AO en cours</div></div>
     <div class="kpi-card"><div class="kpi-value">${m.watch}</div><div class="kpi-label">À surveiller</div></div>`; }
   const s=document.getElementById('portfolioSummary');
-  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange">${m.total} AO</span><span class="summary-pill">${c.cac} CAC40</span><span class="summary-pill">${c.pub} Public</span><span class="summary-pill">${c.priv} Privé</span></div><div class="summary-secondary"><span class="summary-pill orange">${m.upcoming} à venir</span><span class="summary-pill green">${m.confirmed} confirmé</span><span class="summary-pill yellow">${m.progress} en cours</span><span class="summary-pill">⭐ ${m.watch} à surveiller</span></div>`; }
+  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange">${m.total} AO</span><span class="summary-pill">${c.cac} CAC40</span><span class="summary-pill">${c.sbf} SBF120</span><span class="summary-pill">${c.pub} Public</span><span class="summary-pill">${c.eco} Écoles</span><span class="summary-pill">${c.priv} Privé</span></div><div class="summary-secondary"><span class="summary-pill orange">${m.upcoming} à venir</span><span class="summary-pill green">${m.confirmed} confirmé</span><span class="summary-pill yellow">${m.progress} en cours</span><span class="summary-pill">⭐ ${m.watch} à surveiller</span></div>`; }
   document.getElementById('watchTopCount') && (document.getElementById('watchTopCount').textContent=m.watch);
   document.getElementById('watchBtn1') && document.getElementById('watchBtn1').setAttribute('data-count',m.watch);
   document.getElementById('watchBtn2') && document.getElementById('watchBtn2').setAttribute('data-count',m.watch);
@@ -1970,10 +1982,10 @@ function arrangeCockpit(){
   if(editor && legend) editor.insertAdjacentElement('afterend', legend);
 }
 
-function bubbleSizeByCat(cat){ return cat==='CAC 40'?27:cat==='Entreprise privée'?15:9; }
+function bubbleSizeByCat(cat){ return cat==='CAC 40'?27:cat==='SBF 120'?21:cat==='Public / Semi-Public'?18:cat==='Écoles'?16:14; }
 function nextDataId(){ return data.reduce((m,d)=>Math.max(m, Number(d.id)||0),0)+1; }
 function normalizePoint(row){
-  const cat = row.cat || 'Entreprise privée';
+  const cat = CATEGORY_BY_ID[String(row.id)] || row.cat || 'Entreprise privée hors CAC 40/SBF 120';
   const product = row.product || 'Langues';
   const revenue = Number(row.revenue ?? 0);
   const year = Number(row.year ?? new Date().getFullYear());
@@ -2160,8 +2172,9 @@ function renderCompanyTable(){
     ${th('Catégorie','cat',checkboxFilterMenu('cat','Catégorie'))}
     ${th('Owner / BDR','owner',checkboxFilterMenu('owner','Owner / BDR'))}
     <th>À surveiller</th>
+    <th>Statut</th>  
     ${th('Notes','notes',textFilterMenu('notes','Notes'))}
-  </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" class="${Number(d.id)===Number(selectedCompanyId)?'selected':''}"><td><b>${escapeHtml(d.name)}</b></td><td>${d.year}</td><td>${escapeHtml(d.product)}</td><td>${Math.round(d.revenue).toLocaleString('fr-FR')} €</td><td>${escapeHtml(d.cat)}</td><td>${escapeHtml(ownerLabel(d))}</td><td class="watch-check-cell"><button type="button" class="watch-star ${d.watch?'':'off'}" data-watch-id="${d.id}" title="Ajouter à la liste À surveiller">${d.watch?'★':'☆'}</button></td><td class="status-cell">${statusBadgeHtml(d.notes)}</td><td class="notes-cell">${escapeHtml(d.notes||'')}</td></tr>`).join('')}</tbody></table>`;
+  </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" class="${Number(d.id)===Number(selectedCompanyId)?'selected':''}"><td><b>${escapeHtml(d.name)}</b></td><td>${d.year}</td><td>${escapeHtml(d.product)}</td><td>${Math.round(d.revenue).toLocaleString('fr-FR')} €</td><td><span class="cat-dot" style="background:${colorForCategory(d.cat)}"></span> ${escapeHtml(shortCatLabel(d.cat))}</td><td>${escapeHtml(ownerLabel(d))}</td><td class="watch-check-cell"><button type="button" class="watch-star ${d.watch?'':'off'}" data-watch-id="${d.id}" title="Ajouter à la liste À surveiller">${d.watch?'★':'☆'}</button></td><td class="status-cell">${statusBadgeHtml(d.notes)}</td><td class="notes-cell">${escapeHtml(d.notes||'')}</td></tr>`).join('')}</tbody></table>`;
   wrap.querySelectorAll('tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>selectCompany(tr.dataset.id)));
   wrap.querySelectorAll('.watch-star').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); const d=data.find(x=>Number(x.id)===Number(btn.dataset.watchId)); toggleWatch(btn.dataset.watchId, !(d&&d.watch)); }));
   bindTableFilterEvents();
@@ -2252,7 +2265,7 @@ function updateChart(){
         line:{width:cpts.map(p=>Number(p.year)>=currentYearNumber()?3:1.4),color:cpts.map(p=>Number(p.year)>=currentYearNumber()?'#FF7900':'#111')}
       }
     });
-    traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:true,hoverinfo:'skip',x:[null],y:[null],marker:{size:12,color:colorForCategory(cat),line:{width:1,color:'#111'}}});
+    traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:false,hoverinfo:'skip',x:[null],y:[null],marker:{size:12,color:colorForCategory(cat),line:{width:1,color:'#111'}}});
   });
 
   const futurePts = pts.filter(p=>Number(p.year)>=currentYearNumber());
@@ -2294,7 +2307,7 @@ function updateChart(){
     opacity:0.98
   }));
 
-  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:46,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',shapes:[...yearShapes,todayShape],annotations:[todayAnnotation,...labelAnnotations],xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-1.6,f.yMax+1.6]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.95,5.95],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},legend:{orientation:'h',y:1.08,x:-.1},font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
+  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:24,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',shapes:[...yearShapes,todayShape],annotations:[todayAnnotation,...labelAnnotations],xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-1.6,f.yMax+1.6]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.95,5.95],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},showlegend:false,font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
   const gd=document.getElementById('chart');
   gd.removeAllListeners && gd.removeAllListeners('plotly_click');
   gd.removeAllListeners && gd.removeAllListeners('plotly_hover');
@@ -2339,7 +2352,7 @@ function renderEditor(containerId,prefix){
     <div class="field-label">Entreprise</div><input id="${prefix}EditName" type="text" value="${escapeHtml(d.name)}">
     <div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div>
     <div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching'], d.product)}
-    <div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='Entreprise privée'?'selected':''}>Entreprise privée</option><option ${d.cat==='Ecoles / Public / UE'?'selected':''}>Ecoles / Public / UE</option></select>
+    <div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='SBF 120'?'selected':''}>SBF 120</option><option ${d.cat==='Entreprise privée hors CAC 40/SBF 120'?'selected':''}>Entreprise privée hors CAC 40/SBF 120</option><option ${d.cat==='Public / Semi-Public'?'selected':''}>Public / Semi-Public</option><option ${d.cat==='Écoles'?'selected':''}>Écoles</option></select>
     <div class="field-label">Owner / BDR</div>${singleCheckboxGroupHtml(ownerGroup, owners, ownerLabel(d))}
     <div class="field-label">Notes</div><textarea id="${prefix}EditNotes">${escapeHtml(d.notes||'')}</textarea>
     <div class="editor-actions"><button type="submit" class="editor-save">Enregistrer</button><button type="button" id="${prefix}EditClose" class="editor-close">Fermer</button></div>
@@ -2413,13 +2426,13 @@ function renderDashboardFloatingPopup(){
   const productGroup = `${prefix}EditProductChoice`;
   const ownerGroup = `${prefix}EditOwnerChoice`;
   const owners = getEditorOwners(ownerLabel(d));
-  popup.innerHTML = `<div class="popup-shell"><div class="popup-hero"><h3>${escapeHtml(d.name)}</h3><div class="popup-tags"><span class="popup-tag">${escapeHtml(d.cat)}</span><span class="popup-tag">${escapeHtml(d.product)}</span><span class="popup-tag">${d.year}</span><span class="popup-tag">${Math.round(d.revenue).toLocaleString('fr-FR')} €</span>${d.watch?'<span class="popup-tag">⭐ Watchlist</span>':''}</div></div>
+  popup.innerHTML = `<div class="popup-shell"><div class="popup-hero"><h3>${escapeHtml(d.name)}</h3><div class="popup-tags"><span class="popup-tag">${escapeHtml(shortCatLabel(d.cat))}</span><span class="popup-tag">${escapeHtml(d.product)}</span><span class="popup-tag">${d.year}</span><span class="popup-tag">${Math.round(d.revenue).toLocaleString('fr-FR')} €</span>${d.watch?'<span class="popup-tag">⭐ Watchlist</span>':''}</div></div>
   <div class="popup-body"><div class="popup-grid"><div class="info-card"><div class="info-label">Owner</div><div class="info-value">${escapeHtml(ownerLabel(d))}</div></div><div class="info-card"><div class="info-label">Statut</div><div class="info-value">${statusBadgeHtml(d.notes)}</div></div></div>
   <form id="${prefix}EditForm">
     <div class="field-label">Entreprise</div><input id="${prefix}EditName" type="text" value="${escapeHtml(d.name)}">
     <div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div>
     <div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching'], d.product)}
-    <div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='Entreprise privée'?'selected':''}>Entreprise privée</option><option ${d.cat==='Ecoles / Public / UE'?'selected':''}>Ecoles / Public / UE</option></select>
+    <div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='SBF 120'?'selected':''}>SBF 120</option><option ${d.cat==='Entreprise privée hors CAC 40/SBF 120'?'selected':''}>Entreprise privée hors CAC 40/SBF 120</option><option ${d.cat==='Public / Semi-Public'?'selected':''}>Public / Semi-Public</option><option ${d.cat==='Écoles'?'selected':''}>Écoles</option></select>
     <div class="field-label">Owner / BDR</div>${singleCheckboxGroupHtml(ownerGroup, owners, ownerLabel(d))}
     <div class="field-label">Notes</div><div class="notes-zone"><textarea id="${prefix}EditNotes">${escapeHtml(d.notes||'')}</textarea></div>
     <div class="editor-actions"><button type="submit" class="editor-save">Enregistrer</button><button type="button" id="${prefix}EditClose" class="editor-close">Fermer</button></div>
@@ -2557,7 +2570,7 @@ function renderWatchTable(){
     ${watchTh('Catégorie','cat',watchCheckboxFilterMenu('cat','Catégorie'))}
     ${watchTh('Produit','product',watchCheckboxFilterMenu('product','Produit'))}
     ${watchTh('Owner / BDR','owner',watchCheckboxFilterMenu('owner','Owner / BDR'))}
-  </tr></thead><tbody>${rows.map(d=>`<tr><td class="watch-year">${d.year}</td><td><b>${escapeHtml(d.name)}</b></td><td>${escapeHtml(d.cat)}</td><td>${escapeHtml(d.product)}</td><td>${escapeHtml(ownerLabel(d))}</td></tr>`).join('')}</tbody></table>` : '<p>Aucune entreprise cochée “À surveiller” pour le moment.</p>';
+  </tr></thead><tbody>${rows.map(d=>`<tr><td class="watch-year">${d.year}</td><td><b>${escapeHtml(d.name)}</b></td><td><span class="cat-dot" style="background:${colorForCategory(d.cat)}"></span> ${escapeHtml(shortCatLabel(d.cat))}</td><td>${escapeHtml(d.product)}</td><td>${escapeHtml(ownerLabel(d))}</td></tr>`).join('')}</tbody></table>` : '<p>Aucune entreprise cochée “À surveiller” pour le moment.</p>';
   document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">⭐ A surveiller (${rows.length})</h2><div class="mini-note">Liste manuelle : coche/décoche la case "À surveiller" dans l’onglet 2 pour gérer cette liste.</div>${body}`;
   bindWatchFilterEvents();
 }
