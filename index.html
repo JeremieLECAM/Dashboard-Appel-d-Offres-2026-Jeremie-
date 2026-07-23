@@ -219,7 +219,7 @@
 .section.open .section-count{background:rgba(0,0,0,.10);border-color:rgba(0,0,0,.10);}
 .summary-strip{position:sticky;top:0;z-index:15;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.96);backdrop-filter:blur(5px);font-size:12px;font-weight:900;box-shadow:0 5px 16px rgba(0,0,0,.05);}
 .summary-strip .summary-main,.summary-strip .summary-secondary{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.summary-pill{border:1px solid #e8e8e8;background:#fff;border-radius:999px;padding:4px 8px;white-space:nowrap;}
+.summary-pill{border:1px solid #e8e8e8;background:#fff;border-radius:999px;padding:4px 8px;white-space:nowrap;cursor:pointer;} .summary-pill.active{background:#FF7900;color:#000;border-color:#FF7900;box-shadow:0 0 0 2px rgba(255,121,0,.15);} 
 .summary-pill.orange{border-color:rgba(255,121,0,.45);background:#fff6ee;}
 .summary-pill.green{border-color:rgba(67,160,71,.30);background:#f1fbf3;}
 .summary-pill.yellow{border-color:rgba(255,193,7,.35);background:#fff9e6;}
@@ -1865,6 +1865,7 @@ let plotlyReady = false;
 let showNames = false;
 let selectedCompanyId = null;
 let hoveredCompanyId = null;
+let dashboardKpiFilter = null;
 let tableSort = { col: 'name', dir: 'asc' };
 let tableFilters = {
   name: { op: 'contains', value: '' },
@@ -1944,7 +1945,7 @@ function updateCockpitMetrics(){
     <div class="kpi-card"><div class="kpi-value">${m.progress}</div><div class="kpi-label">AO en cours</div></div>
     <div class="kpi-card"><div class="kpi-value">${m.watch}</div><div class="kpi-label">À surveiller</div></div>`; }
   const s=document.getElementById('portfolioSummary');
-  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange">${m.total} AO</span><span class="summary-pill">${c.cac} CAC40</span><span class="summary-pill">${c.sbf} SBF120</span><span class="summary-pill">${c.pub} Public</span><span class="summary-pill">${c.eco} Écoles</span><span class="summary-pill">${c.priv} Privé</span></div><div class="summary-secondary"><span class="summary-pill orange">${m.upcoming} à venir</span><span class="summary-pill green">${m.confirmed} confirmé</span><span class="summary-pill yellow">${m.progress} en cours</span><span class="summary-pill">⭐ ${m.watch} à surveiller</span></div>`; }
+  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${dashboardKpiFilter===null?'active':''}" data-kpi="all">${m.total} AO</span><span class="summary-pill">${c.cac} CAC40</span><span class="summary-pill">${c.sbf} SBF120</span><span class="summary-pill">${c.pub} Public</span><span class="summary-pill">${c.eco} Écoles</span><span class="summary-pill">${c.priv} Privé</span></div><div class="summary-secondary"><span class="summary-pill orange kpi-filter ${dashboardKpiFilter==='upcoming'?'active':''}" data-kpi="upcoming">${m.upcoming} à venir</span><span class="summary-pill green kpi-filter ${dashboardKpiFilter==='confirmed'?'active':''}" data-kpi="confirmed">${m.confirmed} confirmé</span><span class="summary-pill yellow kpi-filter ${dashboardKpiFilter==='progress'?'active':''}" data-kpi="progress">${m.progress} en cours</span><span class="summary-pill kpi-filter ${dashboardKpiFilter==='watch'?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`; s.querySelectorAll('.kpi-filter').forEach(btn=>btn.onclick=()=>{dashboardKpiFilter=btn.dataset.kpi==='all'?null:btn.dataset.kpi; updateAll();}); }
   document.getElementById('watchTopCount') && (document.getElementById('watchTopCount').textContent=m.watch);
   document.getElementById('watchBtn1') && document.getElementById('watchBtn1').setAttribute('data-count',m.watch);
   document.getElementById('watchBtn2') && document.getElementById('watchBtn2').setAttribute('data-count',m.watch);
@@ -2040,7 +2041,7 @@ function switchTab(tab){
 }
 function resizeChart(){ if(window.Plotly) try{Plotly.Plots.resize('chart');}catch(e){} }
 function getFilterState(){ const q=document.getElementById('search').value.trim().toLowerCase(); const cats=[...document.querySelectorAll('.f-cat:checked')].map(e=>e.value); const prods=[...document.querySelectorAll('.f-prod:checked')].map(e=>e.value); const owners=[...document.querySelectorAll('.f-owner:checked')].map(e=>e.value); let yMin=parseInt(document.getElementById('yearMin').value,10), yMax=parseInt(document.getElementById('yearMax').value,10); if(Number.isNaN(yMin)) yMin=Math.min(...years); if(Number.isNaN(yMax)) yMax=Math.max(...years); if(yMin>yMax){const t=yMin;yMin=yMax;yMax=t;} return {q,cats,prods,owners,yMin,yMax}; }
-function filteredData(){ const f=getFilterState(); return data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); }
+function filteredData(){ const f=getFilterState(); let rows=data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); if(dashboardKpiFilter==='upcoming') rows=rows.filter(d=>Number(d.year)>=currentYearNumber()); if(dashboardKpiFilter==='progress') rows=rows.filter(d=>statusFromNotes(d.notes).label==='En cours'); if(dashboardKpiFilter==='watch') rows=rows.filter(d=>d.watch===true); if(dashboardKpiFilter==='confirmed') rows=rows.filter(d=>statusFromNotes(d.notes).label==='Confirmé'); return rows; }
 function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.map(ownerLabel))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); updateFilterCounters(); }
 function updateAll(){ normalizeAllData(); renderList(); renderCompanyTable(); renderEditors(); updateCockpitMetrics(); updateFilterCounters(); updateChart(); saveData(); }
 function renderList(){
@@ -2155,7 +2156,7 @@ function selectedGroupValue(groupName, fallback){
 function renderCompanyTable(){
   const wrap=document.getElementById('companyTableWrap'); if(!wrap) return;
   const q=(document.getElementById('companyTableSearch').value||'').trim().toLowerCase();
-  let rows=data.slice()
+  let rows=filteredData().slice()
     .filter(d=>!q||[d.name,d.year,d.product,d.revenue,d.cat,d.owner,d.notes].some(v=>String(v??'').toLowerCase().includes(q)))
     .filter(d=>textFilterPass(d.name, tableFilters.name))
     .filter(d=>textFilterPass(d.notes || '', tableFilters.notes))
