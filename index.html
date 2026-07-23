@@ -196,6 +196,66 @@
 
 .watch-check-cell{ text-align:center; white-space:nowrap; }
 .watch-toggle{ width:16px; height:16px; accent-color:var(--orange); cursor:pointer; }
+
+
+/* UX cockpit update - recommandations appliquees sans changer le modele de donnees */
+.topbar{align-items:center;padding:7px 12px 0;gap:8px;}
+.topbar-watch-badge{margin-left:auto;align-self:center;border:1px solid rgba(255,121,0,.75);background:#141414;color:#fff;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:900;box-shadow:0 6px 16px rgba(0,0,0,.18);white-space:nowrap;}
+.topbar-watch-badge strong{color:var(--orange);}
+.dashboard-grid{grid-template-columns:250px 1fr;}
+.panel{padding:10px;}
+.cockpit-kpis{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:2px 0 10px;}
+.kpi-card{border:1px solid #ececec;border-radius:13px;background:linear-gradient(180deg,#fff,#fafafa);padding:8px 7px;box-shadow:0 5px 14px rgba(0,0,0,.055);min-height:54px;}
+.kpi-card .kpi-value{font-size:18px;font-weight:950;line-height:1;color:#000;}
+.kpi-card .kpi-label{font-size:9px;color:#555;font-weight:800;margin-top:4px;line-height:1.15;}
+.kpi-card.accent{border-color:rgba(255,121,0,.45);background:#fff7ef;}
+.search-cockpit{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.97);padding:7px 0 8px;margin-bottom:8px;border-bottom:1px solid var(--line);}
+.search-cockpit-title{font-size:10px;font-weight:950;margin:0 0 5px;display:flex;align-items:center;gap:5px;}
+#search{height:34px;border:1px solid rgba(255,121,0,.55);border-radius:12px;font-size:11px;font-weight:700;margin:0;box-shadow:0 4px 13px rgba(0,0,0,.055);}
+.cockpit-title{font-size:10px;font-weight:950;text-transform:uppercase;letter-spacing:.04em;color:#222;margin:8px 0 6px;display:flex;align-items:center;justify-content:space-between;}
+#filters .section{border-radius:13px;margin-bottom:8px;background:#fff;box-shadow:0 3px 9px rgba(0,0,0,.035);}
+#filters .section-head{font-size:10px;padding:8px 9px;border-radius:0;}
+.section-count{margin-left:auto;margin-right:4px;background:rgba(255,255,255,.23);border:1px solid rgba(255,255,255,.35);color:inherit;border-radius:999px;padding:1px 6px;font-size:9px;font-weight:950;}
+.section.open .section-count{background:rgba(0,0,0,.10);border-color:rgba(0,0,0,.10);}
+.summary-strip{position:sticky;top:0;z-index:15;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.96);backdrop-filter:blur(5px);font-size:12px;font-weight:900;box-shadow:0 5px 16px rgba(0,0,0,.05);}
+.summary-strip .summary-main,.summary-strip .summary-secondary{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.summary-pill{border:1px solid #e8e8e8;background:#fff;border-radius:999px;padding:4px 8px;white-space:nowrap;}
+.summary-pill.orange{border-color:rgba(255,121,0,.45);background:#fff6ee;}
+.summary-pill.green{border-color:rgba(67,160,71,.30);background:#f1fbf3;}
+.summary-pill.yellow{border-color:rgba(255,193,7,.35);background:#fff9e6;}
+.item{padding:8px 8px;border-radius:11px;margin-top:6px;border:1px solid #eeeeee;background:#fff;}
+.item-main{display:flex;align-items:center;gap:7px;min-width:0;}
+.cat-dot{width:10px;height:10px;border-radius:999px;display:inline-block;flex:0 0 auto;box-shadow:0 0 0 2px rgba(0,0,0,.05);}
+.item-name{font-size:10px;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item-meta{font-size:9.5px;color:#555;margin-top:4px;padding-left:17px;line-height:1.25;}
+.status-chip{display:inline-flex;align-items:center;gap:3px;border-radius:999px;padding:2px 7px;font-size:9px;font-weight:950;border:1px solid transparent;white-space:nowrap;}
+.status-confirmed{background:#edf8ef;border-color:#bfe4c6;color:#176b2c;}
+.status-progress{background:#fff2e5;border-color:#ffd0a1;color:#9a4b00;}
+.status-toconfirm{background:#fff9df;border-color:#f3df8a;color:#775d00;}
+.status-lost{background:#ffefef;border-color:#ffc4c4;color:#a20f0f;}
+.status-waiting{background:#eef4ff;border-color:#c9dcff;color:#254f92;}
+.status-upcoming{background:#f5edff;border-color:#dcc4ff;color:#5b2b88;}
+.status-empty{background:#f4f4f4;border-color:#e4e4e4;color:#555;}
+.watch-star{border:0;background:transparent;color:#ffb000;font-size:18px;line-height:1;cursor:pointer;padding:0 4px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.20));}
+.watch-star.off{color:#cfcfcf;filter:none;}
+.watch-star:hover{transform:scale(1.12);}
+#watchBtn1::after,#watchBtn2::after{content:' (' attr(data-count) ')';}
+.floating-company-popup{background:#fff!important;padding:0!important;border-radius:18px!important;border:1px solid rgba(0,0,0,.12)!important;overflow:hidden!important;}
+.floating-company-popup .popup-shell,.company-editor .popup-shell{background:#fff;}
+.popup-hero{background:linear-gradient(135deg,#111,#2a2a2a);color:#fff;padding:13px 14px;border-bottom:3px solid var(--orange);}
+.popup-hero h3{margin:0;font-size:15px;line-height:1.2;color:#fff;}
+.popup-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px;}
+.popup-tag{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);font-size:10px;font-weight:900;color:#fff;}
+.popup-body{padding:11px 12px;}
+.popup-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.info-card{border:1px solid #ececec;border-radius:12px;background:#fafafa;padding:7px;}
+.info-card .info-label{font-size:9px;color:#666;font-weight:900;text-transform:uppercase;letter-spacing:.03em;}
+.info-card .info-value{font-size:11px;font-weight:950;margin-top:3px;color:#000;}
+.notes-zone textarea{min-height:135px!important;background:#fffdfb;border:1px solid rgba(255,121,0,.35);font-size:11px;line-height:1.35;}
+.company-table .status-cell{white-space:nowrap;}
+.company-table .watch-check-cell{font-size:18px;}
+@media(max-width:1150px){.dashboard-grid{grid-template-columns:235px 1fr}.summary-strip{align-items:flex-start;flex-direction:column}.topbar-watch-badge{display:none}}
+
 </style>
 </head>
 <body onload="loadPlotly()">
@@ -203,6 +263,7 @@
   <div class="topbar">
     <button type="button" id="tabDashboardBtn" class="tab-btn active">1. Dashboard</button>
     <button type="button" id="tabListBtn" class="tab-btn">2. Liste</button>
+    <button type="button" id="watchTopBadge" class="topbar-watch-badge">⭐ A surveiller <strong id="watchTopCount">0</strong></button>
   </div>
 
   <div id="tabDashboard" class="tab-content active">
@@ -266,6 +327,7 @@
       </aside>
 
       <main id="chartPanel" class="chart-panel">
+        <div id="portfolioSummary" class="summary-strip"></div>
         <div id="chartWrap"><button id="fsBtn" type="button">⛶ Plein écran</button><div id="chart"></div></div>
         <div id="bottomBar"><button id="labelBtn" type="button">👁️ Afficher les noms</button><button id="watchBtn1" type="button">A surveiller</button></div>
       </main>
@@ -1828,7 +1890,86 @@ function escapeHtml(s){ return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&
 function computeYFromRevenue(revenue, product){ const v = Number.isFinite(Number(revenue)) ? Number(revenue) : 0; const bands = String(product).toLowerCase()==='coaching' ? Y_BANDS_COACHING : Y_BANDS_LANGUES; return (bands.find(b=>v<=b.max) || bands[bands.length-1]).y; }
 function colorForCategory(cat){ return CAT_COLORS[cat] || '#1E88E5'; }
 function ownerLabel(d){ return d && d.owner && String(d.owner).trim() ? String(d.owner).trim() : 'Owner / BDR manquant'; }
-function catBadge(cat){ return cat==='CAC 40'?'b-red':cat==='Entreprise privée'?'b-blue':'b-green'; }
+function catBadge(cat){ return cat==='CAC 40'?'b-red':cat==='Entreprise privée'?'b-blue':'b-green'; }  
+function catColor(cat){ return colorForCategory(cat); }
+function categoryIcon(cat){ return `<span class="cat-dot" style="background:${catColor(cat)}"></span>`; }
+function statusFromNotes(notes){
+  const n = normText(notes || '');
+  if(!n) return {label:'Sans statut', cls:'status-empty', icon:'•'};
+  if(n.includes('lost') || n.includes('perdu')) return {label:'Lost', cls:'status-lost', icon:'🔴'};
+  if(n.includes('confirmé') || n.includes('confirme')) return {label:'Confirmé', cls:'status-confirmed', icon:'🟢'};
+  if(n.includes('en cours')) return {label:'En cours', cls:'status-progress', icon:'🟠'};
+  if(n.includes('a confirmer') || n.includes('à confirmer') || n.includes('q1') || n.includes('q2') || n.includes('q3') || n.includes('q4')) return {label:'A confirmer', cls:'status-toconfirm', icon:'🟡'};
+  if(n.includes('attente') || n.includes('cdc') || n.includes('cahier des charges')) return {label:'Attente CDC', cls:'status-waiting', icon:'🔵'};
+  if(n.includes('a venir') || n.includes('à venir')) return {label:'A venir', cls:'status-upcoming', icon:'🟣'};
+  return {label:'Note', cls:'status-empty', icon:'•'};
+}
+function statusBadgeHtml(notes){ const st=statusFromNotes(notes); return `<span class="status-chip ${st.cls}">${st.icon} ${escapeHtml(st.label)}</span>`; }
+function currentDecimalYear(){ const now=new Date(); const start=new Date(now.getFullYear(),0,1), end=new Date(now.getFullYear()+1,0,1); return now.getFullYear()+((now-start)/(end-start)); }
+function currentYearNumber(){ return new Date().getFullYear(); }
+function cockpitMetrics(rows=data){
+  const cy=currentYearNumber();
+  const total=rows.length;
+  const upcoming=rows.filter(d=>Number(d.year)>=cy).length;
+  const progress=rows.filter(d=>statusFromNotes(d.notes).label==='En cours').length;
+  const watch=rows.filter(d=>d.watch===true).length;
+  const confirmed=rows.filter(d=>statusFromNotes(d.notes).label==='Confirmé').length;
+  return {total,upcoming,progress,watch,confirmed};
+}
+function categoryMetrics(rows=data){
+  return {
+    cac: rows.filter(d=>d.cat==='CAC 40').length,
+    pub: rows.filter(d=>d.cat==='Ecoles / Public / UE').length,
+    priv: rows.filter(d=>d.cat==='Entreprise privée').length
+  };
+}
+function updateCockpitMetrics(){
+  const m=cockpitMetrics(data), c=categoryMetrics(data);
+  const k=document.getElementById('cockpitKpis');
+  if(k){ k.innerHTML=`
+    <div class="kpi-card accent"><div class="kpi-value">${m.total}</div><div class="kpi-label">AO recensés</div></div>
+    <div class="kpi-card"><div class="kpi-value">${m.upcoming}</div><div class="kpi-label">AO à venir</div></div>
+    <div class="kpi-card"><div class="kpi-value">${m.progress}</div><div class="kpi-label">AO en cours</div></div>
+    <div class="kpi-card"><div class="kpi-value">${m.watch}</div><div class="kpi-label">À surveiller</div></div>`; }
+  const s=document.getElementById('portfolioSummary');
+  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange">${m.total} AO</span><span class="summary-pill">${c.cac} CAC40</span><span class="summary-pill">${c.pub} Public</span><span class="summary-pill">${c.priv} Privé</span></div><div class="summary-secondary"><span class="summary-pill orange">${m.upcoming} à venir</span><span class="summary-pill green">${m.confirmed} confirmé</span><span class="summary-pill yellow">${m.progress} en cours</span><span class="summary-pill">⭐ ${m.watch} à surveiller</span></div>`; }
+  document.getElementById('watchTopCount') && (document.getElementById('watchTopCount').textContent=m.watch);
+  document.getElementById('watchBtn1') && document.getElementById('watchBtn1').setAttribute('data-count',m.watch);
+  document.getElementById('watchBtn2') && document.getElementById('watchBtn2').setAttribute('data-count',m.watch);
+}
+function updateFilterCounters(){
+  const cats=document.querySelectorAll('.f-cat:checked').length;
+  const prods=document.querySelectorAll('.f-prod:checked').length;
+  const owners=document.querySelectorAll('.f-owner:checked').length;
+  const yMin=document.getElementById('yearMin')?.value || '';
+  const yMax=document.getElementById('yearMax')?.value || '';
+  const labels=[
+    ['#filters .section:nth-child(1) .section-head','🏷 Catégorie', cats],
+    ['#filters .section:nth-child(2) .section-head','📚 Produit', prods],
+    ['#filters .section:nth-child(3) .section-head','📅 Année', `${yMin} → ${yMax}`],
+    ['#ownerToggle','👤 Owner', owners]
+  ];
+  labels.forEach(([sel,title,count])=>{ const btn=document.querySelector(sel); if(!btn) return; const arrow=btn.querySelector('span:last-child')?.textContent || '▶'; const arrowId=sel==='#ownerToggle'?' id="ownerArrow"':''; btn.innerHTML=`${title} <span class="section-count">${count}</span><span${arrowId}>${arrow}</span>`; });
+}
+function arrangeCockpit(){
+  const panel=document.querySelector('#tabDashboard .panel'); if(!panel) return;
+  const logo=panel.querySelector('.panel-logo');
+  if(!document.getElementById('cockpitKpis')){ const k=document.createElement('div'); k.id='cockpitKpis'; k.className='cockpit-kpis'; logo.insertAdjacentElement('afterend', k); }
+  const search=document.getElementById('search');
+  if(search && !document.getElementById('searchCockpit')){ const wrap=document.createElement('div'); wrap.id='searchCockpit'; wrap.className='search-cockpit'; wrap.innerHTML='<div class="search-cockpit-title">🔍 Recherche</div>'; search.parentNode.insertBefore(wrap, search); wrap.appendChild(search); search.placeholder='🔍 Rechercher une entreprise...'; }
+  const filters=document.getElementById('filters');
+  if(filters && !document.getElementById('filtersTitle')){ const title=document.createElement('div'); title.id='filtersTitle'; title.className='cockpit-title'; title.innerHTML='<span>Filtres</span><span>▦</span>'; filters.parentNode.insertBefore(title, filters); }
+  const list=document.getElementById('listSection');
+  const newSec=document.getElementById('newCompanySection');
+  const dataSec=document.getElementById('dataToolsSection');
+  const editor=document.getElementById('companyEditor');
+  const legend=panel.querySelector('.legend');
+  if(list && newSec) list.insertAdjacentElement('afterend', newSec);
+  if(newSec && dataSec) newSec.insertAdjacentElement('afterend', dataSec);
+  if(dataSec && editor) dataSec.insertAdjacentElement('afterend', editor);
+  if(editor && legend) editor.insertAdjacentElement('afterend', legend);
+}
+
 function bubbleSizeByCat(cat){ return cat==='CAC 40'?27:cat==='Entreprise privée'?15:9; }
 function nextDataId(){ return data.reduce((m,d)=>Math.max(m, Number(d.id)||0),0)+1; }
 function normalizePoint(row){
@@ -1850,6 +1991,7 @@ function initApp(){
   if(plotlyReady) return; plotlyReady = true; loadData(); wireUI(); renderOwners(); updateAll();
 }
 function wireUI(){
+  arrangeCockpit();
   document.addEventListener('click', closeFilterMenus);
   document.querySelectorAll('.section-head').forEach(btn=>btn.addEventListener('click', e=>{ if(btn.id==='ownerToggle' || btn.id==='listToggle') return; const sec=btn.closest('.section'); const span=btn.querySelector('span:last-child'); const open=sec.classList.toggle('open'); if(span)span.textContent=open?'▼':'▶'; }));
   document.getElementById('tabDashboardBtn').onclick=()=>switchTab('dashboard'); document.getElementById('tabListBtn').onclick=()=>switchTab('list');
@@ -1867,7 +2009,7 @@ function wireUI(){
   document.getElementById('ownerSelectAllBtn').onclick=()=>{document.querySelectorAll('.f-owner').forEach(cb=>cb.checked=true); updateAll();};
   document.getElementById('ownerDeselectAllBtn').onclick=()=>{document.querySelectorAll('.f-owner').forEach(cb=>cb.checked=false); updateAll();};
   document.getElementById('newCompanyYear').value = new Date().getFullYear(); document.getElementById('newCompanyForm').addEventListener('submit', addCompanyFromForm);
-  document.getElementById('exportConstDataBtn').onclick=exportConstData; document.getElementById('exportCsvBtn').onclick=exportCsv; document.getElementById('importCsvBtn').onclick=()=>document.getElementById('importCsvInput').click(); document.getElementById('importCsvInput').addEventListener('change', importCsv);document.getElementById('watchBtn1')?.addEventListener('click',renderWatchList);document.getElementById('watchBtn2')?.addEventListener('click',renderWatchList);
+  document.getElementById('exportConstDataBtn').onclick=exportConstData; document.getElementById('exportCsvBtn').onclick=exportCsv; document.getElementById('importCsvBtn').onclick=()=>document.getElementById('importCsvInput').click(); document.getElementById('importCsvInput').addEventListener('change', importCsv);document.getElementById('watchBtn1')?.addEventListener('click',renderWatchList);document.getElementById('watchBtn2')?.addEventListener('click',renderWatchList);document.getElementById('watchTopBadge')?.addEventListener('click',renderWatchList);
 }
 function switchTab(tab){
   const list=tab==='list';
@@ -1887,11 +2029,11 @@ function switchTab(tab){
 function resizeChart(){ if(window.Plotly) try{Plotly.Plots.resize('chart');}catch(e){} }
 function getFilterState(){ const q=document.getElementById('search').value.trim().toLowerCase(); const cats=[...document.querySelectorAll('.f-cat:checked')].map(e=>e.value); const prods=[...document.querySelectorAll('.f-prod:checked')].map(e=>e.value); const owners=[...document.querySelectorAll('.f-owner:checked')].map(e=>e.value); let yMin=parseInt(document.getElementById('yearMin').value,10), yMax=parseInt(document.getElementById('yearMax').value,10); if(Number.isNaN(yMin)) yMin=Math.min(...years); if(Number.isNaN(yMax)) yMax=Math.max(...years); if(yMin>yMax){const t=yMin;yMin=yMax;yMax=t;} return {q,cats,prods,owners,yMin,yMax}; }
 function filteredData(){ const f=getFilterState(); return data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); }
-function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.map(ownerLabel))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); }
-function updateAll(){ normalizeAllData(); renderList(); renderCompanyTable(); renderEditors(); updateChart(); saveData(); }
+function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.map(ownerLabel))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); updateFilterCounters(); }
+function updateAll(){ normalizeAllData(); renderList(); renderCompanyTable(); renderEditors(); updateCockpitMetrics(); updateFilterCounters(); updateChart(); saveData(); }
 function renderList(){
   const pts=filteredData().sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));
-  document.getElementById('list').innerHTML=pts.map(d=>`<div class="item ${Number(d.id)===Number(selectedCompanyId)?'selected':''}" data-id="${d.id}"><div><b>${escapeHtml(d.name)}</b><span class="badge ${catBadge(d.cat)}">${escapeHtml(d.cat)}</span></div><div class="small">${escapeHtml(d.product)} · ${d.year} · ${Math.round(d.revenue).toLocaleString('fr-FR')} € · ${escapeHtml(ownerLabel(d))}${d.notes?`<br><span style="color:#666">📝 ${escapeHtml(d.notes).slice(0,90)}</span>`:''}</div></div>`).join('');
+  document.getElementById('list').innerHTML=pts.map(d=>`<div class="item ${Number(d.id)===Number(selectedCompanyId)?'selected':''}" data-id="${d.id}"><div class="item-main">${categoryIcon(d.cat)}<span class="item-name">${escapeHtml(d.name)}</span>${d.watch?' <span title="À surveiller">⭐</span>':''}</div><div class="item-meta">${escapeHtml(d.product)} • ${d.year}<br>👤 ${escapeHtml(ownerLabel(d))} &nbsp; ${statusBadgeHtml(d.notes)}</div></div>`).join('');
   document.querySelectorAll('#list .item').forEach(el=>{
     el.addEventListener('click',()=>selectCompany(el.dataset.id));
     el.addEventListener('mouseenter',()=>highlightCompanyFromList(el.dataset.id));
@@ -1899,7 +2041,6 @@ function renderList(){
   });
   syncFloatingPopupPosition();
 }
-
 function normText(v){ return String(v ?? '').trim().toLowerCase(); }
 function uniqueSortedValues(field){
   const vals = data.map(d => field === 'owner' ? ownerLabel(d) : d[field])
@@ -2020,15 +2161,14 @@ function renderCompanyTable(){
     ${th('Owner / BDR','owner',checkboxFilterMenu('owner','Owner / BDR'))}
     <th>À surveiller</th>
     ${th('Notes','notes',textFilterMenu('notes','Notes'))}
-  </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" class="${Number(d.id)===Number(selectedCompanyId)?'selected':''}"><td><b>${escapeHtml(d.name)}</b></td><td>${d.year}</td><td>${escapeHtml(d.product)}</td><td>${Math.round(d.revenue).toLocaleString('fr-FR')} €</td><td>${escapeHtml(d.cat)}</td><td>${escapeHtml(ownerLabel(d))}</td><td class="watch-check-cell"><input type="checkbox" class="watch-toggle" data-watch-id="${d.id}" ${d.watch?'checked':''} title="Ajouter à la liste À surveiller"></td><td class="notes-cell">${escapeHtml(d.notes||'')}</td></tr>`).join('')}</tbody></table>`;
+  </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" class="${Number(d.id)===Number(selectedCompanyId)?'selected':''}"><td><b>${escapeHtml(d.name)}</b></td><td>${d.year}</td><td>${escapeHtml(d.product)}</td><td>${Math.round(d.revenue).toLocaleString('fr-FR')} €</td><td>${escapeHtml(d.cat)}</td><td>${escapeHtml(ownerLabel(d))}</td><td class="watch-check-cell"><button type="button" class="watch-star ${d.watch?'':'off'}" data-watch-id="${d.id}" title="Ajouter à la liste À surveiller">${d.watch?'★':'☆'}</button></td><td class="status-cell">${statusBadgeHtml(d.notes)}</td><td class="notes-cell">${escapeHtml(d.notes||'')}</td></tr>`).join('')}</tbody></table>`;
   wrap.querySelectorAll('tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>selectCompany(tr.dataset.id)));
-  wrap.querySelectorAll('.watch-toggle').forEach(cb=>cb.addEventListener('click',e=>e.stopPropagation()));
-  wrap.querySelectorAll('.watch-toggle').forEach(cb=>cb.addEventListener('change',()=>toggleWatch(cb.dataset.watchId, cb.checked)));
+  wrap.querySelectorAll('.watch-star').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); const d=data.find(x=>Number(x.id)===Number(btn.dataset.watchId)); toggleWatch(btn.dataset.watchId, !(d&&d.watch)); }));
   bindTableFilterEvents();
 }  
 function highlightCompanyFromList(id){ hoveredCompanyId = Number(id); updateChart(); }
 function clearCompanyHighlight(){ hoveredCompanyId = null; updateChart(); }
-function toggleWatch(id, checked){ const d=data.find(x=>Number(x.id)===Number(id)); if(!d) return; d.watch=!!checked; saveData(); renderCompanyTable(); }
+function toggleWatch(id, checked){ const d=data.find(x=>Number(x.id)===Number(id)); if(!d) return; d.watch=!!checked; saveData(); renderCompanyTable(); renderList(); updateCockpitMetrics(); if(document.getElementById('watchModal')?.classList.contains('open')) renderWatchTable(); }
 function updateChart(){
   if(!window.Plotly || !plotlyReady) return;
   const pts=filteredData();
@@ -2038,16 +2178,23 @@ function updateChart(){
   const traces=[];
   CAT_ORDER.forEach(cat=>{
     const cpts=pts.filter(p=>p.cat===cat);
-    traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:false,x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),customdata:cpts.map(p=>[p.id,p.product,p.revenue,p.year,ownerLabel(p),p.notes&&String(p.notes).trim()?p.notes:'—']),hovertemplate:'<b>%{text}</b><br>Année : %{customdata[3]}<br>Produit : %{customdata[1]}<br>Estimated revenue : %{customdata[2]:,.0f} €<br>Owner / BDR : %{customdata[4]}<br>Note : %{customdata[5]}<extra></extra>',marker:{size:cpts.map(p=>bubbleSizeByCat(p.cat)),color:cpts.map(p=>p.color),opacity:1,line:{width:1,color:'#111'}}});
+    traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:false,x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),customdata:cpts.map(p=>[p.id,p.product,p.revenue,p.year,ownerLabel(p),p.notes&&String(p.notes).trim()?p.notes:'—']),hovertemplate:'<b>%{text}</b><br>Année : %{customdata[3]}<br>Produit : %{customdata[1]}<br>Estimated revenue : %{customdata[2]:,.0f} €<br>Owner / BDR : %{customdata[4]}<br>Note : %{customdata[5]}<extra></extra>',marker:{size:cpts.map(p=>bubbleSizeByCat(p.cat)),color:cpts.map(p=>p.color),opacity:1,line:{width:cpts.map(p=>Number(p.year)>=currentYearNumber()?3:1),color:cpts.map(p=>Number(p.year)>=currentYearNumber()?'#FF7900':'#111')}}});
     traces.push({type:'scatter',mode:'markers',name:cat,legendgroup:cat,showlegend:true,hoverinfo:'skip',x:[null],y:[null],marker:{size:12,color:colorForCategory(cat),line:{width:1,color:'#111'}}});
   });
+  const futurePts = pts.filter(p=>Number(p.year)>=currentYearNumber());
+  if(futurePts.length){ traces.unshift({type:'scatter',mode:'markers',name:'AO à venir',showlegend:false,hoverinfo:'skip',x:futurePts.map(p=>p.plotYear),y:futurePts.map(p=>p.plotY),marker:{size:futurePts.map(p=>bubbleSizeByCat(p.cat)+14),color:'rgba(255,121,0,0.10)',line:{width:2,color:'rgba(255,121,0,0.55)'}}}); }
   if(showNames){ CAT_ORDER.forEach(cat=>{ const cpts=pts.filter(p=>p.cat===cat); traces.push({type:'scatter',mode:'text',showlegend:false,hoverinfo:'skip',x:cpts.map(p=>p.plotYear),y:cpts.map(p=>p.plotY),text:cpts.map(p=>p.name),textfont:{size:pts.length>100?8:10,color:'#000'},textposition:'top center'}); }); }
   const hoverPoint = hoveredCompanyId == null ? null : pts.find(p=>Number(p.id)===Number(hoveredCompanyId));
   if(hoverPoint){
     traces.push({type:'scatter',mode:'markers+text',showlegend:false,hoverinfo:'skip',x:[hoverPoint.plotYear],y:[hoverPoint.plotY],text:[hoverPoint.name],textposition:'top center',textfont:{size:12,color:'#000',family:'Segoe UI,Arial'},marker:{size:[bubbleSizeByCat(hoverPoint.cat)+12],color:['rgba(255,255,255,0)'],line:{color:'#FFD400',width:5}}});
   }
   const ticks=[...Y_BANDS_COACHING,...Y_BANDS_LANGUES].sort((a,b)=>a.y-b.y); const f=getFilterState();
-  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:40,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-1.6,f.yMax+1.6]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.8,5.8],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},legend:{orientation:'h',y:1.02,x:-.1},font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
+  const visibleYears=years.filter(y=>y>=f.yMin && y<=f.yMax);
+  const yearShapes=visibleYears.map((y,i)=>({type:'rect',xref:'x',yref:'paper',x0:y-0.5,x1:y+0.5,y0:0,y1:1,fillcolor:i%2===0?'rgba(0,0,0,0.035)':'rgba(255,121,0,0.035)',line:{width:0},layer:'below'}));
+  const today=currentDecimalYear();
+  const todayShape={type:'line',xref:'x',yref:'paper',x0:today,x1:today,y0:0,y1:1,line:{color:'#FF7900',width:2,dash:'dot'},layer:'above'};
+  const todayAnnotation={xref:'x',yref:'paper',x:today,y:1.02,text:'Aujourd’hui',showarrow:false,font:{color:'#FF7900',size:11},xanchor:'left'};
+  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:46,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',shapes:[...yearShapes,todayShape],annotations:[todayAnnotation],xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-1.6,f.yMax+1.6]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.8,5.8],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},legend:{orientation:'h',y:1.08,x:-.1},font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
   const gd=document.getElementById('chart');
   gd.removeAllListeners && gd.removeAllListeners('plotly_click');
   gd.removeAllListeners && gd.removeAllListeners('plotly_hover');
@@ -2166,16 +2313,17 @@ function renderDashboardFloatingPopup(){
   const productGroup = `${prefix}EditProductChoice`;
   const ownerGroup = `${prefix}EditOwnerChoice`;
   const owners = getEditorOwners(ownerLabel(d));
-  popup.innerHTML = `<h3>Fiche entreprise<br><span style="font-weight:600;color:#444">${escapeHtml(d.name)}</span></h3>
+  popup.innerHTML = `<div class="popup-shell"><div class="popup-hero"><h3>${escapeHtml(d.name)}</h3><div class="popup-tags"><span class="popup-tag">${escapeHtml(d.cat)}</span><span class="popup-tag">${escapeHtml(d.product)}</span><span class="popup-tag">${d.year}</span><span class="popup-tag">${Math.round(d.revenue).toLocaleString('fr-FR')} €</span>${d.watch?'<span class="popup-tag">⭐ Watchlist</span>':''}</div></div>
+  <div class="popup-body"><div class="popup-grid"><div class="info-card"><div class="info-label">Owner</div><div class="info-value">${escapeHtml(ownerLabel(d))}</div></div><div class="info-card"><div class="info-label">Statut</div><div class="info-value">${statusBadgeHtml(d.notes)}</div></div></div>
   <form id="${prefix}EditForm">
     <div class="field-label">Entreprise</div><input id="${prefix}EditName" type="text" value="${escapeHtml(d.name)}">
     <div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div>
     <div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching'], d.product)}
     <div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='Entreprise privée'?'selected':''}>Entreprise privée</option><option ${d.cat==='Ecoles / Public / UE'?'selected':''}>Ecoles / Public / UE</option></select>
     <div class="field-label">Owner / BDR</div>${singleCheckboxGroupHtml(ownerGroup, owners, ownerLabel(d))}
-    <div class="field-label">Notes</div><textarea id="${prefix}EditNotes">${escapeHtml(d.notes||'')}</textarea>
+    <div class="field-label">Notes</div><div class="notes-zone"><textarea id="${prefix}EditNotes">${escapeHtml(d.notes||'')}</textarea></div>
     <div class="editor-actions"><button type="submit" class="editor-save">Enregistrer</button><button type="button" id="${prefix}EditClose" class="editor-close">Fermer</button></div>
-  </form>`;
+  </form></div></div>`;
   popup.classList.add('open');
   popup.style.display='block';
   bindSingleCheckboxGroups(popup);
@@ -2310,7 +2458,7 @@ function renderWatchTable(){
     ${watchTh('Produit','product',watchCheckboxFilterMenu('product','Produit'))}
     ${watchTh('Owner / BDR','owner',watchCheckboxFilterMenu('owner','Owner / BDR'))}
   </tr></thead><tbody>${rows.map(d=>`<tr><td class="watch-year">${d.year}</td><td><b>${escapeHtml(d.name)}</b></td><td>${escapeHtml(d.cat)}</td><td>${escapeHtml(d.product)}</td><td>${escapeHtml(ownerLabel(d))}</td></tr>`).join('')}</tbody></table>` : '<p>Aucune entreprise cochée “À surveiller” pour le moment.</p>';
-  document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">A surveiller</h2><div class="mini-note">Liste manuelle : coche/décoche la case "À surveiller" dans l’onglet 2 pour gérer cette liste.</div>${body}`;
+  document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">⭐ A surveiller (${rows.length})</h2><div class="mini-note">Liste manuelle : coche/décoche la case "À surveiller" dans l’onglet 2 pour gérer cette liste.</div>${body}`;
   bindWatchFilterEvents();
 }
 
