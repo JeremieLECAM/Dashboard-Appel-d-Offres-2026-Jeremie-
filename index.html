@@ -340,7 +340,7 @@
       <main id="chartPanel" class="chart-panel">
         <div id="portfolioSummary" class="summary-strip"></div>
         <div id="chartWrap"><button id="fsBtn" type="button">⛶ Plein écran</button><div id="chart"></div></div>
-        <div id="bottomBar"><button id="labelBtn" type="button">👁️ Afficher les noms clés</button><button id="watchBtn1" type="button">A surveiller</button></div>
+        <div id="bottomBar"><button id="labelBtn" type="button">👁️ Afficher les noms</button><button id="watchBtn1" type="button">A surveiller</button></div>
       </main>
     </div>
   </div>
@@ -2018,7 +2018,7 @@ function wireUI(){
   window.addEventListener('resize', ()=>{resizeChart(); syncFloatingPopupPosition();});
   window.addEventListener('scroll', syncFloatingPopupPosition, true);
   document.querySelector('#tabDashboard .panel')?.addEventListener('scroll', syncFloatingPopupPosition);
-  document.getElementById('labelBtn').onclick=()=>{ showNames=!showNames; document.getElementById('labelBtn').textContent=showNames?'🙈 Masquer les noms':'👁️ Afficher les noms clés'; updateChart(); };
+  document.getElementById('labelBtn').onclick=()=>{ showNames=!showNames; document.getElementById('labelBtn').textContent=showNames?'🙈 Masquer les noms':'👁️ Afficher les noms'; updateChart(); };
   document.querySelectorAll('.f-cat,.f-prod,#yearMin,#yearMax').forEach(el=>el.addEventListener('change', updateAll));
   document.getElementById('search').addEventListener('input', updateAll);
   document.getElementById('companyTableSearch').addEventListener('input', renderCompanyTable);
@@ -2300,7 +2300,7 @@ function updateChart(){
 
   // Labels intelligents : on garde le graphique lisible en n'affichant que les AO prioritaires
   // quand le bouton "Afficher les noms" est actif, plus la bulle survolée / sélectionnée.
-  const labelPts = pts.filter(p=> (showNames && isPriorityLabel(p)) || Number(p.id)===Number(selectedCompanyId) || Number(p.id)===Number(hoveredCompanyId));
+  const labelPts = pts.filter(p=> showNames || Number(p.id)===Number(selectedCompanyId) || Number(p.id)===Number(hoveredCompanyId));
   const labelAnnotations = labelPts.map(p=>({
     xref:'x',yref:'y',x:p.plotYear,y:p.plotY,
     text:escapeHtml(p.name),
