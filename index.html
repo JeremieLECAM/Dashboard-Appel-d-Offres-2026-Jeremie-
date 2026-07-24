@@ -2212,8 +2212,8 @@ function sortRows(rows){
   const col = tableSort.col;
   const dir = tableSort.dir === 'desc' ? -1 : 1;
   return rows.sort((a,b)=>{
-    let va = col === 'owner' ? ownerLabel(a) : a[col];
-    let vb = col === 'owner' ? ownerLabel(b) : b[col];
+    let va = col === 'owner' ? ownerLabel(a) : col==='status' ? statusForCompany(a).label : col==='watch' ? (a.watch?'OUI':'NON') : a[col];
+    let vb = col === 'owner' ? ownerLabel(b) : col==='status' ? statusForCompany(b).label : col==='watch' ? (b.watch?'OUI':'NON') : b[col];
     if(col === 'year' || col === 'revenue') return (Number(va || 0)-Number(vb || 0))*dir;
     return String(va ?? '').localeCompare(String(vb ?? ''),'fr',{sensitivity:'base'})*dir;
   });
