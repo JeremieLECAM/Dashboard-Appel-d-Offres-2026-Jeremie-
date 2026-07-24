@@ -2257,8 +2257,8 @@ function bindTableFilterEvents(){
   document.querySelectorAll('[data-apply-text]').forEach(btn=>btn.addEventListener('click',()=>{ const col=btn.dataset.applyText; tableFilters[col]={op:document.getElementById(col+'FilterOp').value,value:document.getElementById(col+'FilterValue').value}; renderCompanyTable(); }));
   document.querySelectorAll('[data-select-all]').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll(`.tf-check[data-col="${btn.dataset.selectAll}"]`).forEach(cb=>cb.checked=true); }));
   document.querySelectorAll('[data-deselect-all]').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll(`.tf-check[data-col="${btn.dataset.deselectAll}"]`).forEach(cb=>cb.checked=false); }));
-  document.querySelectorAll('[data-apply-check]').forEach(btn=>btn.addEventListener('click',()=>{ const col=btn.dataset.applyCheck; tableFilters[col]=[...document.querySelectorAll(`.tf-check[data-col="${col}"]:checked`)].map(cb=>cb.value); renderCompanyTable(); }));
-  document.querySelectorAll('.tf-check').forEach(cb=>cb.addEventListener('change',()=>{ const col=cb.dataset.col; tableFilters[col]=[...document.querySelectorAll(`.tf-check[data-col="${col}"]:checked`)].map(x=>x.value); renderCompanyTable(); }));
+  document.querySelectorAll('[data-apply-check]').forEach(btn=>btn.addEventListener('click',()=>{ const col=btn.dataset.applyCheck; tableFilters[col]=[...document.querySelectorAll(`.tf-check[data-col="${col}"]:checked`)].map(cb=>cb.value); window.__lastOpenFilter=col; renderCompanyTable(); setTimeout(()=>document.getElementById('filter-'+col)?.classList.add('open'),0); }));
+  document.querySelectorAll('.tf-check').forEach(cb=>cb.addEventListener('change',()=>{ const col=cb.dataset.col; tableFilters[col]=[...document.querySelectorAll(`.tf-check[data-col="${col}"]:checked`)].map(x=>x.value); const trigger=document.querySelector(`[data-filter-trigger="${col}"]`); if(trigger) trigger.classList.add('active'); }));
   document.querySelectorAll('[data-reset]').forEach(btn=>btn.addEventListener('click',()=>{ const col=btn.dataset.reset; if(col==='name'||col==='notes') tableFilters[col]={op:'contains',value:''}; else if(['year','product','cat','owner','status','watch'].includes(col)) tableFilters[col]=null; if(col==='revenue'||(tableSort&&tableSort.col===col)) tableSort={col:'name',dir:'asc'}; renderCompanyTable(); }));
 }
 function getEditorOwners(currentOwner){
@@ -2307,6 +2307,7 @@ function renderCompanyTable(){
   wrap.querySelectorAll('tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>selectCompany(tr.dataset.id)));
   wrap.querySelectorAll('.watch-star').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); const d=data.find(x=>Number(x.id)===Number(btn.dataset.watchId)); toggleWatch(btn.dataset.watchId, !(d&&d.watch)); }));
   bindTableFilterEvents();
+  if(window.__lastOpenFilter){ const m=document.getElementById('filter-'+window.__lastOpenFilter); if(m) m.classList.add('open'); }
 }  
 function highlightCompanyFromList(id){ hoveredCompanyId = Number(id); updateChart(); }
 function clearCompanyHighlight(){ hoveredCompanyId = null; updateChart(); }
