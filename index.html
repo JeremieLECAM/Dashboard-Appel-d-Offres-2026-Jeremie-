@@ -2209,13 +2209,21 @@ function checkboxFilterPass(value, col){
   if(!Array.isArray(selected)) return true;
   return selected.includes(String(value));
 }
+
+function tableValueForColumn(d, col){
+  if(col === 'owner') return ownerLabel(d);
+  if(col === 'status') return statusForCompany(d).label;
+  if(col === 'watch') return d.watch ? 'OUI' : 'NON';
+  if(col === 'notes') return d.notes || '';
+  return d[col];
+}
 function sortRows(rows){
   if(!tableSort || !tableSort.col) return rows;
   const col = tableSort.col;
   const dir = tableSort.dir === 'desc' ? -1 : 1;
   return rows.sort((a,b)=>{
-    let va = col === 'owner' ? ownerLabel(a) : a[col];
-    let vb = col === 'owner' ? ownerLabel(b) : b[col];
+    let va = tableValueForColumn(a, col);
+    let vb = tableValueForColumn(b, col);
     if(col === 'year' || col === 'revenue') return (Number(va || 0)-Number(vb || 0))*dir;
     return String(va ?? '').localeCompare(String(vb ?? ''),'fr',{sensitivity:'base'})*dir;
   });
@@ -2251,15 +2259,58 @@ function th(label,col,menu){
 }
 function closeFilterMenus(){ document.querySelectorAll('.filter-menu.open').forEach(m=>m.classList.remove('open')); }
 function bindTableFilterEvents(){
-  document.querySelectorAll('[data-filter-trigger]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation(); const id='filter-'+btn.dataset.filterTrigger; document.querySelectorAll('.filter-menu').forEach(m=>{ if(m.id!==id) m.classList.remove('open'); }); const menu=document.getElementById(id); if(menu) menu.classList.toggle('open'); }));
+  document.querySelectorAll('[data-filter-trigger]').forEach(btn=>btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    const id='filter-'+btn.dataset.filterTrigger;
+    document.querySelectorAll('.filter-menu').forEach(m=>{ if(m.id!==id) m.classList.remove('open'); });
+    const menu=document.getElementById(id);
+    if(menu){
+      const willOpen = !menu.classList.contains('open');
+      menu.classList.toggle('open');
+      window.__lastOpenFilter = willOpen ? btn.dataset.filterTrigger : null;
+    }
+  }));
   document.querySelectorAll('.filter-menu').forEach(menu=>menu.addEventListener('click',e=>e.stopPropagation()));
-  document.querySelectorAll('[data-sort]').forEach(btn=>btn.addEventListener('click',()=>{ tableSort={col:btn.dataset.sort,dir:btn.dataset.dir}; renderCompanyTable(); }));
-  document.querySelectorAll('[data-apply-text]').forEach(btn=>btn.addEventListener('click',()=>{ const col=btn.dataset.applyText; tableFilters[col]={op:document.getElementById(col+'FilterOp').value,value:document.getElementById(col+'FilterValue').value}; renderCompanyTable(); }));
-  document.querySelectorAll('[data-select-all]').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll(`.tf-check[data-col="${btn.dataset.selectAll}"]`).forEach(cb=>cb.checked=true); }));
-  document.querySelectorAll('[data-deselect-all]').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll(`.tf-check[data-col="${btn.dataset.deselectAll}"]`).forEach(cb=>cb.checked=false); }));
-  document.querySelectorAll('[data-apply-check]').forEach(btn=>btn.addEventListener('click',()=>{ const col=btn.dataset.applyCheck; tableFilters[col]=[...document.querySelectorAll(`.tf-check[data-col="${col}"]:checked`)].map(cb=>cb.value); window.__lastOpenFilter=col; renderCompanyTable(); setTimeout(()=>document.getElementById('filter-'+col)?.classList.add('open'),0); }));
-  document.querySelectorAll('.tf-check').forEach(cb=>cb.addEventListener('change',()=>{ const col=cb.dataset.col; tableFilters[col]=[...document.querySelectorAll(`.tf-check[data-col="${col}"]:checked`)].map(x=>x.value); const trigger=document.querySelector(`[data-filter-trigger="${col}"]`); if(trigger) trigger.classList.add('active'); }));
-  document.querySelectorAll('[data-reset]').forEach(btn=>btn.addEventListener('click',()=>{ const col=btn.dataset.reset; if(col==='name'||col==='notes') tableFilters[col]={op:'contains',value:''}; else if(['year','product','cat','owner','status','watch'].includes(col)) tableFilters[col]=null; if(col==='revenue'||(tableSort&&tableSort.col===col)) tableSort={col:'name',dir:'asc'}; renderCompanyTable(); }));
+  document.querySelectorAll('[data-sort]').forEach(btn=>btn.addEventListener('click',()=>{
+    tableSort={col:btn.dataset.sort,dir:btn.dataset.dir};
+    window.__lastOpenFilter = btn.closest('.filter-menu')?.id?.replace('filter-','') || null;
+    renderCompanyTable();
+  }));
+  document.querySelectorAll('[data-apply-text]').forEach(btn=>btn.addEventListener('click',()=>{
+    const col=btn.dataset.applyText;
+    tableFilters[col]={op:document.getElementById(col+'FilterOp').value,value:document.getElementById(col+'FilterValue').value};
+    window.__lastOpenFilter = col;
+    renderCompanyTable();
+  }));
+  function applyCheckboxColumn(col){
+    tableFilters[col]=[...document.querySelectorAll(`.tf-check[data-col="${col}"]:checked`)].map(cb=>cb.value);
+    window.__lastOpenFilter = col;
+    renderCompanyTable();
+  }
+  document.querySelectorAll('[data-select-all]').forEach(btn=>btn.addEventListener('click',()=>{
+    const col=btn.dataset.selectAll;
+    document.querySelectorAll(`.tf-check[data-col="${col}"]`).forEach(cb=>cb.checked=true);
+    applyCheckboxColumn(col);
+  }));
+  document.querySelectorAll('[data-deselect-all]').forEach(btn=>btn.addEventListener('click',()=>{
+    const col=btn.dataset.deselectAll;
+    document.querySelectorAll(`.tf-check[data-col="${col}"]`).forEach(cb=>cb.checked=false);
+    applyCheckboxColumn(col);
+  }));
+  document.querySelectorAll('[data-apply-check]').forEach(btn=>btn.addEventListener('click',()=>{
+    applyCheckboxColumn(btn.dataset.applyCheck);
+  }));
+  document.querySelectorAll('.tf-check').forEach(cb=>cb.addEventListener('change',()=>{
+    applyCheckboxColumn(cb.dataset.col);
+  }));
+  document.querySelectorAll('[data-reset]').forEach(btn=>btn.addEventListener('click',()=>{
+    const col=btn.dataset.reset;
+    if(col==='name'||col==='notes') tableFilters[col]={op:'contains',value:''};
+    else if(['year','product','cat','owner','status','watch'].includes(col)) tableFilters[col]=null;
+    if(col==='revenue'||(tableSort&&tableSort.col===col)) tableSort={col:'name',dir:'asc'};
+    window.__lastOpenFilter = col;
+    renderCompanyTable();
+  }));
 }
 function getEditorOwners(currentOwner){
   const owners = uniqueSortedValues('owner');
@@ -2285,13 +2336,15 @@ function renderCompanyTable(){
   const wrap=document.getElementById('companyTableWrap'); if(!wrap) return;
   const q=(document.getElementById('companyTableSearch').value||'').trim().toLowerCase();
   let rows=filteredData().slice()
-    .filter(d=>!q||[d.name,d.year,d.product,d.revenue,d.cat,d.owner,statusForCompany(d).label,d.notes].some(v=>String(v??'').toLowerCase().includes(q)))
+    .filter(d=>!q||[d.name,d.year,d.product,d.revenue,d.cat,ownerLabel(d),statusForCompany(d).label,d.watch ? 'OUI' : 'NON',d.notes].some(v=>String(v??'').toLowerCase().includes(q)))
     .filter(d=>textFilterPass(d.name, tableFilters.name))
     .filter(d=>textFilterPass(d.notes || '', tableFilters.notes))
-    .filter(d=>checkboxFilterPass(d.year, 'year'))
-    .filter(d=>checkboxFilterPass(d.product, 'product'))
-    .filter(d=>checkboxFilterPass(d.cat, 'cat'))
-    .filter(d=>checkboxFilterPass(ownerLabel(d), 'owner'));
+    .filter(d=>checkboxFilterPass(tableValueForColumn(d, 'year'), 'year'))
+    .filter(d=>checkboxFilterPass(tableValueForColumn(d, 'product'), 'product'))
+    .filter(d=>checkboxFilterPass(tableValueForColumn(d, 'cat'), 'cat'))
+    .filter(d=>checkboxFilterPass(tableValueForColumn(d, 'owner'), 'owner'))
+    .filter(d=>checkboxFilterPass(tableValueForColumn(d, 'watch'), 'watch'))
+    .filter(d=>checkboxFilterPass(tableValueForColumn(d, 'status'), 'status'));
   rows=sortRows(rows);
   wrap.innerHTML=`<table class="company-table"><thead><tr>
     ${th('Entreprise','name',textFilterMenu('name','Entreprise'))}
@@ -2301,14 +2354,17 @@ function renderCompanyTable(){
     ${th('Catégorie','cat',checkboxFilterMenu('cat','Catégorie',{sort:true,asc:'A → Z',desc:'Z → A'}))}
     ${th('Owner / BDR','owner',checkboxFilterMenu('owner','Owner / BDR',{sort:true,asc:'A → Z',desc:'Z → A'}))}
     ${th('À surveiller','watch',checkboxFilterMenu('watch','À surveiller'))}
-    ${th('Statut','status',checkboxFilterMenu('status','Statut',{sort:true,asc:'A → Z',desc:'Z → A'}))}  
+    ${th('Statut','status',checkboxFilterMenu('status','Statut',{sort:true,asc:'A → Z',desc:'Z → A'}))}
     ${th('Notes','notes',textFilterMenu('notes','Notes'))}
   </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" class="${Number(d.id)===Number(selectedCompanyId)?'selected':''}"><td><b>${escapeHtml(d.name)}</b></td><td>${d.year}</td><td>${escapeHtml(d.product)}</td><td>${Math.round(d.revenue).toLocaleString('fr-FR')} €</td><td><span class="cat-dot" style="background:${colorForCategory(d.cat)}"></span> ${escapeHtml(shortCatLabel(d.cat))}</td><td>${escapeHtml(ownerLabel(d))}</td><td class="watch-check-cell"><button type="button" class="watch-star ${d.watch?'':'off'}" data-watch-id="${d.id}" title="Ajouter à la liste À surveiller">${d.watch?'★':'☆'}</button></td><td class="status-cell">${statusBadgeHtmlForCompany(d)}</td><td class="notes-cell">${escapeHtml(d.notes||'')}</td></tr>`).join('')}</tbody></table>`;
   wrap.querySelectorAll('tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>selectCompany(tr.dataset.id)));
   wrap.querySelectorAll('.watch-star').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); const d=data.find(x=>Number(x.id)===Number(btn.dataset.watchId)); toggleWatch(btn.dataset.watchId, !(d&&d.watch)); }));
   bindTableFilterEvents();
-  if(window.__lastOpenFilter){ const m=document.getElementById('filter-'+window.__lastOpenFilter); if(m) m.classList.add('open'); }
-}  
+  if(window.__lastOpenFilter){
+    const m=document.getElementById('filter-'+window.__lastOpenFilter);
+    if(m) m.classList.add('open');
+  }
+}
 function highlightCompanyFromList(id){ hoveredCompanyId = Number(id); updateChart(); }
 function clearCompanyHighlight(){ hoveredCompanyId = null; updateChart(); }
 function toggleWatch(id, checked){ const d=data.find(x=>Number(x.id)===Number(id)); if(!d) return; d.watch=!!checked; saveData(); renderCompanyTable(); renderList(); updateCockpitMetrics(); if(document.getElementById('watchModal')?.classList.contains('open')) renderWatchTable(); }
