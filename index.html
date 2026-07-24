@@ -223,6 +223,19 @@
 .summary-pill.orange{border-color:rgba(255,121,0,.45);background:#fff6ee;}
 .summary-pill.green{border-color:rgba(67,160,71,.30);background:#f1fbf3;}
 .summary-pill.yellow{border-color:rgba(255,193,7,.35);background:#fff9e6;}
+.summary-pill.red{border-color:rgba(229,57,53,.35);background:#fff0f0;color:#8b1010;}
+.summary-pill.blue{border-color:rgba(30,136,229,.30);background:#eef6ff;color:#174b82;}
+.summary-pill.status-progress-pill{border-color:#ffc071;background:#fff2e5;color:#9a4b00;}
+.summary-pill.status-confirm-pill{border-color:#f3df8a;background:#fff9df;color:#775d00;}
+.summary-pill.status-docs-pill{border-color:#c9dcff;background:#eef4ff;color:#254f92;}
+.summary-pill.status-lost-pill{border-color:#ffc4c4;background:#ffefef;color:#a20f0f;}
+.summary-pill.status-empty-pill{border-color:#e4e4e4;background:#f4f4f4;color:#555;}
+.filter-menu label.status-filter-choice{border-radius:8px;padding:3px 5px;border:1px solid transparent;}
+.filter-menu label.status-filter-choice.status-progress{background:#fff2e5;border-color:#ffd0a1;color:#9a4b00;}
+.filter-menu label.status-filter-choice.status-lost{background:#ffefef;border-color:#ffc4c4;color:#a20f0f;}
+.filter-menu label.status-filter-choice.status-toconfirm{background:#fff9df;border-color:#f3df8a;color:#775d00;}
+.filter-menu label.status-filter-choice.status-waiting{background:#eef4ff;border-color:#c9dcff;color:#254f92;}
+.filter-menu label.status-filter-choice.status-empty{background:#f4f4f4;border-color:#e4e4e4;color:#555;}
 .item{padding:8px 8px;border-radius:11px;margin-top:6px;border:1px solid #eeeeee;background:#fff;}
 .item-main{display:flex;align-items:center;gap:7px;min-width:0;}
 .cat-dot{width:10px;height:10px;border-radius:999px;display:inline-block;flex:0 0 auto;box-shadow:0 0 0 2px rgba(0,0,0,.05);}
@@ -1990,6 +2003,57 @@ const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','o
 const CAT_COLORS = {"CAC 40": "#E53935", "SBF 120": "#8E24AA", "Entreprise privée hors CAC 40/SBF 120": "#1E88E5", "Public / Semi-Public": "#43A047", "Écoles": "#00A6A6"}; // couleurs métier mises à jour depuis classification_entreprises_AO.xlsx
 const CAT_ORDER = ["Public / Semi-Public", "Écoles", "SBF 120", "CAC 40", "Entreprise privée hors CAC 40/SBF 120"];
 const STATUS_OPTIONS = ['En cours','Perdu','AO à confirmer','Docs à venir','Sans statut'];
+const DASHBOARD_KPI_TABLE_PRESETS = {
+  'status-en-cours': {col:'status', values:['En cours']},
+  'status-ao-confirm': {col:'status', values:['AO à confirmer']},
+  'status-docs': {col:'status', values:['Docs à venir']},
+  'status-perdu': {col:'status', values:['Perdu']},
+  'status-empty': {col:'status', values:['Sans statut']},
+  'watch': {col:'watch', values:['OUI']},
+  'upcoming': {col:'year', values:() => years.filter(y => Number(y) >= currentYearNumber()).map(String)}
+};
+const DASHBOARD_CATEGORY_TABLE_PRESETS = {
+  cac:['CAC 40'],
+  sbf:['SBF 120'],
+  pub:['Public / Semi-Public'],
+  eco:['Écoles'],
+  priv:['Entreprise privée hors CAC 40/SBF 120']
+};
+function sameArrayValues(a,b){
+  if(!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  return a.map(String).sort().join('|') === b.map(String).sort().join('|');
+}
+function applyDashboardFilterToTable(kind, key, active){
+  // Les boutons de l'onglet 1 doivent préparer les filtres de l'onglet 2,
+  // sans bloquer ensuite l'utilisateur : il peut ajouter/retirer des cases normalement.
+  if(key === 'all'){
+    dashboardKpiFilter = null;
+    dashboardCategoryFilter = null;
+    tableFilters.year = null;
+    tableFilters.cat = null;
+    tableFilters.status = null;
+    tableFilters.watch = null;
+    return;
+  }
+  if(kind === 'kpi'){
+    const preset = DASHBOARD_KPI_TABLE_PRESETS[key];
+    if(!preset) return;
+    const values = typeof preset.values === 'function' ? preset.values() : preset.values;
+    if(active){
+      if(preset.col === 'status'){ tableFilters.status = values.slice(); tableFilters.watch = null; }
+      else if(preset.col === 'watch'){ tableFilters.watch = values.slice(); }
+      else if(preset.col === 'year'){ tableFilters.year = values.slice(); }
+    } else if(sameArrayValues(tableFilters[preset.col], values)){
+      tableFilters[preset.col] = null;
+    }
+  }
+  if(kind === 'cat'){
+    const values = DASHBOARD_CATEGORY_TABLE_PRESETS[key];
+    if(!values) return;
+    if(active) tableFilters.cat = values.slice();
+    else if(sameArrayValues(tableFilters.cat, values)) tableFilters.cat = null;
+  }
+}
 const CATEGORY_BY_ID = {"1": "Public / Semi-Public", "2": "SBF 120", "3": "CAC 40", "4": "CAC 40", "5": "SBF 120", "6": "Entreprise privée hors CAC 40/SBF 120", "7": "Entreprise privée hors CAC 40/SBF 120", "8": "Public / Semi-Public", "9": "Public / Semi-Public", "10": "CAC 40", "11": "CAC 40", "12": "Entreprise privée hors CAC 40/SBF 120", "13": "CAC 40", "14": "Entreprise privée hors CAC 40/SBF 120", "15": "SBF 120", "16": "CAC 40", "17": "Entreprise privée hors CAC 40/SBF 120", "18": "CAC 40", "19": "Entreprise privée hors CAC 40/SBF 120", "20": "Entreprise privée hors CAC 40/SBF 120", "21": "Entreprise privée hors CAC 40/SBF 120", "22": "Entreprise privée hors CAC 40/SBF 120", "23": "Entreprise privée hors CAC 40/SBF 120", "24": "Entreprise privée hors CAC 40/SBF 120", "25": "Entreprise privée hors CAC 40/SBF 120", "26": "CAC 40", "27": "CAC 40", "28": "Entreprise privée hors CAC 40/SBF 120", "29": "Entreprise privée hors CAC 40/SBF 120", "30": "Public / Semi-Public", "31": "Écoles", "32": "Écoles", "33": "CAC 40", "34": "Entreprise privée hors CAC 40/SBF 120", "35": "Entreprise privée hors CAC 40/SBF 120", "36": "Entreprise privée hors CAC 40/SBF 120", "37": "Entreprise privée hors CAC 40/SBF 120", "38": "Entreprise privée hors CAC 40/SBF 120", "39": "Public / Semi-Public", "40": "SBF 120", "41": "Entreprise privée hors CAC 40/SBF 120", "42": "Entreprise privée hors CAC 40/SBF 120", "43": "Entreprise privée hors CAC 40/SBF 120", "44": "Entreprise privée hors CAC 40/SBF 120", "45": "Entreprise privée hors CAC 40/SBF 120", "46": "SBF 120", "47": "Public / Semi-Public", "48": "Public / Semi-Public", "49": "Public / Semi-Public", "50": "SBF 120", "51": "SBF 120", "52": "Écoles", "53": "CAC 40", "54": "Entreprise privée hors CAC 40/SBF 120", "55": "Entreprise privée hors CAC 40/SBF 120", "56": "CAC 40", "57": "CAC 40", "58": "Entreprise privée hors CAC 40/SBF 120", "59": "Entreprise privée hors CAC 40/SBF 120", "60": "Entreprise privée hors CAC 40/SBF 120", "61": "Entreprise privée hors CAC 40/SBF 120", "62": "Entreprise privée hors CAC 40/SBF 120", "63": "Écoles", "64": "SBF 120", "65": "SBF 120", "66": "CAC 40", "67": "Entreprise privée hors CAC 40/SBF 120", "68": "Public / Semi-Public", "69": "CAC 40", "70": "CAC 40", "71": "CAC 40", "72": "Public / Semi-Public", "73": "CAC 40", "74": "Entreprise privée hors CAC 40/SBF 120", "75": "Entreprise privée hors CAC 40/SBF 120", "76": "Entreprise privée hors CAC 40/SBF 120", "77": "SBF 120", "78": "SBF 120", "79": "SBF 120", "80": "SBF 120", "81": "CAC 40", "82": "Entreprise privée hors CAC 40/SBF 120", "83": "CAC 40", "84": "Entreprise privée hors CAC 40/SBF 120", "85": "Entreprise privée hors CAC 40/SBF 120", "86": "Entreprise privée hors CAC 40/SBF 120", "87": "CAC 40", "88": "Entreprise privée hors CAC 40/SBF 120", "89": "CAC 40", "90": "CAC 40", "91": "Entreprise privée hors CAC 40/SBF 120", "92": "Public / Semi-Public", "93": "CAC 40", "94": "CAC 40"};
 const Y_BANDS_LANGUES = [
   {max:10000,y:1,label:'Langues ≤ 10k€'}, {max:50000,y:2,label:'Langues 10–50k€'}, {max:100000,y:3,label:'Langues 50–100k€'}, {max:200000,y:4,label:'Langues 100–200k€'}, {max:1000000,y:5,label:'Langues > 200k€'}
@@ -2070,7 +2134,7 @@ function updateCockpitMetrics(){
     <div class="kpi-card"><div class="kpi-value">${m.statusCounts['AO à confirmer']}</div><div class="kpi-label">AO à confirmer</div></div>
     <div class="kpi-card"><div class="kpi-value">${m.statusCounts['Docs à venir']}</div><div class="kpi-label">Docs à venir</div></div>`; }
   const s=document.getElementById('portfolioSummary');
-  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${dashboardKpiFilter===null && dashboardCategoryFilter===null?'active':''}" data-kpi="all">${m.total} AO</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='cac'?'active':''}" data-cat="cac">${c.cac} CAC40</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='sbf'?'active':''}" data-cat="sbf">${c.sbf} SBF120</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='pub'?'active':''}" data-cat="pub">${c.pub} Public</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='eco'?'active':''}" data-cat="eco">${c.eco} Écoles</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='priv'?'active':''}" data-cat="priv">${c.priv} Privé</span></div><div class="summary-secondary"><span class="summary-pill orange kpi-filter ${dashboardKpiFilter==='upcoming'?'active':''}" data-kpi="upcoming">${m.upcoming} à venir</span><span class="summary-pill yellow kpi-filter ${dashboardKpiFilter==='status-en-cours'?'active':''}" data-kpi="status-en-cours">${m.statusCounts['En cours']} En cours</span><span class="summary-pill kpi-filter ${dashboardKpiFilter==='status-ao-confirm'?'active':''}" data-kpi="status-ao-confirm">${m.statusCounts['AO à confirmer']} AO à confirmer</span><span class="summary-pill blue kpi-filter ${dashboardKpiFilter==='status-docs'?'active':''}" data-kpi="status-docs">${m.statusCounts['Docs à venir']} Docs à venir</span><span class="summary-pill red kpi-filter ${dashboardKpiFilter==='status-perdu'?'active':''}" data-kpi="status-perdu">${m.statusCounts['Perdu']} Perdu</span><span class="summary-pill kpi-filter ${dashboardKpiFilter==='status-empty'?'active':''}" data-kpi="status-empty">${m.statusCounts['Sans statut']} Sans statut</span><span class="summary-pill kpi-filter ${dashboardKpiFilter==='watch'?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`; s.querySelectorAll('.kpi-filter[data-kpi]').forEach(btn=>btn.onclick=()=>{ if(btn.dataset.kpi==='all'){ dashboardKpiFilter=null; dashboardCategoryFilter=null; } else { dashboardKpiFilter=(dashboardKpiFilter===btn.dataset.kpi?null:btn.dataset.kpi); } updateAll();}); s.querySelectorAll('.kpi-filter[data-cat]').forEach(btn=>btn.onclick=()=>{dashboardCategoryFilter=(dashboardCategoryFilter===btn.dataset.cat?null:btn.dataset.cat); updateAll();}); }
+  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${dashboardKpiFilter===null && dashboardCategoryFilter===null?'active':''}" data-kpi="all">${m.total} AO</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='cac'?'active':''}" data-cat="cac">${c.cac} CAC40</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='sbf'?'active':''}" data-cat="sbf">${c.sbf} SBF120</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='pub'?'active':''}" data-cat="pub">${c.pub} Public</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='eco'?'active':''}" data-cat="eco">${c.eco} Écoles</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='priv'?'active':''}" data-cat="priv">${c.priv} Privé</span></div><div class="summary-secondary"><span class="summary-pill orange kpi-filter ${dashboardKpiFilter==='upcoming'?'active':''}" data-kpi="upcoming">${m.upcoming} à venir</span><span class="summary-pill status-progress-pill kpi-filter ${dashboardKpiFilter==='status-en-cours'?'active':''}" data-kpi="status-en-cours">${m.statusCounts['En cours']} En cours</span><span class="summary-pill status-confirm-pill kpi-filter ${dashboardKpiFilter==='status-ao-confirm'?'active':''}" data-kpi="status-ao-confirm">${m.statusCounts['AO à confirmer']} AO à confirmer</span><span class="summary-pill status-docs-pill kpi-filter ${dashboardKpiFilter==='status-docs'?'active':''}" data-kpi="status-docs">${m.statusCounts['Docs à venir']} Docs à venir</span><span class="summary-pill status-lost-pill kpi-filter ${dashboardKpiFilter==='status-perdu'?'active':''}" data-kpi="status-perdu">${m.statusCounts['Perdu']} Perdu</span><span class="summary-pill status-empty-pill kpi-filter ${dashboardKpiFilter==='status-empty'?'active':''}" data-kpi="status-empty">${m.statusCounts['Sans statut']} Sans statut</span><span class="summary-pill kpi-filter ${dashboardKpiFilter==='watch'?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`; s.querySelectorAll('.kpi-filter[data-kpi]').forEach(btn=>btn.onclick=()=>{ if(btn.dataset.kpi==='all'){ applyDashboardFilterToTable('kpi','all',true); } else { const next = dashboardKpiFilter===btn.dataset.kpi ? null : btn.dataset.kpi; dashboardKpiFilter=next; applyDashboardFilterToTable('kpi', btn.dataset.kpi, !!next); } updateAll();}); s.querySelectorAll('.kpi-filter[data-cat]').forEach(btn=>btn.onclick=()=>{ const next = dashboardCategoryFilter===btn.dataset.cat ? null : btn.dataset.cat; dashboardCategoryFilter=next; applyDashboardFilterToTable('cat', btn.dataset.cat, !!next); updateAll();}); }
   document.getElementById('watchTopCount') && (document.getElementById('watchTopCount').textContent=m.watch);
   document.getElementById('watchBtn1') && document.getElementById('watchBtn1').setAttribute('data-count',m.watch);
   document.getElementById('watchBtn2') && document.getElementById('watchBtn2').setAttribute('data-count',m.watch);
@@ -2170,6 +2234,7 @@ function switchTab(tab){
 function resizeChart(){ if(window.Plotly) try{Plotly.Plots.resize('chart');}catch(e){} }
 function getFilterState(){ const q=document.getElementById('search').value.trim().toLowerCase(); const cats=[...document.querySelectorAll('.f-cat:checked')].map(e=>e.value); const prods=[...document.querySelectorAll('.f-prod:checked')].map(e=>e.value); const owners=[...document.querySelectorAll('.f-owner:checked')].map(e=>e.value); let yMin=parseInt(document.getElementById('yearMin').value,10), yMax=parseInt(document.getElementById('yearMax').value,10); if(Number.isNaN(yMin)) yMin=Math.min(...years); if(Number.isNaN(yMax)) yMax=Math.max(...years); if(yMin>yMax){const t=yMin;yMin=yMax;yMax=t;} return {q,cats,prods,owners,yMin,yMax}; }
 function filteredData(){ const f=getFilterState(); let rows=data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); if(dashboardKpiFilter==='upcoming') rows=rows.filter(d=>Number(d.year)>=currentYearNumber()); if(dashboardKpiFilter==='status-en-cours') rows=rows.filter(d=>statusForCompany(d).label==='En cours'); if(dashboardKpiFilter==='status-ao-confirm') rows=rows.filter(d=>statusForCompany(d).label==='AO à confirmer'); if(dashboardKpiFilter==='status-docs') rows=rows.filter(d=>statusForCompany(d).label==='Docs à venir'); if(dashboardKpiFilter==='status-perdu') rows=rows.filter(d=>statusForCompany(d).label==='Perdu'); if(dashboardKpiFilter==='status-empty') rows=rows.filter(d=>statusForCompany(d).label==='Sans statut'); if(dashboardKpiFilter==='watch') rows=rows.filter(d=>d.watch===true); if(dashboardCategoryFilter==='cac') rows=rows.filter(d=>d.cat==='CAC 40'); if(dashboardCategoryFilter==='sbf') rows=rows.filter(d=>d.cat==='SBF 120'); if(dashboardCategoryFilter==='pub') rows=rows.filter(d=>d.cat==='Public / Semi-Public'); if(dashboardCategoryFilter==='eco') rows=rows.filter(d=>d.cat==='Écoles'); if(dashboardCategoryFilter==='priv') rows=rows.filter(d=>d.cat==='Entreprise privée hors CAC 40/SBF 120'); return rows; }
+function baseFilteredDataForTable(){ const f=getFilterState(); return data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); }
 function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.map(ownerLabel))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); updateFilterCounters(); }
 function updateAll(){ normalizeAllData(); renderList(); renderCompanyTable(); renderEditors(); updateCockpitMetrics(); updateFilterCounters(); updateChart(); saveData(); }
 function renderList(){
@@ -2248,7 +2313,7 @@ function checkboxFilterMenu(col, label, options={}){
   return `<div class="filter-menu" id="filter-${col}">
     <div class="fm-title">${label}</div>${sortBtns}
     <div class="fm-bulk"><button type="button" data-select-all="${col}">Tout sélectionner</button><button type="button" data-deselect-all="${col}">Tout désélectionner</button></div>
-    <div class="fm-checks">${vals.map(v=>`<label><input type="checkbox" class="tf-check" data-col="${col}" value="${escapeHtml(v)}" ${selected.includes(String(v))?'checked':''}> ${escapeHtml(v)}</label>`).join('')}</div>
+    <div class="fm-checks">${vals.map(v=>{ const st = col==='status' ? statusMeta(v) : null; const cls = st ? ` class="status-filter-choice ${st.cls}"` : ''; return `<label${cls}><input type="checkbox" class="tf-check" data-col="${col}" value="${escapeHtml(v)}" ${selected.includes(String(v))?'checked':''}> ${escapeHtml(v)}</label>`; }).join('')}</div>
     <div class="fm-actions"><button type="button" class="primary" data-apply-check="${col}">Appliquer</button><button type="button" data-reset="${col}">Réinitialiser</button></div>
   </div>`;
 }
@@ -2336,7 +2401,7 @@ function selectedGroupValue(groupName, fallback){
 function renderCompanyTable(){
   const wrap=document.getElementById('companyTableWrap'); if(!wrap) return;
   const q=(document.getElementById('companyTableSearch').value||'').trim().toLowerCase();
-  let rows=filteredData().slice()
+  let rows=baseFilteredDataForTable().slice()
     .filter(d=>!q||[d.name,d.year,d.product,d.revenue,d.cat,ownerLabel(d),statusForCompany(d).label,d.watch ? 'OUI' : 'NON',d.notes].some(v=>String(v??'').toLowerCase().includes(q)))
     .filter(d=>textFilterPass(d.name, tableFilters.name))
     .filter(d=>textFilterPass(d.notes || '', tableFilters.notes))
