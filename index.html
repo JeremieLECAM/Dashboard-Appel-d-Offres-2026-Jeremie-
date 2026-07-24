@@ -914,10 +914,10 @@ const SEED_DATA = [
     "outline": "",
     "owner": "Clément Le Roux",
     "owner_missing": false,
-    "notes": "Lost",
+    "notes": "Perdu",
     "plotYear": 2025.91,
     "plotY": 2,
-    "status": "Lost"
+    "status": "Perdu"
   },
   {
     "id": 34,
@@ -1118,10 +1118,10 @@ const SEED_DATA = [
     "outline": "",
     "owner": "Stéphanie Rousseau",
     "owner_missing": false,
-    "notes": "A venir fin Q4",
+    "notes": "Docs Docs à venir fin Q4",
     "plotYear": 2026,
     "plotY": 1,
-    "status": "A confirmer"
+    "status": "AO à confirmer"
   },
   {
     "id": 46,
@@ -1237,10 +1237,10 @@ const SEED_DATA = [
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
-    "notes": "Lost",
+    "notes": "Perdu",
     "plotYear": 2026,
     "plotY": 1,
-    "status": "Lost"
+    "status": "Perdu"
   },
   {
     "id": 53,
@@ -1254,10 +1254,10 @@ const SEED_DATA = [
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
-    "notes": "A confirmer",
+    "notes": "AO AO à confirmer",
     "plotYear": 2026,
     "plotY": 2,
-    "status": "A confirmer"
+    "status": "AO à confirmer"
   },
   {
     "id": 54,
@@ -1441,10 +1441,10 @@ const SEED_DATA = [
     "outline": "",
     "owner": "Sarah Kureemun",
     "owner_missing": false,
-    "notes": "A confirmer",
+    "notes": "AO AO à confirmer",
     "plotYear": 2027,
     "plotY": -3,
-    "status": "A confirmer"
+    "status": "AO à confirmer"
   },
   {
     "id": 65,
@@ -1458,10 +1458,10 @@ const SEED_DATA = [
     "outline": "",
     "owner": "Sarah Kureemun",
     "owner_missing": false,
-    "notes": "A confirmer",
+    "notes": "AO AO à confirmer",
     "plotYear": 2026.0900000000001,
     "plotY": 2,
-    "status": "A confirmer"
+    "status": "AO à confirmer"
   },
   {
     "id": 66,
@@ -1577,10 +1577,10 @@ const SEED_DATA = [
     "outline": "",
     "owner": "Sarah Kureemun",
     "owner_missing": false,
-    "notes": "A confirmer",
+    "notes": "AO AO à confirmer",
     "plotYear": 2026,
     "plotY": 5,
-    "status": "A confirmer"
+    "status": "AO à confirmer"
   },
   {
     "id": 73,
@@ -1611,10 +1611,10 @@ const SEED_DATA = [
     "outline": "",
     "owner": "Sarah Kureemun",
     "owner_missing": false,
-    "notes": "A confirmer",
+    "notes": "AO AO à confirmer",
     "plotYear": 2026,
     "plotY": -4,
-    "status": "A confirmer"
+    "status": "AO à confirmer"
   },
   {
     "id": 75,
@@ -1716,7 +1716,7 @@ const SEED_DATA = [
     "notes": "Attente cahier des charges",
     "plotYear": 2026,
     "plotY": 1,
-    "status": "Attente CDC"
+    "status": "Docs à venir"
   },
   {
     "id": 81,
@@ -1883,10 +1883,10 @@ const SEED_DATA = [
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
-    "notes": "A confirmer",
+    "notes": "AO AO à confirmer",
     "plotYear": 2026.91,
     "plotY": -5,
-    "status": "A confirmer"
+    "status": "AO à confirmer"
   },
   {
     "id": 91,
@@ -1934,10 +1934,10 @@ const SEED_DATA = [
     "outline": "",
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
-    "notes": "Confirmé oralement",
+    "notes": "AO à confirmer",
     "plotYear": 2027.0900000000001,
     "plotY": -5,
-    "status": "Confirmé"
+    "status": "AO à confirmer"
   },
   {
     "id": 94,
@@ -1951,10 +1951,10 @@ const SEED_DATA = [
     "outline": "",
     "owner": "Clément Le Roux",
     "owner_missing": false,
-    "notes": "Q1 2027 à confirmer",
+    "notes": "Q1 2027 AO à confirmer",
     "plotYear": 2027,
     "plotY": 1,
-    "status": "A confirmer"
+    "status": "AO à confirmer"
   }
 ];
 
@@ -2007,27 +2007,30 @@ function ownerLabel(d){ return d && d.owner && String(d.owner).trim() ? String(d
 function catBadge(cat){ return 'b-dynamic'; }  
 function catColor(cat){ return colorForCategory(cat); }
 function categoryIcon(cat){ return `<span class="cat-dot" style="background:${catColor(cat)}"></span>`; }
-function inferStatusFromNotes(notes){
-  const n = normText(notes || '');
-  if(!n) return 'Sans statut';
-  if(n.includes('lost') || n.includes('perdu')) return 'Perdu';
-  if(n.includes('confirmé') || n.includes('confirme')) return 'AO à confirmer';
+function normalizeStatusLabel(status){
+  const raw = String(status || '').trim();
+  const n = normText(raw);
+  if(raw === 'En cours') return 'En cours';
+  if(raw === 'Perdu') return 'Perdu';
+  if(raw === 'AO à confirmer') return 'AO à confirmer';
+  if(raw === 'Docs à venir') return 'Docs à venir';
+  if(raw === 'Sans statut') return 'Sans statut';
+  if(!raw || n === 'note' || n === 'sans statut') return 'Sans statut';
+  if(n.includes('perdu') || n.includes('lost')) return 'Perdu';
+  if(n.includes('attente') || n.includes('cdc') || n.includes('cahier des charges') || n.includes('a venir') || n.includes('docs')) return 'Docs à venir';
+  if(n.includes('a confirmer') || n.includes('confirme') || n.includes('q1') || n.includes('q2') || n.includes('q3') || n.includes('q4')) return 'AO à confirmer';
   if(n.includes('en cours')) return 'En cours';
-  if(n.includes('a confirmer') || n.includes('à confirmer') || n.includes('q1') || n.includes('q2') || n.includes('q3') || n.includes('q4')) return 'AO à confirmer';
-  if(n.includes('attente') || n.includes('cdc') || n.includes('cahier des charges') || n.includes('a venir') || n.includes('à venir')) return 'Docs à venir';
-  return 'Note';
+  return 'Sans statut';
 }
+function inferStatusFromNotes(notes){ return normalizeStatusLabel(notes); }
 function statusMeta(status){
-  const label = STATUS_OPTIONS.includes(String(status || '').trim()) ? String(status).trim() : 'Sans statut';
+  const label = normalizeStatusLabel(status);
   const map = {
-    'Sans statut': {cls:'status-empty', icon:'•'},
     'En cours': {cls:'status-progress', icon:'🟠'},
-    'AO à confirmer': {cls:'status-toconfirm', icon:'🟡'},
-    'AO à confirmer': {cls:'status-confirmed', icon:'🟢'},
     'Perdu': {cls:'status-lost', icon:'🔴'},
+    'AO à confirmer': {cls:'status-toconfirm', icon:'🟡'},
     'Docs à venir': {cls:'status-waiting', icon:'🔵'},
-    'Docs à venir': {cls:'status-upcoming', icon:'🟣'},
-    'Note': {cls:'status-empty', icon:'•'}
+    'Sans statut': {cls:'status-empty', icon:'•'}
   };
   return {label, ...(map[label] || map['Sans statut'])};
 }
@@ -2036,7 +2039,7 @@ function statusForCompany(d){ return statusMeta(d && d.status ? d.status : infer
 function statusBadgeHtml(notes){ const st=statusFromNotes(notes); return `<span class="status-chip ${st.cls}">${st.icon} ${escapeHtml(st.label)}</span>`; }
 function statusBadgeHtmlForCompany(d){ const st=statusForCompany(d); return `<span class="status-chip ${st.cls}">${st.icon} ${escapeHtml(st.label)}</span>`; }
 function statusSelectHtml(id, selected){
-  const chosen = STATUS_OPTIONS.includes(String(selected || '').trim()) ? String(selected).trim() : 'Sans statut';
+  const chosen = normalizeStatusLabel(selected);
   return `<select id="${id}">${STATUS_OPTIONS.map(v=>`<option value="${escapeHtml(v)}" ${v===chosen?'selected':''}>${escapeHtml(v)}</option>`).join('')}</select>`;
 }
 function currentDecimalYear(){ const now=new Date(); const start=new Date(now.getFullYear(),0,1), end=new Date(now.getFullYear()+1,0,1); return now.getFullYear()+((now-start)/(end-start)); }
@@ -2045,10 +2048,9 @@ function cockpitMetrics(rows=data){
   const cy=currentYearNumber();
   const total=rows.length;
   const upcoming=rows.filter(d=>Number(d.year)>=cy).length;
-  const progress=rows.filter(d=>statusForCompany(d).label==='En cours').length;
   const watch=rows.filter(d=>d.watch===true).length;
-  const confirmed=rows.filter(d=>statusForCompany(d).label==='AO à confirmer').length;
-  return {total,upcoming,progress,watch,confirmed};
+  const statusCounts = Object.fromEntries(STATUS_OPTIONS.map(st=>[st, rows.filter(d=>statusForCompany(d).label===st).length]));
+  return {total,upcoming,watch,statusCounts};
 }
 function categoryMetrics(rows=data){
   return {
@@ -2064,11 +2066,11 @@ function updateCockpitMetrics(){
   const k=document.getElementById('cockpitKpis');
   if(k){ k.innerHTML=`
     <div class="kpi-card accent"><div class="kpi-value">${m.total}</div><div class="kpi-label">AO recensés</div></div>
-    <div class="kpi-card"><div class="kpi-value">${m.upcoming}</div><div class="kpi-label">AO à venir</div></div>
-    <div class="kpi-card"><div class="kpi-value">${m.progress}</div><div class="kpi-label">AO en cours</div></div>
-    <div class="kpi-card"><div class="kpi-value">${m.watch}</div><div class="kpi-label">À surveiller</div></div>`; }
+    <div class="kpi-card"><div class="kpi-value">${m.statusCounts['En cours']}</div><div class="kpi-label">En cours</div></div>
+    <div class="kpi-card"><div class="kpi-value">${m.statusCounts['AO à confirmer']}</div><div class="kpi-label">AO à confirmer</div></div>
+    <div class="kpi-card"><div class="kpi-value">${m.statusCounts['Docs à venir']}</div><div class="kpi-label">Docs à venir</div></div>`; }
   const s=document.getElementById('portfolioSummary');
-  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${dashboardKpiFilter===null && dashboardCategoryFilter===null?'active':''}" data-kpi="all">${m.total} AO</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='cac'?'active':''}" data-cat="cac">${c.cac} CAC40</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='sbf'?'active':''}" data-cat="sbf">${c.sbf} SBF120</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='pub'?'active':''}" data-cat="pub">${c.pub} Public</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='eco'?'active':''}" data-cat="eco">${c.eco} Écoles</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='priv'?'active':''}" data-cat="priv">${c.priv} Privé</span></div><div class="summary-secondary"><span class="summary-pill orange kpi-filter ${dashboardKpiFilter==='upcoming'?'active':''}" data-kpi="upcoming">${m.upcoming} à venir</span><span class="summary-pill green">${m.progress} en cours</span><span class="summary-pill">${m.aconfirmer} AO à confirmer</span><span class="summary-pill">${m.docs} Docs à venir</span><span class="summary-pill">${m.perdu} Perdu</span><span class="summary-pill yellow kpi-filter ${dashboardKpiFilter==='progress'?'active':''}" data-kpi="progress">${m.progress} en cours</span><span class="summary-pill kpi-filter ${dashboardKpiFilter==='watch'?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`; s.querySelectorAll('.kpi-filter[data-kpi]').forEach(btn=>btn.onclick=()=>{ if(btn.dataset.kpi==='all'){ dashboardKpiFilter=null; dashboardCategoryFilter=null; } else { dashboardKpiFilter=(dashboardKpiFilter===btn.dataset.kpi?null:btn.dataset.kpi); } updateAll();}); s.querySelectorAll('.kpi-filter[data-cat]').forEach(btn=>btn.onclick=()=>{dashboardCategoryFilter=(dashboardCategoryFilter===btn.dataset.cat?null:btn.dataset.cat); updateAll();}); }
+  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${dashboardKpiFilter===null && dashboardCategoryFilter===null?'active':''}" data-kpi="all">${m.total} AO</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='cac'?'active':''}" data-cat="cac">${c.cac} CAC40</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='sbf'?'active':''}" data-cat="sbf">${c.sbf} SBF120</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='pub'?'active':''}" data-cat="pub">${c.pub} Public</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='eco'?'active':''}" data-cat="eco">${c.eco} Écoles</span><span class="summary-pill kpi-filter ${dashboardCategoryFilter==='priv'?'active':''}" data-cat="priv">${c.priv} Privé</span></div><div class="summary-secondary"><span class="summary-pill orange kpi-filter ${dashboardKpiFilter==='upcoming'?'active':''}" data-kpi="upcoming">${m.upcoming} à venir</span><span class="summary-pill yellow kpi-filter ${dashboardKpiFilter==='status-en-cours'?'active':''}" data-kpi="status-en-cours">${m.statusCounts['En cours']} En cours</span><span class="summary-pill kpi-filter ${dashboardKpiFilter==='status-ao-confirm'?'active':''}" data-kpi="status-ao-confirm">${m.statusCounts['AO à confirmer']} AO à confirmer</span><span class="summary-pill blue kpi-filter ${dashboardKpiFilter==='status-docs'?'active':''}" data-kpi="status-docs">${m.statusCounts['Docs à venir']} Docs à venir</span><span class="summary-pill red kpi-filter ${dashboardKpiFilter==='status-perdu'?'active':''}" data-kpi="status-perdu">${m.statusCounts['Perdu']} Perdu</span><span class="summary-pill kpi-filter ${dashboardKpiFilter==='status-empty'?'active':''}" data-kpi="status-empty">${m.statusCounts['Sans statut']} Sans statut</span><span class="summary-pill kpi-filter ${dashboardKpiFilter==='watch'?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`; s.querySelectorAll('.kpi-filter[data-kpi]').forEach(btn=>btn.onclick=()=>{ if(btn.dataset.kpi==='all'){ dashboardKpiFilter=null; dashboardCategoryFilter=null; } else { dashboardKpiFilter=(dashboardKpiFilter===btn.dataset.kpi?null:btn.dataset.kpi); } updateAll();}); s.querySelectorAll('.kpi-filter[data-cat]').forEach(btn=>btn.onclick=()=>{dashboardCategoryFilter=(dashboardCategoryFilter===btn.dataset.cat?null:btn.dataset.cat); updateAll();}); }
   document.getElementById('watchTopCount') && (document.getElementById('watchTopCount').textContent=m.watch);
   document.getElementById('watchBtn1') && document.getElementById('watchBtn1').setAttribute('data-count',m.watch);
   document.getElementById('watchBtn2') && document.getElementById('watchBtn2').setAttribute('data-count',m.watch);
@@ -2118,7 +2120,7 @@ function normalizePoint(row){
   const watch = rawWatch === true || ['true','1','oui','yes','x'].includes(String(rawWatch).toLowerCase().trim());
   const notes = row.notes==null?'':String(row.notes);
   const rawStatus = row.status || row.statut || row.Statut || row.STATUS || '';
-  const status = STATUS_OPTIONS.includes(String(rawStatus).trim()) ? String(rawStatus).trim() : inferStatusFromNotes(notes);
+  const status = rawStatus ? normalizeStatusLabel(rawStatus) : inferStatusFromNotes(notes);
   return { id:Number(row.id)||nextDataId(), name:String(row.name||row.entreprise||'').trim(), year:Number.isFinite(year)?year:new Date().getFullYear(), product, revenue:Number.isFinite(revenue)?revenue:0, y:computeYFromRevenue(revenue, product), cat, color:colorForCategory(cat), outline:row.outline||'', owner, owner_missing:!(owner&&String(owner).trim()), status, notes, watch };
 }
 function normalizeAllData(){ data = data.map(normalizePoint).filter(d=>d.name); years = [...new Set(data.map(d=>Number(d.year)).filter(Number.isFinite))].sort((a,b)=>a-b); syncYearInputs(); }
@@ -2167,7 +2169,7 @@ function switchTab(tab){
 }
 function resizeChart(){ if(window.Plotly) try{Plotly.Plots.resize('chart');}catch(e){} }
 function getFilterState(){ const q=document.getElementById('search').value.trim().toLowerCase(); const cats=[...document.querySelectorAll('.f-cat:checked')].map(e=>e.value); const prods=[...document.querySelectorAll('.f-prod:checked')].map(e=>e.value); const owners=[...document.querySelectorAll('.f-owner:checked')].map(e=>e.value); let yMin=parseInt(document.getElementById('yearMin').value,10), yMax=parseInt(document.getElementById('yearMax').value,10); if(Number.isNaN(yMin)) yMin=Math.min(...years); if(Number.isNaN(yMax)) yMax=Math.max(...years); if(yMin>yMax){const t=yMin;yMin=yMax;yMax=t;} return {q,cats,prods,owners,yMin,yMax}; }
-function filteredData(){ const f=getFilterState(); let rows=data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); if(dashboardKpiFilter==='upcoming') rows=rows.filter(d=>Number(d.year)>=currentYearNumber()); if(dashboardKpiFilter==='progress') rows=rows.filter(d=>statusForCompany(d).label==='En cours'); if(dashboardKpiFilter==='watch') rows=rows.filter(d=>d.watch===true); if(dashboardKpiFilter==='confirmed') rows=rows.filter(d=>statusForCompany(d).label==='AO à confirmer'); if(dashboardCategoryFilter==='cac') rows=rows.filter(d=>d.cat==='CAC 40'); if(dashboardCategoryFilter==='sbf') rows=rows.filter(d=>d.cat==='SBF 120'); if(dashboardCategoryFilter==='pub') rows=rows.filter(d=>d.cat==='Public / Semi-Public'); if(dashboardCategoryFilter==='eco') rows=rows.filter(d=>d.cat==='Écoles'); if(dashboardCategoryFilter==='priv') rows=rows.filter(d=>d.cat==='Entreprise privée hors CAC 40/SBF 120'); return rows; }
+function filteredData(){ const f=getFilterState(); let rows=data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); if(dashboardKpiFilter==='upcoming') rows=rows.filter(d=>Number(d.year)>=currentYearNumber()); if(dashboardKpiFilter==='status-en-cours') rows=rows.filter(d=>statusForCompany(d).label==='En cours'); if(dashboardKpiFilter==='status-ao-confirm') rows=rows.filter(d=>statusForCompany(d).label==='AO à confirmer'); if(dashboardKpiFilter==='status-docs') rows=rows.filter(d=>statusForCompany(d).label==='Docs à venir'); if(dashboardKpiFilter==='status-perdu') rows=rows.filter(d=>statusForCompany(d).label==='Perdu'); if(dashboardKpiFilter==='status-empty') rows=rows.filter(d=>statusForCompany(d).label==='Sans statut'); if(dashboardKpiFilter==='watch') rows=rows.filter(d=>d.watch===true); if(dashboardCategoryFilter==='cac') rows=rows.filter(d=>d.cat==='CAC 40'); if(dashboardCategoryFilter==='sbf') rows=rows.filter(d=>d.cat==='SBF 120'); if(dashboardCategoryFilter==='pub') rows=rows.filter(d=>d.cat==='Public / Semi-Public'); if(dashboardCategoryFilter==='eco') rows=rows.filter(d=>d.cat==='Écoles'); if(dashboardCategoryFilter==='priv') rows=rows.filter(d=>d.cat==='Entreprise privée hors CAC 40/SBF 120'); return rows; }
 function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.map(ownerLabel))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); updateFilterCounters(); }
 function updateAll(){ normalizeAllData(); renderList(); renderCompanyTable(); renderEditors(); updateCockpitMetrics(); updateFilterCounters(); updateChart(); saveData(); }
 function renderList(){
@@ -2396,7 +2398,7 @@ function updateChart(){
   }
   function isPriorityLabel(p){
     const st = statusForCompany(p).label;
-    return Number(p.year)>=currentYearNumber() || p.watch===true || ['En cours','AO à confirmer','AO à confirmer','Docs à venir','Docs à venir'].includes(st) || Number(p.id)===Number(selectedCompanyId) || Number(p.id)===Number(hoveredCompanyId);
+    return Number(p.year)>=currentYearNumber() || p.watch===true || ['En cours','AO à confirmer','Docs à venir'].includes(st) || Number(p.id)===Number(selectedCompanyId) || Number(p.id)===Number(hoveredCompanyId);
   }
 
   const groups=new Map();
