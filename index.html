@@ -2181,7 +2181,7 @@ function renderList(){
 }
 function normText(v){ return String(v ?? '').trim().toLowerCase(); }
 function uniqueSortedValues(field){
-  const vals = data.map(d => field === 'owner' ? ownerLabel(d) : d[field])
+  const vals = data.map(d => field === 'owner' ? ownerLabel(d) : field==='status' ? statusForCompany(d).label : field==='watch' ? (d.watch?'OUI':'NON') : d[field])
     .filter(v => v !== null && v !== undefined && String(v).trim() !== '')
     .map(v => String(v));
   return [...new Set(vals)].sort((a,b)=>{
@@ -2192,7 +2192,7 @@ function uniqueSortedValues(field){
 function isFilterActive(col){
   if(col === 'name') return !!(tableFilters.name && tableFilters.name.value);
   if(col === 'notes') return !!(tableFilters.notes && tableFilters.notes.value);
-  if(['year','product','cat','owner'].includes(col)) return Array.isArray(tableFilters[col]);
+  if(['year','product','cat','owner','status','watch'].includes(col)) return Array.isArray(tableFilters[col]);
   if(col === 'revenue') return tableSort && tableSort.col === 'revenue';
   return tableSort && tableSort.col === col;
 }
@@ -2220,8 +2220,8 @@ function sortRows(rows){
 }
 function textFilterMenu(col, label){
   const f = tableFilters[col] || {op:'contains',value:''};
-  const ascTxt = col === 'notes' ? 'A → Z notes' : 'A → Z entreprise';
-  const descTxt = col === 'notes' ? 'Z → A notes' : 'Z → A entreprise';
+  const ascTxt = col === 'notes' ? 'A → Z' : 'A → Z entreprise';
+  const descTxt = col === 'notes' ? 'Z → A' : 'Z → A entreprise';
   return `<div class="filter-menu" id="filter-${col}">
     <div class="fm-title">${label}</div>
     <select id="${col}FilterOp"><option value="contains" ${f.op==='contains'?'selected':''}>Contains</option><option value="equals" ${f.op==='equals'?'selected':''}>Equals</option></select>
@@ -2256,7 +2256,7 @@ function bindTableFilterEvents(){
   document.querySelectorAll('[data-select-all]').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll(`.tf-check[data-col="${btn.dataset.selectAll}"]`).forEach(cb=>cb.checked=true); }));
   document.querySelectorAll('[data-deselect-all]').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll(`.tf-check[data-col="${btn.dataset.deselectAll}"]`).forEach(cb=>cb.checked=false); }));
   document.querySelectorAll('[data-apply-check]').forEach(btn=>btn.addEventListener('click',()=>{ const col=btn.dataset.applyCheck; tableFilters[col]=[...document.querySelectorAll(`.tf-check[data-col="${col}"]:checked`)].map(cb=>cb.value); renderCompanyTable(); }));
-  document.querySelectorAll('[data-reset]').forEach(btn=>btn.addEventListener('click',()=>{ const col=btn.dataset.reset; if(col==='name'||col==='notes') tableFilters[col]={op:'contains',value:''}; else if(['year','product','cat','owner'].includes(col)) tableFilters[col]=null; if(col==='revenue'||(tableSort&&tableSort.col===col)) tableSort={col:'name',dir:'asc'}; renderCompanyTable(); }));
+  document.querySelectorAll('[data-reset]').forEach(btn=>btn.addEventListener('click',()=>{ const col=btn.dataset.reset; if(col==='name'||col==='notes') tableFilters[col]={op:'contains',value:''}; else if(['year','product','cat','owner','status','watch'].includes(col)) tableFilters[col]=null; if(col==='revenue'||(tableSort&&tableSort.col===col)) tableSort={col:'name',dir:'asc'}; renderCompanyTable(); }));
 }
 function getEditorOwners(currentOwner){
   const owners = uniqueSortedValues('owner');
@@ -2293,12 +2293,12 @@ function renderCompanyTable(){
   wrap.innerHTML=`<table class="company-table"><thead><tr>
     ${th('Entreprise','name',textFilterMenu('name','Entreprise'))}
     ${th('Année','year',checkboxFilterMenu('year','Année',{sort:true,asc:'Plus ancien → récent',desc:'Plus récent → ancien'}))}
-    ${th('Produit','product',checkboxFilterMenu('product','Produit'))}
+    ${th('Produit','product',checkboxFilterMenu('product','Produit',{sort:true,asc:'A → Z',desc:'Z → A'}))}
     ${th('Estimated €','revenue',revenueFilterMenu())}
-    ${th('Catégorie','cat',checkboxFilterMenu('cat','Catégorie'))}
-    ${th('Owner / BDR','owner',checkboxFilterMenu('owner','Owner / BDR'))}
-    <th>À surveiller</th>
-    <th>Statut</th>  
+    ${th('Catégorie','cat',checkboxFilterMenu('cat','Catégorie',{sort:true,asc:'A → Z',desc:'Z → A'}))}
+    ${th('Owner / BDR','owner',checkboxFilterMenu('owner','Owner / BDR',{sort:true,asc:'A → Z',desc:'Z → A'}))}
+    ${th('À surveiller','watch',checkboxFilterMenu('watch','À surveiller'))}
+    ${th('Statut','status',checkboxFilterMenu('status','Statut',{sort:true,asc:'A → Z',desc:'Z → A'}))}  
     ${th('Notes','notes',textFilterMenu('notes','Notes'))}
   </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" class="${Number(d.id)===Number(selectedCompanyId)?'selected':''}"><td><b>${escapeHtml(d.name)}</b></td><td>${d.year}</td><td>${escapeHtml(d.product)}</td><td>${Math.round(d.revenue).toLocaleString('fr-FR')} €</td><td><span class="cat-dot" style="background:${colorForCategory(d.cat)}"></span> ${escapeHtml(shortCatLabel(d.cat))}</td><td>${escapeHtml(ownerLabel(d))}</td><td class="watch-check-cell"><button type="button" class="watch-star ${d.watch?'':'off'}" data-watch-id="${d.id}" title="Ajouter à la liste À surveiller">${d.watch?'★':'☆'}</button></td><td class="status-cell">${statusBadgeHtmlForCompany(d)}</td><td class="notes-cell">${escapeHtml(d.notes||'')}</td></tr>`).join('')}</tbody></table>`;
   wrap.querySelectorAll('tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>selectCompany(tr.dataset.id)));
