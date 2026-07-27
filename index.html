@@ -277,6 +277,49 @@
 .summary-pill{transition:transform .15s ease, box-shadow .15s ease;}
 .summary-pill:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.10);}
 .summary-pill.active{box-shadow:0 0 0 2px rgba(255,121,0,.22),0 4px 12px rgba(255,121,0,.20)!important;}
+
+/* V16 - Mini timeline AO par année/statut sous le graphique principal */
+.chart-panel{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+}
+.chart-main{
+  flex:0 0 100%;
+  min-height:100%;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.status-timeline-panel{
+  flex:0 0 auto;
+  margin:12px;
+  padding:14px 16px 16px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:#fff;
+  box-shadow:var(--shadow);
+}
+.timeline-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px;}
+.timeline-title{font-size:15px;font-weight:950;margin:0;color:#000;}
+.timeline-subtitle{font-size:11px;color:#666;margin-top:3px;font-weight:700;}
+.timeline-legend{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;}
+.timeline-legend .status-chip{font-size:10px;padding:3px 8px;}
+.timeline-row{display:grid;grid-template-columns:64px minmax(220px,1fr) 54px;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #f0f0f0;}
+.timeline-row:first-child{border-top:0;}
+.timeline-year{font-size:13px;font-weight:950;color:#000;}
+.timeline-track{height:25px;border-radius:999px;background:#f1f1f1;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);}
+.timeline-fill{height:100%;display:flex;border-radius:999px;overflow:hidden;min-width:4px;}
+.timeline-segment{height:100%;min-width:2px;display:flex;align-items:center;justify-content:center;color:#000;font-size:10px;font-weight:950;border-right:1px solid rgba(255,255,255,.75);white-space:nowrap;}
+.timeline-segment:last-child{border-right:0;}
+.timeline-segment.status-progress{background:#ffd0a1;color:#783700;}
+.timeline-segment.status-lost{background:#ffc4c4;color:#8b1010;}
+.timeline-segment.status-toconfirm{background:#f3df8a;color:#665000;}
+.timeline-segment.status-waiting{background:#c9dcff;color:#1e447e;}
+.timeline-segment.status-empty{background:#e4e4e4;color:#4d4d4d;}
+.timeline-total{font-size:12px;font-weight:950;text-align:right;color:#000;}
+.timeline-empty{padding:16px;border:1px dashed #ddd;border-radius:12px;color:#666;font-size:12px;font-weight:800;background:#fafafa;}
+@media(max-width:1150px){.timeline-head{flex-direction:column;align-items:flex-start}.timeline-legend{justify-content:flex-start}.timeline-row{grid-template-columns:52px minmax(160px,1fr) 46px}}
+
 </style>
 </head>
 <body onload="loadPlotly()">
@@ -351,9 +394,21 @@
       </aside>
 
       <main id="chartPanel" class="chart-panel">
-        <div id="portfolioSummary" class="summary-strip"></div>
-        <div id="chartWrap"><button id="fsBtn" type="button">⛶ Plein écran</button><div id="chart"></div></div>
-        <div id="bottomBar"><button id="labelBtn" type="button">👁️ Afficher les noms</button><button id="watchBtn1" type="button">A surveiller</button></div>
+        <div class="chart-main">
+          <div id="portfolioSummary" class="summary-strip"></div>
+          <div id="chartWrap"><button id="fsBtn" type="button">⛶ Plein écran</button><div id="chart"></div></div>
+          <div id="bottomBar"><button id="labelBtn" type="button">👁️ Afficher les noms</button><button id="watchBtn1" type="button">A surveiller</button></div>
+        </div>
+        <section id="statusTimelinePanel" class="status-timeline-panel">
+          <div class="timeline-head">
+            <div>
+              <h2 class="timeline-title">Mini timeline des AO à venir</h2>
+              <div class="timeline-subtitle">Nombre d'AO par année, à partir de 2026, réparti par statut</div>
+            </div>
+            <div id="statusTimelineLegend" class="timeline-legend"></div>
+          </div>
+          <div id="statusTimelineBody"></div>
+        </section>
       </main>
     </div>
   </div>
@@ -2673,7 +2728,47 @@ function getFilterState(){ const q=document.getElementById('search').value.trim(
 function filteredData(){ const f=getFilterState(); let rows=data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); if(dashboardKpiFilter==='status-en-cours') rows=rows.filter(d=>statusForCompany(d).label==='En cours'); if(dashboardKpiFilter==='status-ao-confirm') rows=rows.filter(d=>statusForCompany(d).label==='AO à confirmer'); if(dashboardKpiFilter==='status-docs') rows=rows.filter(d=>statusForCompany(d).label==='Docs à venir'); if(dashboardKpiFilter==='status-perdu') rows=rows.filter(d=>statusForCompany(d).label==='Perdu'); if(dashboardKpiFilter==='status-empty') rows=rows.filter(d=>statusForCompany(d).label==='Sans statut'); if(dashboardKpiFilter==='watch') rows=rows.filter(d=>d.watch===true); if(dashboardCategoryFilter==='cac') rows=rows.filter(d=>d.cat==='CAC 40'); if(dashboardCategoryFilter==='sbf') rows=rows.filter(d=>d.cat==='SBF 120'); if(dashboardCategoryFilter==='pub') rows=rows.filter(d=>d.cat==='Public / Semi-Public'); if(dashboardCategoryFilter==='eco') rows=rows.filter(d=>d.cat==='Écoles'); if(dashboardCategoryFilter==='priv') rows=rows.filter(d=>d.cat==='Entreprise privée hors CAC 40/SBF 120'); return rows; }
 function baseFilteredDataForTable(){ const f=getFilterState(); return data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); }
 function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.map(ownerLabel))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); updateFilterCounters(); }
-function updateAll(){ normalizeAllData(); renderList(); renderCompanyTable(); renderEditors(); updateCockpitMetrics(); updateFilterCounters(); updateChart(); saveData(); }
+
+function statusTimelineSourceRows(){
+  let rows = baseFilteredDataForTable().filter(d => Number(d.year) >= 2026);
+  // La mini timeline respecte les filtres de base du dashboard et le filtre catégorie cliqué,
+  // mais conserve la répartition par statut pour rester lisible.
+  if(dashboardCategoryFilter==='cac') rows=rows.filter(d=>d.cat==='CAC 40');
+  if(dashboardCategoryFilter==='sbf') rows=rows.filter(d=>d.cat==='SBF 120');
+  if(dashboardCategoryFilter==='pub') rows=rows.filter(d=>d.cat==='Public / Semi-Public');
+  if(dashboardCategoryFilter==='eco') rows=rows.filter(d=>d.cat==='Écoles');
+  if(dashboardCategoryFilter==='priv') rows=rows.filter(d=>d.cat==='Entreprise privée hors CAC 40/SBF 120');
+  return rows;
+}
+function renderStatusTimeline(){
+  const body=document.getElementById('statusTimelineBody');
+  const legend=document.getElementById('statusTimelineLegend');
+  if(!body || !legend) return;
+  const rows=statusTimelineSourceRows();
+  const yearsList=[...new Set(rows.map(d=>Number(d.year)).filter(y=>Number.isFinite(y) && y>=2026))].sort((a,b)=>a-b);
+  legend.innerHTML=STATUS_OPTIONS.map(st=>{ const meta=statusMeta(st); return `<span class="status-chip ${meta.cls}">${meta.icon} ${escapeHtml(st)}</span>`; }).join('');
+  if(!yearsList.length){ body.innerHTML='<div class="timeline-empty">Aucun AO à partir de 2026 avec les filtres actuels.</div>'; return; }
+  const byYear=yearsList.map(year=>{
+    const yearRows=rows.filter(d=>Number(d.year)===year);
+    const counts=Object.fromEntries(STATUS_OPTIONS.map(st=>[st, yearRows.filter(d=>statusForCompany(d).label===st).length]));
+    return {year,counts,total:yearRows.length};
+  });
+  const maxTotal=Math.max(...byYear.map(y=>y.total),1);
+  body.innerHTML=byYear.map(row=>{
+    const fillWidth=Math.max(6,(row.total/maxTotal)*100);
+    const segments=STATUS_OPTIONS.map(st=>{
+      const count=row.counts[st]||0;
+      if(!count) return '';
+      const meta=statusMeta(st);
+      const pct=(count/row.total)*100;
+      const label=count>=2 ? count : '';
+      return `<div class="timeline-segment ${meta.cls}" style="width:${pct}%" title="${escapeHtml(st)} : ${count} AO">${label}</div>`;
+    }).join('');
+    return `<div class="timeline-row"><div class="timeline-year">${row.year}</div><div class="timeline-track"><div class="timeline-fill" style="width:${fillWidth}%">${segments}</div></div><div class="timeline-total">${row.total} AO</div></div>`;
+  }).join('');
+}
+
+function updateAll(){ normalizeAllData(); renderList(); renderCompanyTable(); renderEditors(); updateCockpitMetrics(); updateFilterCounters(); updateChart(); renderStatusTimeline(); saveData(); }
 function renderList(){
   const pts=filteredData().sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));
   document.getElementById('list').innerHTML=pts.map(d=>`<div class="item ${Number(d.id)===Number(selectedCompanyId)?'selected':''}" data-id="${d.id}"><div class="item-main">${categoryIcon(d.cat)}<span class="item-name">${escapeHtml(d.name)}</span>${d.watch?' <span title="À surveiller">⭐</span>':''}</div><div class="item-meta">${escapeHtml(d.product)} • ${d.year}<br>👤 ${escapeHtml(ownerLabel(d))} &nbsp; ${statusBadgeHtmlForCompany(d)}</div></div>`).join('');
