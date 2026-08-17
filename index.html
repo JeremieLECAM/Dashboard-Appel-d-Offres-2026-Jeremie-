@@ -26,6 +26,7 @@
     }
   
 /* V18 applied */
+/* V19 cumulative dashboard filters + fixed popup scroll */
 </script>
   <style>
     :root{
@@ -356,6 +357,41 @@
 .timeline-segment.status-waiting{background:#FF1493!important;color:#fff!important;}
 .timeline-segment.status-lost{background:#000!important;color:#fff!important;}
 .timeline-segment.status-empty{background:#fff!important;color:#555!important;box-shadow:inset 0 0 0 1px #e5e5e5;}
+
+
+/* V19 - Popup fiche entreprise scrollable + boutons visibles */
+.floating-company-popup{
+  max-height:min(82vh,720px)!important;
+  overflow:hidden!important;
+  display:none;
+  flex-direction:column!important;
+}
+.floating-company-popup.open{display:flex!important;}
+.floating-company-popup .popup-shell{
+  display:flex!important;
+  flex-direction:column!important;
+  max-height:min(82vh,720px)!important;
+  min-height:0!important;
+}
+.floating-company-popup .popup-hero{flex:0 0 auto!important;}
+.floating-company-popup .popup-body{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  min-height:0!important;
+  max-height:calc(82vh - 84px)!important;
+  padding-bottom:0!important;
+  scrollbar-gutter:stable;
+}
+.floating-company-popup form{display:flex;flex-direction:column;min-height:0;}
+.floating-company-popup .editor-actions{
+  position:sticky!important;
+  bottom:0!important;
+  z-index:5!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.88),#fff 36%)!important;
+  padding:9px 0 10px!important;
+  margin-bottom:0!important;
+  box-shadow:0 -8px 18px rgba(0,0,0,.08)!important;
+}
 
 </style>
 </head>
@@ -2552,37 +2588,54 @@ function sameArrayValues(a,b){
   if(!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
   return a.map(String).sort().join('|') === b.map(String).sort().join('|');
 }
-function applyDashboardFilterToTable(kind, key, active){
-  // Les boutons de l'onglet 1 doivent préparer les filtres de l'onglet 2,
-  // sans bloquer ensuite l'utilisateur : il peut ajouter/retirer des cases normalement.
-  if(key === 'all'){
-    dashboardKpiFilter = null;
-    dashboardCategoryFilter = null;
-    tableFilters.year = null;
-    tableFilters.cat = null;
-    tableFilters.status = null;
-    tableFilters.watch = null;
-    return;
-  }
-  if(kind === 'kpi'){
-    const preset = DASHBOARD_KPI_TABLE_PRESETS[key];
-    if(!preset) return;
-    const values = typeof preset.values === 'function' ? preset.values() : preset.values;
-    if(active){
-      if(preset.col === 'status'){ tableFilters.status = values.slice(); tableFilters.watch = null; }
-      else if(preset.col === 'watch'){ tableFilters.watch = values.slice(); }
-      else if(preset.col === 'year'){ tableFilters.year = values.slice(); }
-    } else if(sameArrayValues(tableFilters[preset.col], values)){
-      tableFilters[preset.col] = null;
-    }
-  }
-  if(kind === 'cat'){
-    const values = DASHBOARD_CATEGORY_TABLE_PRESETS[key];
-    if(!values) return;
-    if(active) tableFilters.cat = values.slice();
-    else if(sameArrayValues(tableFilters.cat, values)) tableFilters.cat = null;
-  }
-}
+function selectedDashboardCategoryValues(){  
+  const map = DASHBOARD_CATEGORY_TABLE_PRESETS;  
+  return [...dashboardCategoryFilters].flatMap(k => map[k] || []);  
+}  
+function selectedDashboardStatusValues(){  
+  const out = [];  
+  if(dashboardKpiFilters.has('status-en-cours')) out.push('En cours');  
+  if(dashboardKpiFilters.has('status-ao-confirm')) out.push('AO à confirmer');  
+  if(dashboardKpiFilters.has('status-docs')) out.push('Docs à venir');  
+  if(dashboardKpiFilters.has('status-perdu')) out.push('Perdu');  
+  if(dashboardKpiFilters.has('status-empty')) out.push('Sans statut');  
+  return out;  
+}  
+function syncDashboardButtonFiltersToTable(){  
+  const cats = selectedDashboardCategoryValues();  
+  const statuses = selectedDashboardStatusValues();  
+  tableFilters.cat = cats.length ? cats : null;  
+  tableFilters.status = statuses.length ? statuses : null;  
+  tableFilters.watch = dashboardKpiFilters.has('watch') ? ['OUI'] : null;  
+}  
+function clearDashboardButtonFilters(){  
+  dashboardKpiFilters.clear();  
+  dashboardCategoryFilters.clear();  
+  dashboardKpiFilter = null;  
+  dashboardCategoryFilter = null;  
+  tableFilters.year = null;  
+  tableFilters.cat = null;  
+  tableFilters.status = null;  
+  tableFilters.watch = null;  
+}  
+function toggleDashboardKpiFilter(key){  
+  if(key === 'all'){ clearDashboardButtonFilters(); return; }  
+  if(dashboardKpiFilters.has(key)) dashboardKpiFilters.delete(key);  
+  else dashboardKpiFilters.add(key);  
+  dashboardKpiFilter = dashboardKpiFilters.size === 1 ? [...dashboardKpiFilters][0] : null;  
+  syncDashboardButtonFiltersToTable();  
+}  
+function toggleDashboardCategoryFilter(key){  
+  if(dashboardCategoryFilters.has(key)) dashboardCategoryFilters.delete(key);  
+  else dashboardCategoryFilters.add(key);  
+  dashboardCategoryFilter = dashboardCategoryFilters.size === 1 ? [...dashboardCategoryFilters][0] : null;  
+  syncDashboardButtonFiltersToTable();  
+}  
+function applyDashboardFilterToTable(kind, key, active){  
+  // Compatibilité avec les anciennes fonctions : on redirige vers le nouveau mode cumulable.  
+  if(key === 'all') clearDashboardButtonFilters();  
+  else syncDashboardButtonFiltersToTable();  
+}  
 const CATEGORY_BY_ID = {"1": "Public / Semi-Public", "2": "SBF 120", "3": "CAC 40", "4": "CAC 40", "5": "SBF 120", "6": "Entreprise privée hors CAC 40/SBF 120", "7": "Entreprise privée hors CAC 40/SBF 120", "8": "Public / Semi-Public", "9": "Public / Semi-Public", "10": "CAC 40", "11": "CAC 40", "12": "Entreprise privée hors CAC 40/SBF 120", "13": "CAC 40", "14": "Entreprise privée hors CAC 40/SBF 120", "15": "SBF 120", "16": "CAC 40", "17": "Entreprise privée hors CAC 40/SBF 120", "18": "CAC 40", "19": "Entreprise privée hors CAC 40/SBF 120", "20": "Entreprise privée hors CAC 40/SBF 120", "21": "Entreprise privée hors CAC 40/SBF 120", "22": "Entreprise privée hors CAC 40/SBF 120", "23": "Entreprise privée hors CAC 40/SBF 120", "24": "Entreprise privée hors CAC 40/SBF 120", "25": "Entreprise privée hors CAC 40/SBF 120", "26": "CAC 40", "27": "CAC 40", "28": "Entreprise privée hors CAC 40/SBF 120", "29": "Entreprise privée hors CAC 40/SBF 120", "30": "Public / Semi-Public", "31": "Écoles", "32": "Écoles", "33": "CAC 40", "34": "Entreprise privée hors CAC 40/SBF 120", "35": "Entreprise privée hors CAC 40/SBF 120", "36": "Entreprise privée hors CAC 40/SBF 120", "37": "Entreprise privée hors CAC 40/SBF 120", "38": "Entreprise privée hors CAC 40/SBF 120", "39": "Public / Semi-Public", "40": "SBF 120", "41": "Entreprise privée hors CAC 40/SBF 120", "42": "Entreprise privée hors CAC 40/SBF 120", "43": "Entreprise privée hors CAC 40/SBF 120", "44": "Entreprise privée hors CAC 40/SBF 120", "45": "Entreprise privée hors CAC 40/SBF 120", "46": "SBF 120", "47": "Public / Semi-Public", "48": "Public / Semi-Public", "49": "Public / Semi-Public", "50": "SBF 120", "51": "SBF 120", "52": "Écoles", "53": "CAC 40", "54": "Entreprise privée hors CAC 40/SBF 120", "55": "Entreprise privée hors CAC 40/SBF 120", "56": "CAC 40", "57": "CAC 40", "58": "Entreprise privée hors CAC 40/SBF 120", "59": "Entreprise privée hors CAC 40/SBF 120", "60": "Entreprise privée hors CAC 40/SBF 120", "61": "Entreprise privée hors CAC 40/SBF 120", "62": "Entreprise privée hors CAC 40/SBF 120", "63": "Écoles", "64": "SBF 120", "65": "SBF 120", "66": "CAC 40", "67": "Entreprise privée hors CAC 40/SBF 120", "68": "Public / Semi-Public", "69": "CAC 40", "70": "CAC 40", "71": "CAC 40", "72": "Public / Semi-Public", "73": "CAC 40", "74": "Entreprise privée hors CAC 40/SBF 120", "75": "Entreprise privée hors CAC 40/SBF 120", "76": "Entreprise privée hors CAC 40/SBF 120", "77": "SBF 120", "78": "SBF 120", "79": "SBF 120", "80": "SBF 120", "81": "CAC 40", "82": "Entreprise privée hors CAC 40/SBF 120", "83": "CAC 40", "84": "Entreprise privée hors CAC 40/SBF 120", "85": "Entreprise privée hors CAC 40/SBF 120", "86": "Entreprise privée hors CAC 40/SBF 120", "87": "CAC 40", "88": "Entreprise privée hors CAC 40/SBF 120", "89": "CAC 40", "90": "CAC 40", "91": "Entreprise privée hors CAC 40/SBF 120", "92": "Public / Semi-Public", "93": "CAC 40", "94": "CAC 40"};
 const Y_BANDS_LANGUES = [
   {max:10000,y:1,label:'Langues ≤ 10k€'}, {max:50000,y:2,label:'Langues 10–50k€'}, {max:100000,y:3,label:'Langues 50–100k€'}, {max:200000,y:4,label:'Langues 100–200k€'}, {max:1000000,y:5,label:'Langues > 200k€'}
@@ -2657,20 +2710,24 @@ function categoryMetrics(rows=data){
     eco: rows.filter(d=>d.cat==='Écoles').length
   };
 }
-function updateCockpitMetrics(){
-  const m=cockpitMetrics(data), c=categoryMetrics(data);
-  const k=document.getElementById('cockpitKpis');
-  if(k){ k.innerHTML=`
-    <div class="kpi-card accent"><div class="kpi-value">${m.total}</div><div class="kpi-label">AO recensés</div></div>
-    <div class="kpi-card"><div class="kpi-value">${m.statusCounts['En cours']}</div><div class="kpi-label">En cours</div></div>
-    <div class="kpi-card"><div class="kpi-value">${m.statusCounts['AO à confirmer']}</div><div class="kpi-label">AO à confirmer</div></div>
-    <div class="kpi-card"><div class="kpi-value">${m.statusCounts['Docs à venir']}</div><div class="kpi-label">Docs à venir</div></div>`; }
-  const s=document.getElementById('portfolioSummary');
-  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${dashboardKpiFilter===null && dashboardCategoryFilter===null?'active':''}" data-kpi="all">${m.total} AO</span><span class="summary-pill cat-pill cat-pill-cac kpi-filter ${dashboardCategoryFilter==='cac'?'active':''}" data-cat="cac">${c.cac} CAC40</span><span class="summary-pill cat-pill cat-pill-sbf kpi-filter ${dashboardCategoryFilter==='sbf'?'active':''}" data-cat="sbf">${c.sbf} SBF120</span><span class="summary-pill cat-pill cat-pill-priv kpi-filter ${dashboardCategoryFilter==='priv'?'active':''}" data-cat="priv">${c.priv} Privé</span><span class="summary-pill cat-pill cat-pill-pub kpi-filter ${dashboardCategoryFilter==='pub'?'active':''}" data-cat="pub">${c.pub} Public</span><span class="summary-pill cat-pill cat-pill-eco kpi-filter ${dashboardCategoryFilter==='eco'?'active':''}" data-cat="eco">${c.eco} Écoles</span></div><div class="summary-secondary"><span class="summary-pill status-progress-pill kpi-filter ${dashboardKpiFilter==='status-en-cours'?'active':''}" data-kpi="status-en-cours">${m.statusCounts['En cours']} En cours</span><span class="summary-pill status-confirm-pill kpi-filter ${dashboardKpiFilter==='status-ao-confirm'?'active':''}" data-kpi="status-ao-confirm">${m.statusCounts['AO à confirmer']} AO à confirmer</span><span class="summary-pill status-docs-pill kpi-filter ${dashboardKpiFilter==='status-docs'?'active':''}" data-kpi="status-docs">${m.statusCounts['Docs à venir']} Docs à venir</span><span class="summary-pill status-lost-pill kpi-filter ${dashboardKpiFilter==='status-perdu'?'active':''}" data-kpi="status-perdu">${m.statusCounts['Perdu']} Perdu</span><span class="summary-pill status-empty-pill kpi-filter ${dashboardKpiFilter==='status-empty'?'active':''}" data-kpi="status-empty">${m.statusCounts['Sans statut']} Sans statut</span><span class="summary-pill kpi-filter ${dashboardKpiFilter==='watch'?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`; s.querySelectorAll('.kpi-filter[data-kpi]').forEach(btn=>btn.onclick=()=>{ if(btn.dataset.kpi==='all'){ applyDashboardFilterToTable('kpi','all',true); } else { const next = dashboardKpiFilter===btn.dataset.kpi ? null : btn.dataset.kpi; dashboardKpiFilter=next; applyDashboardFilterToTable('kpi', btn.dataset.kpi, !!next); } updateAll();}); s.querySelectorAll('.kpi-filter[data-cat]').forEach(btn=>btn.onclick=()=>{ const next = dashboardCategoryFilter===btn.dataset.cat ? null : btn.dataset.cat; dashboardCategoryFilter=next; applyDashboardFilterToTable('cat', btn.dataset.cat, !!next); updateAll();}); }
-  document.getElementById('watchTopCount') && (document.getElementById('watchTopCount').textContent=m.watch);
-  document.getElementById('watchBtn1') && document.getElementById('watchBtn1').setAttribute('data-count',m.watch);
-  document.getElementById('watchBtn2') && document.getElementById('watchBtn2').setAttribute('data-count',m.watch);
-}
+function updateCockpitMetrics(){  
+  const m=cockpitMetrics(data), c=categoryMetrics(data);  
+  const k=document.getElementById('cockpitKpis');  
+  if(k){ k.innerHTML=`  
+    <div class="kpi-card accent"><div class="kpi-value">${m.total}</div><div class="kpi-label">AO recensés</div></div>  
+    <div class="kpi-card"><div class="kpi-value">${m.statusCounts['En cours']}</div><div class="kpi-label">En cours</div></div>  
+    <div class="kpi-card"><div class="kpi-value">${m.statusCounts['AO à confirmer']}</div><div class="kpi-label">AO à confirmer</div></div>  
+    <div class="kpi-card"><div class="kpi-value">${m.statusCounts['Docs à venir']}</div><div class="kpi-label">Docs à venir</div></div>`; }  
+  const s=document.getElementById('portfolioSummary');  
+  const noDashboardButtons = dashboardKpiFilters.size===0 && dashboardCategoryFilters.size===0;  
+  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${noDashboardButtons?'active':''}" data-kpi="all">${m.total} AO</span><span class="summary-pill cat-pill cat-pill-cac kpi-filter ${dashboardCategoryFilters.has('cac')?'active':''}" data-cat="cac">${c.cac} CAC40</span><span class="summary-pill cat-pill cat-pill-sbf kpi-filter ${dashboardCategoryFilters.has('sbf')?'active':''}" data-cat="sbf">${c.sbf} SBF120</span><span class="summary-pill cat-pill cat-pill-priv kpi-filter ${dashboardCategoryFilters.has('priv')?'active':''}" data-cat="priv">${c.priv} Privé</span><span class="summary-pill cat-pill cat-pill-pub kpi-filter ${dashboardCategoryFilters.has('pub')?'active':''}" data-cat="pub">${c.pub} Public</span><span class="summary-pill cat-pill cat-pill-eco kpi-filter ${dashboardCategoryFilters.has('eco')?'active':''}" data-cat="eco">${c.eco} Écoles</span></div><div class="summary-secondary"><span class="summary-pill status-progress-pill kpi-filter ${dashboardKpiFilters.has('status-en-cours')?'active':''}" data-kpi="status-en-cours">${m.statusCounts['En cours']} En cours</span><span class="summary-pill status-confirm-pill kpi-filter ${dashboardKpiFilters.has('status-ao-confirm')?'active':''}" data-kpi="status-ao-confirm">${m.statusCounts['AO à confirmer']} AO à confirmer</span><span class="summary-pill status-docs-pill kpi-filter ${dashboardKpiFilters.has('status-docs')?'active':''}" data-kpi="status-docs">${m.statusCounts['Docs à venir']} Docs à venir</span><span class="summary-pill status-lost-pill kpi-filter ${dashboardKpiFilters.has('status-perdu')?'active':''}" data-kpi="status-perdu">${m.statusCounts['Perdu']} Perdu</span><span class="summary-pill status-empty-pill kpi-filter ${dashboardKpiFilters.has('status-empty')?'active':''}" data-kpi="status-empty">${m.statusCounts['Sans statut']} Sans statut</span><span class="summary-pill kpi-filter ${dashboardKpiFilters.has('watch')?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`; 
+    s.querySelectorAll('.kpi-filter[data-kpi]').forEach(btn=>btn.onclick=()=>{ toggleDashboardKpiFilter(btn.dataset.kpi); updateAll();}); 
+    s.querySelectorAll('.kpi-filter[data-cat]').forEach(btn=>btn.onclick=()=>{ toggleDashboardCategoryFilter(btn.dataset.cat); updateAll();}); 
+  }  
+  document.getElementById('watchTopCount') && (document.getElementById('watchTopCount').textContent=m.watch);  
+  document.getElementById('watchBtn1') && document.getElementById('watchBtn1').setAttribute('data-count',m.watch);  
+  document.getElementById('watchBtn2') && document.getElementById('watchBtn2').setAttribute('data-count',m.watch);  
+}  
 function updateFilterCounters(){
   const cats=document.querySelectorAll('.f-cat:checked').length;
   const prods=document.querySelectorAll('.f-prod:checked').length;
@@ -2765,21 +2822,26 @@ function switchTab(tab){
 }
 function resizeChart(){ if(window.Plotly) try{Plotly.Plots.resize('chart');}catch(e){} }
 function getFilterState(){ const q=document.getElementById('search').value.trim().toLowerCase(); const cats=[...document.querySelectorAll('.f-cat:checked')].map(e=>e.value); const prods=[...document.querySelectorAll('.f-prod:checked')].map(e=>e.value); const owners=[...document.querySelectorAll('.f-owner:checked')].map(e=>e.value); let yMin=parseInt(document.getElementById('yearMin').value,10), yMax=parseInt(document.getElementById('yearMax').value,10); if(Number.isNaN(yMin)) yMin=Math.min(...years); if(Number.isNaN(yMax)) yMax=Math.max(...years); if(yMin>yMax){const t=yMin;yMin=yMax;yMax=t;} return {q,cats,prods,owners,yMin,yMax}; }
-function filteredData(){ const f=getFilterState(); let rows=data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); if(dashboardKpiFilter==='status-en-cours') rows=rows.filter(d=>statusForCompany(d).label==='En cours'); if(dashboardKpiFilter==='status-ao-confirm') rows=rows.filter(d=>statusForCompany(d).label==='AO à confirmer'); if(dashboardKpiFilter==='status-docs') rows=rows.filter(d=>statusForCompany(d).label==='Docs à venir'); if(dashboardKpiFilter==='status-perdu') rows=rows.filter(d=>statusForCompany(d).label==='Perdu'); if(dashboardKpiFilter==='status-empty') rows=rows.filter(d=>statusForCompany(d).label==='Sans statut'); if(dashboardKpiFilter==='watch') rows=rows.filter(d=>d.watch===true); if(dashboardCategoryFilter==='cac') rows=rows.filter(d=>d.cat==='CAC 40'); if(dashboardCategoryFilter==='sbf') rows=rows.filter(d=>d.cat==='SBF 120'); if(dashboardCategoryFilter==='pub') rows=rows.filter(d=>d.cat==='Public / Semi-Public'); if(dashboardCategoryFilter==='eco') rows=rows.filter(d=>d.cat==='Écoles'); if(dashboardCategoryFilter==='priv') rows=rows.filter(d=>d.cat==='Entreprise privée hors CAC 40/SBF 120'); return rows; }
+function filteredData(){ 
+  const f=getFilterState(); 
+  let rows=data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); 
+  const activeCats = selectedDashboardCategoryValues(); 
+  const activeStatuses = selectedDashboardStatusValues(); 
+  if(activeCats.length) rows=rows.filter(d=>activeCats.includes(d.cat)); 
+  if(activeStatuses.length) rows=rows.filter(d=>activeStatuses.includes(statusForCompany(d).label)); 
+  if(dashboardKpiFilters.has('watch')) rows=rows.filter(d=>d.watch===true); 
+  return rows; 
+}  
 function baseFilteredDataForTable(){ const f=getFilterState(); return data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); }
 function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.map(ownerLabel))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); updateFilterCounters(); }
 
-function statusTimelineSourceRows(){
-  let rows = baseFilteredDataForTable().filter(d => Number(d.year) >= 2026);
-  // La mini timeline respecte les filtres de base du dashboard et le filtre catégorie cliqué,
-  // mais conserve la répartition par statut pour rester lisible.
-  if(dashboardCategoryFilter==='cac') rows=rows.filter(d=>d.cat==='CAC 40');
-  if(dashboardCategoryFilter==='sbf') rows=rows.filter(d=>d.cat==='SBF 120');
-  if(dashboardCategoryFilter==='pub') rows=rows.filter(d=>d.cat==='Public / Semi-Public');
-  if(dashboardCategoryFilter==='eco') rows=rows.filter(d=>d.cat==='Écoles');
-  if(dashboardCategoryFilter==='priv') rows=rows.filter(d=>d.cat==='Entreprise privée hors CAC 40/SBF 120');
-  return rows;
-}
+function statusTimelineSourceRows(){  
+  let rows = baseFilteredDataForTable().filter(d => Number(d.year) >= 2026);  
+  // La mini timeline respecte les filtres de base et les catégories cumulées, tout en gardant la répartition par statut.  
+  const activeCats = selectedDashboardCategoryValues();  
+  if(activeCats.length) rows=rows.filter(d=>activeCats.includes(d.cat));  
+  return rows;  
+}  
 function renderStatusTimeline(){
   const body=document.getElementById('statusTimelineBody');
   const legend=document.getElementById('statusTimelineLegend');
@@ -3232,7 +3294,7 @@ function syncFloatingPopupPosition(){
   top = Math.max(8, Math.min(top, maxTop));
   popup.style.left = left + 'px';
   popup.style.top = top + 'px';
-  popup.style.display='block';
+  popup.style.display='flex';
 }
 function renderDashboardFloatingPopup(){
   const popup = document.getElementById('floatingCompanyPopup');
@@ -3256,31 +3318,34 @@ function renderDashboardFloatingPopup(){
     <div class="editor-actions"><button type="submit" class="editor-save">Enregistrer</button><button type="button" id="${prefix}EditClose" class="editor-close">Fermer</button></div>
   </form></div></div>`;
   popup.classList.add('open');
-  popup.style.display='block';
+  popup.style.display='flex';
   bindSingleCheckboxGroups(popup);
   document.getElementById(`${prefix}EditForm`).onsubmit=e=>{e.preventDefault(); saveFloatingEditor(d.id);};
   document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderList();renderCompanyTable();closeFloatingCompanyPopup();};
   syncFloatingPopupPosition();
 }
-function saveFloatingEditor(id){
-  const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return;
-  const prefix='float';
-  d.name=document.getElementById(`${prefix}EditName`).value.trim();
-  d.year=Number(document.getElementById(`${prefix}EditYear`).value)||new Date().getFullYear();
-  d.revenue=Number(document.getElementById(`${prefix}EditRevenue`).value||0);
-  d.product=selectedGroupValue(`${prefix}EditProductChoice`, d.product);
-  d.cat=document.getElementById(`${prefix}EditCat`).value;
-  d.color=colorForCategory(d.cat);
-  d.owner=selectedGroupValue(`${prefix}EditOwnerChoice`, ownerLabel(d));
-  if(d.owner === 'Owner / BDR manquant') d.owner = null;
-  d.owner_missing=!d.owner;
-  d.status=document.getElementById(`${prefix}EditStatus`).value;
-  d.notes=document.getElementById(`${prefix}EditNotes`).value;
-  d.y=computeYFromRevenue(d.revenue,d.product);
-  renderOwners();
-  updateAll();
-  selectedCompanyId=d.id;
-  renderDashboardFloatingPopup();
+function saveFloatingEditor(id){  
+  const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return;  
+  const prefix='float';  
+  d.name=document.getElementById(`${prefix}EditName`).value.trim();  
+  d.year=Number(document.getElementById(`${prefix}EditYear`).value)||new Date().getFullYear();  
+  d.revenue=Number(document.getElementById(`${prefix}EditRevenue`).value||0);  
+  d.product=selectedGroupValue(`${prefix}EditProductChoice`, d.product);  
+  d.cat=document.getElementById(`${prefix}EditCat`).value;  
+  d.color=colorForCategory(d.cat);  
+  d.owner=selectedGroupValue(`${prefix}EditOwnerChoice`, ownerLabel(d));  
+  if(d.owner === 'Owner / BDR manquant') d.owner = null;  
+  d.owner_missing=!d.owner;  
+  d.status=document.getElementById(`${prefix}EditStatus`).value;  
+  d.notes=document.getElementById(`${prefix}EditNotes`).value;  
+  d.y=computeYFromRevenue(d.revenue,d.product);  
+  renderOwners();  
+  updateAll();  
+  selectedCompanyId=null;  
+  renderList();  
+  renderCompanyTable();  
+  closeFloatingCompanyPopup();  
+  updateChart();  
 }
 
 
