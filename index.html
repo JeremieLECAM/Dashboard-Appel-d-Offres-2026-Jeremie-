@@ -393,6 +393,11 @@
   box-shadow:0 -8px 18px rgba(0,0,0,.08)!important;
 }
 
+
+/* V21 - patch final anti-régression */
+.cat-filter-label{display:flex!important;align-items:center;gap:6px;color:#000!important;font-weight:800;}
+.cat-filter-label .cat-filter-text{line-height:1.2;}
+
 </style>
 </head>
 <body onload="loadPlotly()">
@@ -441,11 +446,11 @@
 
         <div id="filters">
           <div class="section open"><button type="button" class="section-head">Catégorie <span>▼</span></button><div class="section-body">
-            <label style="color:#E53935"><input type="checkbox" class="f-cat" value="CAC 40" checked> CAC 40</label>
-            <label style="color:#8E24AA"><input type="checkbox" class="f-cat" value="SBF 120" checked> SBF 120</label>
-            <label style="color:#1E88E5"><input type="checkbox" class="f-cat" value="Entreprise privée hors CAC 40/SBF 120" checked> Privé hors CAC/SBF</label>
-            <label style="color:#43A047"><input type="checkbox" class="f-cat" value="Public / Semi-Public" checked> Public / Semi-public</label>
-            <label style="color:#00A6A6"><input type="checkbox" class="f-cat" value="Écoles" checked> Écoles</label>
+            <label class="cat-filter-label"><input type="checkbox" class="f-cat" value="CAC 40" checked><span class="cat-dot" style="background:#E53935"></span><span class="cat-filter-text">CAC 40</span></label>
+            <label class="cat-filter-label"><input type="checkbox" class="f-cat" value="SBF 120" checked><span class="cat-dot" style="background:#8E24AA"></span><span class="cat-filter-text">SBF 120</span></label>
+            <label class="cat-filter-label"><input type="checkbox" class="f-cat" value="Entreprise privée hors CAC 40/SBF 120" checked><span class="cat-dot" style="background:#1E88E5"></span><span class="cat-filter-text">Privé hors CAC/SBF</span></label>
+            <label class="cat-filter-label"><input type="checkbox" class="f-cat" value="Public / Semi-Public" checked><span class="cat-dot" style="background:#43A047"></span><span class="cat-filter-text">Public / Semi-public</span></label>
+            <label class="cat-filter-label"><input type="checkbox" class="f-cat" value="Écoles" checked><span class="cat-dot" style="background:#00A6A6"></span><span class="cat-filter-text">Écoles</span></label>
           </div></div>
           <div class="section"><button type="button" class="section-head">Produit <span>▶</span></button><div class="section-body">
             <label><input type="checkbox" class="f-prod" value="Langues" checked> Langues</label>
@@ -463,7 +468,6 @@
         <input id="search" type="text" placeholder="Rechercher… (ex: Air Liquide)" />
         <div id="listSection" class="section open"><button type="button" id="listToggle" class="section-head">Liste des entreprises <span id="listArrow">▼</span></button><div id="list" class="section-body" style="display:block"></div></div>
         <div id="companyEditor" class="company-editor company-popup"></div>
-        <div class="legend"><b>Catégories</b><br>1) <span class="badge" style="background:#E53935">Rouge</span> CAC 40<br>2) <span class="badge" style="background:#8E24AA">Violet</span> SBF 120<br>3) <span class="badge" style="background:#1E88E5">Bleu</span> Privé hors CAC/SBF<br>4) <span class="badge" style="background:#43A047">Vert</span> Public / Semi-public<br>5) <span class="badge" style="background:#00A6A6">Turquoise</span> Écoles</div>
       </aside>
 
       <main id="chartPanel" class="chart-panel">
@@ -2545,6 +2549,8 @@ let selectedCompanyId = null;
 let hoveredCompanyId = null;
 let dashboardKpiFilter = null;
 let dashboardCategoryFilter = null;
+let dashboardKpiFilters = new Set();
+let dashboardCategoryFilters = new Set();
 let tableSort = { col: 'name', dir: 'asc' };
 let tableFilters = {
   name: { op: 'contains', value: '' },
