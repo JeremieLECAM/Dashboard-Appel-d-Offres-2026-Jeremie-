@@ -398,6 +398,38 @@
 .cat-filter-label{display:flex!important;align-items:center;gap:6px;color:#000!important;font-weight:800;}
 .cat-filter-label .cat-filter-text{line-height:1.2;}
 
+
+/* V22 - Boutons de statut sélectionnés : remplissage avec leur couleur */
+#portfolioSummary .summary-pill.status-progress-pill.active{
+  background:#FF9800!important;
+  border-color:#FF9800!important;
+  color:#000!important;
+  box-shadow:0 0 0 2px rgba(255,152,0,.22),0 4px 12px rgba(255,152,0,.22)!important;
+}
+#portfolioSummary .summary-pill.status-confirm-pill.active{
+  background:#FFD400!important;
+  border-color:#FFD400!important;
+  color:#000!important;
+  box-shadow:0 0 0 2px rgba(255,212,0,.24),0 4px 12px rgba(255,212,0,.22)!important;
+}
+#portfolioSummary .summary-pill.status-docs-pill.active{
+  background:#FF1493!important;
+  border-color:#FF1493!important;
+  color:#fff!important;
+  box-shadow:0 0 0 2px rgba(255,20,147,.22),0 4px 12px rgba(255,20,147,.22)!important;
+}
+#portfolioSummary .summary-pill.status-lost-pill.active{
+  background:#000!important;
+  border-color:#000!important;
+  color:#fff!important;
+  box-shadow:0 0 0 2px rgba(0,0,0,.18),0 4px 12px rgba(0,0,0,.24)!important;
+}
+#portfolioSummary .summary-pill.status-empty-pill.active{
+  background:#d8d8d8!important;
+  border-color:#d8d8d8!important;
+  color:#000!important;
+  box-shadow:0 0 0 2px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.12)!important;
+}
 </style>
 </head>
 <body onload="loadPlotly()">
