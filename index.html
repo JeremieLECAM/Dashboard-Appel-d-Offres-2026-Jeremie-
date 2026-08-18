@@ -3331,7 +3331,7 @@ const hoverPoint = hoveredCompanyId == null ? null : pts.find(p=>Number(p.id)===
   }
 
   const ticks=[...Y_BANDS_COACHING,...Y_BANDS_LANGUES].sort((a,b)=>a.y-b.y); const f=getFilterState();
-  const visibleYears=years.filter(y=>y>=f.yMin && y<=f.yMax);
+  const visibleYears=Array.from({length:(f.yMax-f.yMin+1)},(_,i)=>f.yMin+i);
   const activeYearsForChart = selectedDashboardYears();
   if(visibleYears.length){
     traces.push({
