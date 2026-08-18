@@ -3788,7 +3788,7 @@ const hoverPoint = hoveredCompanyId == null ? null : pts.find(p=>Number(p.id)===
   const today=currentDecimalYear();
   const todayShape={type:'line',xref:'x',yref:'paper',x0:today,x1:today,y0:0,y1:1,line:{color:'#FF7900',width:2,dash:'dot'},layer:'above'};
   const todayAnnotation={xref:'x',yref:'paper',x:today,y:1.02,text:'Aujourd’hui',showarrow:false,font:{color:'#FF7900',size:11},xanchor:'left'};
-  const productBandAnnotations=ticks.map(t=>({xref:'paper',yref:'y',x:-0.065,y:t.y,text:t.label,showarrow:false,xanchor:'center',yanchor:'middle',font:{size:9,color:'#000',family:'Segoe UI,Arial'},bgcolor:'rgba(255,255,255,0)',borderwidth:0}));
+  const productBandAnnotations=ticks.map(t=>({xref:'paper',yref:'y',x:-0.035,y:t.y,text:t.label,showarrow:false,xanchor:'center',yanchor:'middle',font:{size:9,color:'#000',family:'Segoe UI,Arial'},bgcolor:'rgba(255,255,255,0)',borderwidth:0}));
 
   // Labels intelligents : on garde le graphique lisible en n'affichant que les AO prioritaires
   // quand le bouton "Afficher les noms" est actif, plus la bulle survolée / sélectionnée.
