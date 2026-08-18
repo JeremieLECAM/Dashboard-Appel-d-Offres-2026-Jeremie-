@@ -434,6 +434,7 @@
 /* V23 - Timeline et années du graphique cliquables */
 /* V24 - Repères produit taille 9 + années uniques cliquables + encadrement pointillé */
 /* V25 - Sidebar compacte + watchlist dynamique avec override manuel */
+/* V26 - Suppression BCL/Alstom + KPI dynamiques + axes sans titres */
 .timeline-year,.timeline-segment,.chart-year-click-target{
   cursor:pointer;
   transition:transform .14s ease, box-shadow .14s ease, filter .14s ease;
@@ -670,27 +671,6 @@ const SEED_DATA = [
   },
   {
     "id": 5,
-    "name": "Alstom University",
-    "year": 2012,
-    "product": "Langues",
-    "revenue": 0,
-    "y": 1,
-    "cat": "SBF 120",
-    "color": "#8E24AA",
-    "outline": "",
-    "owner": "Stéphanie Rousseau",
-    "owner_missing": false,
-    "status": "Sans statut",
-    "notes": "",
-    "watch": false,
-    "baseYear": 2012,
-    "baseY": 1,
-    "plotYear": 2012,
-    "plotY": 1,
-    "labelPosition": "top center"
-  },
-  {
-    "id": 6,
     "name": "ArianeGroup France",
     "year": 2023,
     "product": "Langues",
@@ -711,7 +691,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 7,
+    "id": 6,
     "name": "Axian group",
     "year": 2024,
     "product": "Langues",
@@ -732,7 +712,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 8,
+    "id": 7,
     "name": "Banque de France",
     "year": 2024,
     "product": "Langues",
@@ -753,28 +733,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 9,
-    "name": "BCL - Banque Centrale du Luxembourg",
-    "year": 2016,
-    "product": "Langues",
-    "revenue": 42500,
-    "y": 2,
-    "cat": "Public / Semi-Public",
-    "color": "#43A047",
-    "outline": "",
-    "owner": "Jérémie Lecamus",
-    "owner_missing": false,
-    "status": "Sans statut",
-    "notes": "",
-    "watch": false,
-    "baseYear": 2016,
-    "baseY": 2,
-    "plotYear": 2015.84,
-    "plotY": 2.32,
-    "labelPosition": "top left"
-  },
-  {
-    "id": 10,
+    "id": 8,
     "name": "BNP Paribas SA",
     "year": 2025,
     "product": "Langues",
@@ -795,7 +754,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 11,
+    "id": 9,
     "name": "BNP Paribas SA",
     "year": 2025,
     "product": "Coaching",
@@ -816,7 +775,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 12,
+    "id": 10,
     "name": "Bobst Group SA",
     "year": 2024,
     "product": "Langues",
@@ -837,7 +796,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 13,
+    "id": 11,
     "name": "Bouygues Construction S.A",
     "year": 2024,
     "product": "Langues",
@@ -858,7 +817,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 14,
+    "id": 12,
     "name": "Bpost",
     "year": 2025,
     "product": "Langues",
@@ -879,7 +838,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 15,
+    "id": 13,
     "name": "CACEIS",
     "year": 2023,
     "product": "Langues",
@@ -900,7 +859,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 16,
+    "id": 14,
     "name": "Capgemini SE",
     "year": 2024,
     "product": "Langues",
@@ -921,7 +880,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 17,
+    "id": 15,
     "name": "Cargolux Airlines",
     "year": 2026,
     "product": "Langues",
@@ -942,7 +901,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 18,
+    "id": 16,
     "name": "Carrefour France",
     "year": 2024,
     "product": "Langues",
@@ -963,7 +922,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 19,
+    "id": 17,
     "name": "CGI France SAS",
     "year": 2021,
     "product": "Langues",
@@ -984,7 +943,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 20,
+    "id": 18,
     "name": "CMA CGM S.A.",
     "year": 2022,
     "product": "Langues",
@@ -1005,7 +964,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 21,
+    "id": 19,
     "name": "CMA CGM S.A.",
     "year": 2026,
     "product": "Langues",
@@ -1026,7 +985,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 22,
+    "id": 20,
     "name": "CNP Assurances SA",
     "year": 2025,
     "product": "Coaching",
@@ -1047,7 +1006,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 23,
+    "id": 21,
     "name": "Cofidis S.A",
     "year": 2022,
     "product": "Langues",
@@ -1068,7 +1027,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 24,
+    "id": 22,
     "name": "Continental Automotive France",
     "year": 2023,
     "product": "Langues",
@@ -1089,7 +1048,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 25,
+    "id": 23,
     "name": "Covéa Mutual Insurance Group Company",
     "year": 2020,
     "product": "Langues",
@@ -1110,7 +1069,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 26,
+    "id": 24,
     "name": "Danone SA",
     "year": 2022,
     "product": "Langues",
@@ -1131,7 +1090,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 27,
+    "id": 25,
     "name": "Dassault Systemes SE",
     "year": 2024,
     "product": "Langues",
@@ -1152,7 +1111,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 28,
+    "id": 26,
     "name": "Deloitte France",
     "year": 2024,
     "product": "Langues",
@@ -1173,7 +1132,7 @@ const SEED_DATA = [
     "labelPosition": "bottom right"
   },
   {
-    "id": 29,
+    "id": 27,
     "name": "DEVOTEAM G CLOUD",
     "year": 2020,
     "product": "Langues",
@@ -1194,7 +1153,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 30,
+    "id": 28,
     "name": "ELECTRICITE DE FRANCE",
     "year": 2021,
     "product": "Langues",
@@ -1215,7 +1174,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 31,
+    "id": 29,
     "name": "EM Lyon",
     "year": 2021,
     "product": "Langues",
@@ -1236,7 +1195,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 32,
+    "id": 30,
     "name": "EM NORMANDIE",
     "year": 2024,
     "product": "Langues",
@@ -1257,7 +1216,7 @@ const SEED_DATA = [
     "labelPosition": "bottom right"
   },
   {
-    "id": 33,
+    "id": 31,
     "name": "ENGIE SA",
     "year": 2026,
     "product": "Langues",
@@ -1278,7 +1237,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 34,
+    "id": 32,
     "name": "Europcar France",
     "year": 2019,
     "product": "Langues",
@@ -1299,7 +1258,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 35,
+    "id": 33,
     "name": "Eviden FRANCE",
     "year": 2025,
     "product": "Coaching",
@@ -1320,7 +1279,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 36,
+    "id": 34,
     "name": "Ferrero France",
     "year": 2020,
     "product": "Langues",
@@ -1341,7 +1300,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 37,
+    "id": 35,
     "name": "Generali France",
     "year": 2017,
     "product": "Langues",
@@ -1362,7 +1321,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 38,
+    "id": 36,
     "name": "Groupama Holding",
     "year": 2020,
     "product": "Langues",
@@ -1383,7 +1342,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 39,
+    "id": 37,
     "name": "Groupe AFNOR",
     "year": 2022,
     "product": "Langues",
@@ -1404,7 +1363,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 40,
+    "id": 38,
     "name": "Groupe Air France KLM",
     "year": 2014,
     "product": "Langues",
@@ -1425,7 +1384,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 41,
+    "id": 39,
     "name": "Groupe BPCE",
     "year": 2024,
     "product": "Langues",
@@ -1446,7 +1405,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 42,
+    "id": 40,
     "name": "Groupe Limagrain Holding SA",
     "year": 2022,
     "product": "Langues",
@@ -1467,7 +1426,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 43,
+    "id": 41,
     "name": "Groupe Rocher",
     "year": 2021,
     "product": "Langues",
@@ -1488,7 +1447,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 44,
+    "id": 42,
     "name": "Groupe Roquette",
     "year": 2021,
     "product": "Langues",
@@ -1509,7 +1468,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 45,
+    "id": 43,
     "name": "Groupe Roquette",
     "year": 2026,
     "product": "Langues",
@@ -1530,7 +1489,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 46,
+    "id": 44,
     "name": "Groupe SEB",
     "year": 2020,
     "product": "Langues",
@@ -1551,7 +1510,7 @@ const SEED_DATA = [
     "labelPosition": "bottom right"
   },
   {
-    "id": 47,
+    "id": 45,
     "name": "Groupe SNCF",
     "year": 2024,
     "product": "Coaching",
@@ -1572,7 +1531,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 48,
+    "id": 46,
     "name": "Groupe SNCF",
     "year": 2026,
     "product": "Coaching",
@@ -1593,7 +1552,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 49,
+    "id": 47,
     "name": "Groupe SNCF",
     "year": 2022,
     "product": "Langues",
@@ -1614,7 +1573,7 @@ const SEED_DATA = [
     "labelPosition": "bottom right"
   },
   {
-    "id": 50,
+    "id": 48,
     "name": "Ipsen S.A.",
     "year": 2025,
     "product": "Langues",
@@ -1635,7 +1594,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 51,
+    "id": 49,
     "name": "JCDecaux SA",
     "year": 2022,
     "product": "Langues",
@@ -1656,7 +1615,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 52,
+    "id": 50,
     "name": "Kedge",
     "year": 2026,
     "product": "Langues",
@@ -1677,7 +1636,7 @@ const SEED_DATA = [
     "labelPosition": "bottom right"
   },
   {
-    "id": 53,
+    "id": 51,
     "name": "Kering SA",
     "year": 2026,
     "product": "Langues",
@@ -1698,7 +1657,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 54,
+    "id": 52,
     "name": "Kingfisher France",
     "year": 2022,
     "product": "Langues",
@@ -1719,7 +1678,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 55,
+    "id": 53,
     "name": "La Poste S.A.",
     "year": 2023,
     "product": "Langues",
@@ -1740,7 +1699,7 @@ const SEED_DATA = [
     "labelPosition": "bottom right"
   },
   {
-    "id": 56,
+    "id": 54,
     "name": "L'Oréal SA",
     "year": 2024,
     "product": "Langues",
@@ -1761,7 +1720,7 @@ const SEED_DATA = [
     "labelPosition": "bottom center"
   },
   {
-    "id": 57,
+    "id": 55,
     "name": "M.P.F. Michelin",
     "year": 2021,
     "product": "Langues",
@@ -1782,7 +1741,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 58,
+    "id": 56,
     "name": "Majorel Africa",
     "year": 2023,
     "product": "Langues",
@@ -1803,7 +1762,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 59,
+    "id": 57,
     "name": "Manpower France",
     "year": 2016,
     "product": "Langues",
@@ -1824,7 +1783,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 60,
+    "id": 58,
     "name": "Mars Food France",
     "year": 2020,
     "product": "Langues",
@@ -1845,7 +1804,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 61,
+    "id": 59,
     "name": "MBDA Group",
     "year": 2020,
     "product": "Langues",
@@ -1866,7 +1825,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 62,
+    "id": 60,
     "name": "Naval Group SA",
     "year": 2021,
     "product": "Langues",
@@ -1887,7 +1846,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 63,
+    "id": 61,
     "name": "NEOMA BUSINESS SCHOOL",
     "year": 2022,
     "product": "Langues",
@@ -1908,7 +1867,7 @@ const SEED_DATA = [
     "labelPosition": "middle left"
   },
   {
-    "id": 64,
+    "id": 62,
     "name": "OPMobility SE",
     "year": 2027,
     "product": "Coaching",
@@ -1929,7 +1888,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 65,
+    "id": 63,
     "name": "OPMobility SE",
     "year": 2026,
     "product": "Langues",
@@ -1950,7 +1909,7 @@ const SEED_DATA = [
     "labelPosition": "middle left"
   },
   {
-    "id": 66,
+    "id": 64,
     "name": "Orange SA",
     "year": 2022,
     "product": "Langues",
@@ -1971,7 +1930,7 @@ const SEED_DATA = [
     "labelPosition": "middle right"
   },
   {
-    "id": 67,
+    "id": 65,
     "name": "RADIALL",
     "year": 2026,
     "product": "Langues",
@@ -1992,7 +1951,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 68,
+    "id": 66,
     "name": "RATP Pro",
     "year": 2021,
     "product": "Langues",
@@ -2013,7 +1972,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 69,
+    "id": 67,
     "name": "Safran SA",
     "year": 2025,
     "product": "Langues",
@@ -2034,7 +1993,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 70,
+    "id": 68,
     "name": "Sanofi SA",
     "year": 2025,
     "product": "Langues",
@@ -2055,7 +2014,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 71,
+    "id": 69,
     "name": "Schneider Electric SE",
     "year": 2025,
     "product": "Langues",
@@ -2076,7 +2035,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 72,
+    "id": 70,
     "name": "SNCB Holding S.a.",
     "year": 2026,
     "product": "Langues",
@@ -2097,7 +2056,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 73,
+    "id": 71,
     "name": "Société Générale",
     "year": 2021,
     "product": "Langues",
@@ -2118,7 +2077,7 @@ const SEED_DATA = [
     "labelPosition": "bottom right"
   },
   {
-    "id": 74,
+    "id": 72,
     "name": "Solvay SA",
     "year": 2026,
     "product": "Coaching",
@@ -2139,7 +2098,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 75,
+    "id": 73,
     "name": "Solvay SA",
     "year": 2025,
     "product": "Langues",
@@ -2160,7 +2119,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 76,
+    "id": 74,
     "name": "Sonepar S.A.",
     "year": 2025,
     "product": "Langues",
@@ -2181,7 +2140,7 @@ const SEED_DATA = [
     "labelPosition": "bottom right"
   },
   {
-    "id": 77,
+    "id": 75,
     "name": "Sopra Steria Group SA",
     "year": 2024,
     "product": "Langues",
@@ -2202,7 +2161,7 @@ const SEED_DATA = [
     "labelPosition": "middle left"
   },
   {
-    "id": 78,
+    "id": 76,
     "name": "Spie SA",
     "year": 2022,
     "product": "Langues",
@@ -2223,7 +2182,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 79,
+    "id": 77,
     "name": "Teleperformance Limited",
     "year": 2023,
     "product": "Langues",
@@ -2244,7 +2203,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 80,
+    "id": 78,
     "name": "Teleperformance Limited",
     "year": 2026,
     "product": "Langues",
@@ -2265,7 +2224,7 @@ const SEED_DATA = [
     "labelPosition": "bottom right"
   },
   {
-    "id": 81,
+    "id": 79,
     "name": "Thales SA",
     "year": 2024,
     "product": "Langues",
@@ -2286,7 +2245,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 82,
+    "id": 80,
     "name": "TNT France",
     "year": 2017,
     "product": "Langues",
@@ -2307,7 +2266,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 83,
+    "id": 81,
     "name": "TotalEnergies SE",
     "year": 2023,
     "product": "Langues",
@@ -2328,7 +2287,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 84,
+    "id": 82,
     "name": "Unilabs SA",
     "year": 2023,
     "product": "Langues",
@@ -2349,7 +2308,7 @@ const SEED_DATA = [
     "labelPosition": "bottom center"
   },
   {
-    "id": 85,
+    "id": 83,
     "name": "Veepee France",
     "year": 2021,
     "product": "Langues",
@@ -2370,7 +2329,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 86,
+    "id": 84,
     "name": "Verisure France",
     "year": 2023,
     "product": "Langues",
@@ -2391,7 +2350,7 @@ const SEED_DATA = [
     "labelPosition": "middle left"
   },
   {
-    "id": 87,
+    "id": 85,
     "name": "Vinci Construction France",
     "year": 2022,
     "product": "Langues",
@@ -2412,7 +2371,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 88,
+    "id": 86,
     "name": "Xpo Logistics Europe SA",
     "year": 2022,
     "product": "Coaching",
@@ -2433,7 +2392,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 89,
+    "id": 87,
     "name": "Kering SA",
     "year": 2022,
     "product": "Langues",
@@ -2454,7 +2413,7 @@ const SEED_DATA = [
     "labelPosition": "bottom center"
   },
   {
-    "id": 90,
+    "id": 88,
     "name": "Orange SA",
     "year": 2027,
     "product": "Coaching",
@@ -2475,7 +2434,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 91,
+    "id": 89,
     "name": "SCC",
     "year": 2026,
     "product": "Langues",
@@ -2496,7 +2455,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 92,
+    "id": 90,
     "name": "Enabel Sénégal",
     "year": 2026,
     "product": "Langues",
@@ -2517,7 +2476,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 93,
+    "id": 91,
     "name": "TotalEnergies SE",
     "year": 2027,
     "product": "Coaching",
@@ -2538,7 +2497,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 94,
+    "id": 92,
     "name": "L'Oréal SA",
     "year": 2027,
     "product": "Langues",
@@ -2559,7 +2518,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 95,
+    "id": 93,
     "name": "Société Générale SA",
     "year": 2026,
     "product": "Coaching",
@@ -2580,7 +2539,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 96,
+    "id": 94,
     "name": "Lesaffre",
     "year": 2026,
     "product": "Langues",
@@ -2601,7 +2560,7 @@ const SEED_DATA = [
     "labelPosition": "bottom center"
   },
   {
-    "id": 97,
+    "id": 95,
     "name": "Crédit Agricole SA - IFCAM",
     "year": 2027,
     "product": "Coaching",
@@ -2622,7 +2581,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 98,
+    "id": 96,
     "name": "MEFSIN",
     "year": 2026,
     "product": "Coaching",
@@ -2643,7 +2602,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 99,
+    "id": 97,
     "name": "SPF Belgique",
     "year": 2026,
     "product": "Langues",
@@ -2664,7 +2623,7 @@ const SEED_DATA = [
     "labelPosition": "middle right"
   },
   {
-    "id": 100,
+    "id": 98,
     "name": "Engie SA",
     "year": 2015,
     "product": "Langues",
@@ -2685,7 +2644,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 101,
+    "id": 99,
     "name": "Generali France",
     "year": 2024,
     "product": "Langues",
@@ -2706,7 +2665,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 102,
+    "id": 100,
     "name": "Groupe SNCF",
     "year": 2018,
     "product": "Langues",
@@ -2727,7 +2686,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 103,
+    "id": 101,
     "name": "La Poste S.A.",
     "year": 2013,
     "product": "Langues",
@@ -2748,7 +2707,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 104,
+    "id": 102,
     "name": "Capgemini SE",
     "year": 2019,
     "product": "Langues",
@@ -2769,7 +2728,7 @@ const SEED_DATA = [
     "labelPosition": "top left"
   },
   {
-    "id": 105,
+    "id": 103,
     "name": "Dassault Systemes SE",
     "year": 2020,
     "product": "Langues",
@@ -2790,7 +2749,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 106,
+    "id": 104,
     "name": "Deloitte France",
     "year": 2018,
     "product": "Langues",
@@ -2811,7 +2770,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 107,
+    "id": 105,
     "name": "ELECTRICITE DE FRANCE",
     "year": 2017,
     "product": "Langues",
@@ -2832,7 +2791,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 108,
+    "id": 106,
     "name": "L'Oréal SA",
     "year": 2013,
     "product": "Langues",
@@ -2853,7 +2812,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 109,
+    "id": 107,
     "name": "L'Oréal SA",
     "year": 2016,
     "product": "Langues",
@@ -2874,7 +2833,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 110,
+    "id": 108,
     "name": "L'Oréal SA",
     "year": 2019,
     "product": "Langues",
@@ -2895,7 +2854,7 @@ const SEED_DATA = [
     "labelPosition": "bottom left"
   },
   {
-    "id": 111,
+    "id": 109,
     "name": "L'Oréal SA",
     "year": 2021,
     "product": "Langues",
@@ -2916,7 +2875,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 112,
+    "id": 110,
     "name": "Schneider Electric SE",
     "year": 2014,
     "product": "Langues",
@@ -2937,7 +2896,7 @@ const SEED_DATA = [
     "labelPosition": "top right"
   },
   {
-    "id": 113,
+    "id": 111,
     "name": "Société Générale SA",
     "year": 2014,
     "product": "Langues",
@@ -2958,7 +2917,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 114,
+    "id": 112,
     "name": "Société Générale SA",
     "year": 2017,
     "product": "Langues",
@@ -2979,7 +2938,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 115,
+    "id": 113,
     "name": "Société Générale SA",
     "year": 2021,
     "product": "Langues",
@@ -3000,7 +2959,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 116,
+    "id": 114,
     "name": "Sopra Steria Group SA",
     "year": 2020,
     "product": "Langues",
@@ -3021,7 +2980,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 117,
+    "id": 115,
     "name": "Spie SA",
     "year": 2016,
     "product": "Langues",
@@ -3042,7 +3001,7 @@ const SEED_DATA = [
     "labelPosition": "top center"
   },
   {
-    "id": 118,
+    "id": 116,
     "name": "Spie SA",
     "year": 2019,
     "product": "Langues",
@@ -3097,6 +3056,13 @@ let watchFilters = {
 };
 const STORAGE_KEY = 'ao_dashboard_data_categories_excel_v3_watchrules';
 const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','outline','owner','owner_missing','status','notes','watch','watch_override'];
+function removeDeletedCompaniesAndReindex(rows){
+  const removedNames = new Set(['BCL - Banque Centrale du Luxembourg','Alstom University']);
+  return (Array.isArray(rows) ? rows : [])
+    .filter(row => row && !removedNames.has(String(row.name || '').trim()))
+    .map((row, index) => ({...row, id:index+1}));
+}
+
 const CAT_COLORS = {"CAC 40": "#E53935", "SBF 120": "#8E24AA", "Entreprise privée hors CAC 40/SBF 120": "#1E88E5", "Public / Semi-Public": "#43A047", "Écoles": "#00A6A6"}; // couleurs métier mises à jour depuis classification_entreprises_AO.xlsx
 const CAT_ORDER = ["Public / Semi-Public", "Écoles", "SBF 120", "CAC 40", "Entreprise privée hors CAC 40/SBF 120"];
 const STATUS_OPTIONS = ['En cours','Perdu','AO à confirmer','Docs à venir','Sans statut']; // Source unique des statuts affichés dans l'onglet 1 et l'onglet 2
@@ -3216,7 +3182,7 @@ function applyDashboardFilterToTable(kind, key, active){
   if(key === 'all') clearDashboardButtonFilters();  
   else syncDashboardButtonFiltersToTable();  
 }  
-const CATEGORY_BY_ID = {"1": "Public / Semi-Public", "2": "SBF 120", "3": "CAC 40", "4": "CAC 40", "5": "SBF 120", "6": "Entreprise privée hors CAC 40/SBF 120", "7": "Entreprise privée hors CAC 40/SBF 120", "8": "Public / Semi-Public", "9": "Public / Semi-Public", "10": "CAC 40", "11": "CAC 40", "12": "Entreprise privée hors CAC 40/SBF 120", "13": "CAC 40", "14": "Entreprise privée hors CAC 40/SBF 120", "15": "SBF 120", "16": "CAC 40", "17": "Entreprise privée hors CAC 40/SBF 120", "18": "CAC 40", "19": "Entreprise privée hors CAC 40/SBF 120", "20": "Entreprise privée hors CAC 40/SBF 120", "21": "Entreprise privée hors CAC 40/SBF 120", "22": "Entreprise privée hors CAC 40/SBF 120", "23": "Entreprise privée hors CAC 40/SBF 120", "24": "Entreprise privée hors CAC 40/SBF 120", "25": "Entreprise privée hors CAC 40/SBF 120", "26": "CAC 40", "27": "CAC 40", "28": "Entreprise privée hors CAC 40/SBF 120", "29": "Entreprise privée hors CAC 40/SBF 120", "30": "Public / Semi-Public", "31": "Écoles", "32": "Écoles", "33": "CAC 40", "34": "Entreprise privée hors CAC 40/SBF 120", "35": "Entreprise privée hors CAC 40/SBF 120", "36": "Entreprise privée hors CAC 40/SBF 120", "37": "Entreprise privée hors CAC 40/SBF 120", "38": "Entreprise privée hors CAC 40/SBF 120", "39": "Public / Semi-Public", "40": "SBF 120", "41": "Entreprise privée hors CAC 40/SBF 120", "42": "Entreprise privée hors CAC 40/SBF 120", "43": "Entreprise privée hors CAC 40/SBF 120", "44": "Entreprise privée hors CAC 40/SBF 120", "45": "Entreprise privée hors CAC 40/SBF 120", "46": "SBF 120", "47": "Public / Semi-Public", "48": "Public / Semi-Public", "49": "Public / Semi-Public", "50": "SBF 120", "51": "SBF 120", "52": "Écoles", "53": "CAC 40", "54": "Entreprise privée hors CAC 40/SBF 120", "55": "Entreprise privée hors CAC 40/SBF 120", "56": "CAC 40", "57": "CAC 40", "58": "Entreprise privée hors CAC 40/SBF 120", "59": "Entreprise privée hors CAC 40/SBF 120", "60": "Entreprise privée hors CAC 40/SBF 120", "61": "Entreprise privée hors CAC 40/SBF 120", "62": "Entreprise privée hors CAC 40/SBF 120", "63": "Écoles", "64": "SBF 120", "65": "SBF 120", "66": "CAC 40", "67": "Entreprise privée hors CAC 40/SBF 120", "68": "Public / Semi-Public", "69": "CAC 40", "70": "CAC 40", "71": "CAC 40", "72": "Public / Semi-Public", "73": "CAC 40", "74": "Entreprise privée hors CAC 40/SBF 120", "75": "Entreprise privée hors CAC 40/SBF 120", "76": "Entreprise privée hors CAC 40/SBF 120", "77": "SBF 120", "78": "SBF 120", "79": "SBF 120", "80": "SBF 120", "81": "CAC 40", "82": "Entreprise privée hors CAC 40/SBF 120", "83": "CAC 40", "84": "Entreprise privée hors CAC 40/SBF 120", "85": "Entreprise privée hors CAC 40/SBF 120", "86": "Entreprise privée hors CAC 40/SBF 120", "87": "CAC 40", "88": "Entreprise privée hors CAC 40/SBF 120", "89": "CAC 40", "90": "CAC 40", "91": "Entreprise privée hors CAC 40/SBF 120", "92": "Public / Semi-Public", "93": "CAC 40", "94": "CAC 40"};
+const CATEGORY_BY_ID = {"1": "Public / Semi-Public", "2": "SBF 120", "3": "CAC 40", "4": "CAC 40", "5": "Entreprise privée hors CAC 40/SBF 120", "6": "Entreprise privée hors CAC 40/SBF 120", "7": "Public / Semi-Public", "8": "CAC 40", "9": "CAC 40", "10": "Entreprise privée hors CAC 40/SBF 120", "11": "CAC 40", "12": "Entreprise privée hors CAC 40/SBF 120", "13": "SBF 120", "14": "CAC 40", "15": "Entreprise privée hors CAC 40/SBF 120", "16": "CAC 40", "17": "Entreprise privée hors CAC 40/SBF 120", "18": "Entreprise privée hors CAC 40/SBF 120", "19": "Entreprise privée hors CAC 40/SBF 120", "20": "Entreprise privée hors CAC 40/SBF 120", "21": "Entreprise privée hors CAC 40/SBF 120", "22": "Entreprise privée hors CAC 40/SBF 120", "23": "Entreprise privée hors CAC 40/SBF 120", "24": "CAC 40", "25": "CAC 40", "26": "Entreprise privée hors CAC 40/SBF 120", "27": "Entreprise privée hors CAC 40/SBF 120", "28": "Public / Semi-Public", "29": "Écoles", "30": "Écoles", "31": "CAC 40", "32": "Entreprise privée hors CAC 40/SBF 120", "33": "Entreprise privée hors CAC 40/SBF 120", "34": "Entreprise privée hors CAC 40/SBF 120", "35": "Entreprise privée hors CAC 40/SBF 120", "36": "Entreprise privée hors CAC 40/SBF 120", "37": "Public / Semi-Public", "38": "SBF 120", "39": "Entreprise privée hors CAC 40/SBF 120", "40": "Entreprise privée hors CAC 40/SBF 120", "41": "Entreprise privée hors CAC 40/SBF 120", "42": "Entreprise privée hors CAC 40/SBF 120", "43": "Entreprise privée hors CAC 40/SBF 120", "44": "SBF 120", "45": "Public / Semi-Public", "46": "Public / Semi-Public", "47": "Public / Semi-Public", "48": "SBF 120", "49": "SBF 120", "50": "Écoles", "51": "CAC 40", "52": "Entreprise privée hors CAC 40/SBF 120", "53": "Entreprise privée hors CAC 40/SBF 120", "54": "CAC 40", "55": "CAC 40", "56": "Entreprise privée hors CAC 40/SBF 120", "57": "Entreprise privée hors CAC 40/SBF 120", "58": "Entreprise privée hors CAC 40/SBF 120", "59": "Entreprise privée hors CAC 40/SBF 120", "60": "Entreprise privée hors CAC 40/SBF 120", "61": "Écoles", "62": "SBF 120", "63": "SBF 120", "64": "CAC 40", "65": "Entreprise privée hors CAC 40/SBF 120", "66": "Public / Semi-Public", "67": "CAC 40", "68": "CAC 40", "69": "CAC 40", "70": "Public / Semi-Public", "71": "CAC 40", "72": "Entreprise privée hors CAC 40/SBF 120", "73": "Entreprise privée hors CAC 40/SBF 120", "74": "Entreprise privée hors CAC 40/SBF 120", "75": "SBF 120", "76": "SBF 120", "77": "SBF 120", "78": "SBF 120", "79": "CAC 40", "80": "Entreprise privée hors CAC 40/SBF 120", "81": "CAC 40", "82": "Entreprise privée hors CAC 40/SBF 120", "83": "Entreprise privée hors CAC 40/SBF 120", "84": "Entreprise privée hors CAC 40/SBF 120", "85": "CAC 40", "86": "Entreprise privée hors CAC 40/SBF 120", "87": "CAC 40", "88": "CAC 40", "89": "Entreprise privée hors CAC 40/SBF 120", "90": "Public / Semi-Public", "91": "CAC 40", "92": "CAC 40", "93": "CAC 40", "94": "Entreprise privée hors CAC 40/SBF 120", "95": "CAC 40", "96": "Public / Semi-Public", "97": "Public / Semi-Public", "98": "CAC 40", "99": "Entreprise privée hors CAC 40/SBF 120", "100": "Public / Semi-Public", "101": "Public / Semi-Public", "102": "CAC 40", "103": "CAC 40", "104": "Entreprise privée hors CAC 40/SBF 120", "105": "Public / Semi-Public", "106": "CAC 40", "107": "CAC 40", "108": "CAC 40", "109": "CAC 40", "110": "CAC 40", "111": "CAC 40", "112": "CAC 40", "113": "CAC 40", "114": "SBF 120", "115": "SBF 120", "116": "SBF 120"};
 const Y_BANDS_LANGUES = [
   {max:10000,y:1,label:'Langues ≤ 10k€'}, {max:50000,y:2,label:'Langues 10–50k€'}, {max:100000,y:3,label:'Langues 50–100k€'}, {max:200000,y:4,label:'Langues 100–200k€'}, {max:1000000,y:5,label:'Langues > 200k€'}
 ];
@@ -3324,7 +3290,8 @@ function categoryMetrics(rows=data){
   };
 }
 function updateCockpitMetrics(){  
-  const m=cockpitMetrics(data), c=categoryMetrics(data);  
+  const visibleRows=filteredData();
+  const m=cockpitMetrics(visibleRows), c=categoryMetrics(visibleRows);  
   const k=document.getElementById('cockpitKpis');  
   if(k){ k.innerHTML=`  
     <div class="kpi-card accent"><div class="kpi-value">${m.total}</div><div class="kpi-label">AO recensés</div></div>  
@@ -3332,7 +3299,7 @@ function updateCockpitMetrics(){
     <div class="kpi-card"><div class="kpi-value">${m.statusCounts['AO à confirmer']}</div><div class="kpi-label">AO à confirmer</div></div>  
     <div class="kpi-card"><div class="kpi-value">${m.statusCounts['Docs à venir']}</div><div class="kpi-label">Docs à venir</div></div>`; }  
   const s=document.getElementById('portfolioSummary');  
-  const noDashboardButtons = dashboardKpiFilters.size===0 && dashboardCategoryFilters.size===0;  
+  const noDashboardButtons = dashboardKpiFilters.size===0 && dashboardCategoryFilters.size===0 && dashboardYearFilters.size===0;  
   if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${noDashboardButtons?'active':''}" data-kpi="all">${m.total} AO</span><span class="summary-pill cat-pill cat-pill-cac kpi-filter ${dashboardCategoryFilters.has('cac')?'active':''}" data-cat="cac">${c.cac} CAC40</span><span class="summary-pill cat-pill cat-pill-sbf kpi-filter ${dashboardCategoryFilters.has('sbf')?'active':''}" data-cat="sbf">${c.sbf} SBF120</span><span class="summary-pill cat-pill cat-pill-priv kpi-filter ${dashboardCategoryFilters.has('priv')?'active':''}" data-cat="priv">${c.priv} Privé</span><span class="summary-pill cat-pill cat-pill-pub kpi-filter ${dashboardCategoryFilters.has('pub')?'active':''}" data-cat="pub">${c.pub} Public</span><span class="summary-pill cat-pill cat-pill-eco kpi-filter ${dashboardCategoryFilters.has('eco')?'active':''}" data-cat="eco">${c.eco} Écoles</span></div><div class="summary-secondary"><span class="summary-pill status-progress-pill kpi-filter ${dashboardKpiFilters.has('status-en-cours')?'active':''}" data-kpi="status-en-cours">${m.statusCounts['En cours']} En cours</span><span class="summary-pill status-confirm-pill kpi-filter ${dashboardKpiFilters.has('status-ao-confirm')?'active':''}" data-kpi="status-ao-confirm">${m.statusCounts['AO à confirmer']} AO à confirmer</span><span class="summary-pill status-docs-pill kpi-filter ${dashboardKpiFilters.has('status-docs')?'active':''}" data-kpi="status-docs">${m.statusCounts['Docs à venir']} Docs à venir</span><span class="summary-pill status-lost-pill kpi-filter ${dashboardKpiFilters.has('status-perdu')?'active':''}" data-kpi="status-perdu">${m.statusCounts['Perdu']} Perdu</span><span class="summary-pill status-empty-pill kpi-filter ${dashboardKpiFilters.has('status-empty')?'active':''}" data-kpi="status-empty">${m.statusCounts['Sans statut']} Sans statut</span><span class="summary-pill kpi-filter ${dashboardKpiFilters.has('watch')?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`; 
     s.querySelectorAll('.kpi-filter[data-kpi]').forEach(btn=>btn.onclick=()=>{ toggleDashboardKpiFilter(btn.dataset.kpi); updateAll();}); 
     s.querySelectorAll('.kpi-filter[data-cat]').forEach(btn=>btn.onclick=()=>{ toggleDashboardCategoryFilter(btn.dataset.cat); updateAll();}); 
@@ -3377,7 +3344,7 @@ function arrangeCockpit(){
 function bubbleSizeByCat(cat){ return 21; }
 function nextDataId(){ return data.reduce((m,d)=>Math.max(m, Number(d.id)||0),0)+1; }
 function normalizePoint(row){
-  const cat = CATEGORY_BY_ID[String(row.id)] || row.cat || 'Entreprise privée hors CAC 40/SBF 120';
+  const cat = row.cat || CATEGORY_BY_ID[String(row.id)] || 'Entreprise privée hors CAC 40/SBF 120';
   const product = row.product || 'Langues';
   const revenue = Number(row.revenue ?? 0);
   const year = Number(row.year ?? new Date().getFullYear());
@@ -3391,7 +3358,7 @@ function normalizePoint(row){
 }
 function normalizeAllData(){ data = data.map(normalizePoint).filter(d=>d.name); years = [...new Set(data.map(d=>Number(d.year)).filter(Number.isFinite))].sort((a,b)=>a-b); syncYearInputs(); }
 function saveData(){ try{localStorage.setItem(STORAGE_KEY, JSON.stringify(data));}catch(e){} }
-function loadData(){ try{ const raw=localStorage.getItem(STORAGE_KEY); data = raw ? JSON.parse(raw).map(normalizePoint) : SEED_DATA.map(normalizePoint); }catch(e){ data = SEED_DATA.map(normalizePoint); } normalizeAllData(); }
+function loadData(){ try{ const raw=localStorage.getItem(STORAGE_KEY); const source = raw ? JSON.parse(raw) : SEED_DATA; data = removeDeletedCompaniesAndReindex(source).map(normalizePoint); }catch(e){ data = removeDeletedCompaniesAndReindex(SEED_DATA).map(normalizePoint); } normalizeAllData(); }
 function syncYearInputs(){ const min=document.getElementById('yearMin'), max=document.getElementById('yearMax'); if(!min||!max||!years.length)return; const minYear=Math.min(...years); const maxYear=Math.max(...years); if(!min.value) min.value=minYear; if(!max.value) max.value=maxYear; min.min=minYear; min.max=maxYear; max.min=minYear; max.max=maxYear; }
 
 function initApp(){
@@ -3835,7 +3802,7 @@ const hoverPoint = hoveredCompanyId == null ? null : pts.find(p=>Number(p.id)===
     opacity:0.98
   }));
 
-  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:24,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',shapes:[...yearShapes,...selectedYearShapes,todayShape],annotations:[todayAnnotation,...labelAnnotations],xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(()=>''),range:[f.yMin-0.35,f.yMax+0.35]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),tickfont:{size:9},range:[-5.95,5.95],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},showlegend:false,font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
+  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:24,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',shapes:[...yearShapes,...selectedYearShapes,todayShape],annotations:[todayAnnotation,...labelAnnotations],xaxis:{title:'',tickmode:'array',tickvals:years,ticktext:years.map(()=>''),range:[f.yMin-0.35,f.yMax+0.35]},yaxis:{title:'',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),tickfont:{size:9},range:[-5.95,5.95],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},showlegend:false,font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
   const gd=document.getElementById('chart');
   gd.removeAllListeners && gd.removeAllListeners('plotly_click');
   gd.removeAllListeners && gd.removeAllListeners('plotly_hover');
