@@ -432,6 +432,7 @@
 }
 
 /* V23 - Timeline et années du graphique cliquables */
+/* V24 - Repères produit taille 9 + années uniques cliquables + encadrement pointillé */
 .timeline-year,.timeline-segment,.chart-year-click-target{
   cursor:pointer;
   transition:transform .14s ease, box-shadow .14s ease, filter .14s ease;
@@ -3345,6 +3346,23 @@ const hoverPoint = hoveredCompanyId == null ? null : pts.find(p=>Number(p.id)===
     });
   }
   const yearShapes=visibleYears.map((y,i)=>({type:'rect',xref:'x',yref:'paper',x0:y-0.5,x1:y+0.5,y0:0,y1:1,fillcolor:i%2===0?'rgba(0,0,0,0.035)':'rgba(255,121,0,0.035)',line:{width:0},layer:'below'}));
+  const selectedYearShapes=activeYearsForChart.map(y=>{
+    const yearPts=pts.filter(p=>Number(p.year)===Number(y));
+    if(!yearPts.length) return null;
+    const xs=yearPts.map(p=>Number(p.plotYear)).filter(Number.isFinite);
+    const ys=yearPts.map(p=>Number(p.plotY)).filter(Number.isFinite);
+    if(!xs.length || !ys.length) return null;
+    const xPad=0.34;
+    const yPad=0.56;
+    return {
+      type:'rect',xref:'x',yref:'y',
+      x0:Math.min(...xs)-xPad,x1:Math.max(...xs)+xPad,
+      y0:Math.max(-5.85,Math.min(...ys)-yPad),y1:Math.min(5.85,Math.max(...ys)+yPad),
+      fillcolor:'rgba(255,121,0,0.035)',
+      line:{color:'#FF7900',width:2,dash:'dot'},
+      layer:'above'
+    };
+  }).filter(Boolean);
   const today=currentDecimalYear();
   const todayShape={type:'line',xref:'x',yref:'paper',x0:today,x1:today,y0:0,y1:1,line:{color:'#FF7900',width:2,dash:'dot'},layer:'above'};
   const todayAnnotation={xref:'x',yref:'paper',x:today,y:1.02,text:'Aujourd’hui',showarrow:false,font:{color:'#FF7900',size:11},xanchor:'left'};
@@ -3363,7 +3381,7 @@ const hoverPoint = hoveredCompanyId == null ? null : pts.find(p=>Number(p.id)===
     opacity:0.98
   }));
 
-  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:24,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',shapes:[...yearShapes,todayShape],annotations:[todayAnnotation,...labelAnnotations],xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(String),range:[f.yMin-0.35,f.yMax+0.35]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),range:[-5.95,5.95],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},showlegend:false,font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
+  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:24,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',shapes:[...yearShapes,...selectedYearShapes,todayShape],annotations:[todayAnnotation,...labelAnnotations],xaxis:{title:'Année',tickmode:'array',tickvals:years,ticktext:years.map(()=>''),range:[f.yMin-0.35,f.yMax+0.35]},yaxis:{title:'Produit + Estimated €',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),tickfont:{size:9},range:[-5.95,5.95],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},showlegend:false,font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
   const gd=document.getElementById('chart');
   gd.removeAllListeners && gd.removeAllListeners('plotly_click');
   gd.removeAllListeners && gd.removeAllListeners('plotly_hover');
