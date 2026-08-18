@@ -3804,7 +3804,7 @@ const hoverPoint = hoveredCompanyId == null ? null : pts.find(p=>Number(p.id)===
     opacity:0.98
   }));
 
-  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:24,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',shapes:[...yearShapes,...selectedYearShapes,todayShape],annotations:[todayAnnotation,...productBandAnnotations,...labelAnnotations],xaxis:{title:'',tickmode:'array',tickvals:years,ticktext:years.map(()=>''),range:[f.yMin-0.35,f.yMax+0.35]},yaxis:{title:'',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(()=>''),tickfont:{size:9},range:[-5.95,5.95],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},showlegend:false,font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
+  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:24,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',shapes:[...yearShapes,...selectedYearShapes,todayShape],annotations:[todayAnnotation,...productBandAnnotations,...labelAnnotations],xaxis:{title:'',tickmode:'array',tickvals:years,ticktext:years.map(()=>''),range:[f.yMin-0.35,f.yMax+0.35]},yaxis:{title:'',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(()=>''),tickfont:{size:10},range:[-5.95,5.95],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},showlegend:false,font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
   const gd=document.getElementById('chart');
   gd.removeAllListeners && gd.removeAllListeners('plotly_click');
   gd.removeAllListeners && gd.removeAllListeners('plotly_hover');
