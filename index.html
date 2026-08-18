@@ -435,6 +435,7 @@
 /* V24 - Repères produit taille 9 + années uniques cliquables + encadrement pointillé */
 /* V25 - Sidebar compacte + watchlist dynamique avec override manuel */
 /* V26 - Suppression BCL/Alstom + KPI dynamiques + axes sans titres */
+/* V27 - Repères produit centrés dans la marge gauche */
 .timeline-year,.timeline-segment,.chart-year-click-target{
   cursor:pointer;
   transition:transform .14s ease, box-shadow .14s ease, filter .14s ease;
@@ -3787,6 +3788,7 @@ const hoverPoint = hoveredCompanyId == null ? null : pts.find(p=>Number(p.id)===
   const today=currentDecimalYear();
   const todayShape={type:'line',xref:'x',yref:'paper',x0:today,x1:today,y0:0,y1:1,line:{color:'#FF7900',width:2,dash:'dot'},layer:'above'};
   const todayAnnotation={xref:'x',yref:'paper',x:today,y:1.02,text:'Aujourd’hui',showarrow:false,font:{color:'#FF7900',size:11},xanchor:'left'};
+  const productBandAnnotations=ticks.map(t=>({xref:'paper',yref:'y',x:-0.065,y:t.y,text:t.label,showarrow:false,xanchor:'center',yanchor:'middle',font:{size:9,color:'#000',family:'Segoe UI,Arial'},bgcolor:'rgba(255,255,255,0)',borderwidth:0}));
 
   // Labels intelligents : on garde le graphique lisible en n'affichant que les AO prioritaires
   // quand le bouton "Afficher les noms" est actif, plus la bulle survolée / sélectionnée.
@@ -3802,7 +3804,7 @@ const hoverPoint = hoveredCompanyId == null ? null : pts.find(p=>Number(p.id)===
     opacity:0.98
   }));
 
-  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:24,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',shapes:[...yearShapes,...selectedYearShapes,todayShape],annotations:[todayAnnotation,...labelAnnotations],xaxis:{title:'',tickmode:'array',tickvals:years,ticktext:years.map(()=>''),range:[f.yMin-0.35,f.yMax+0.35]},yaxis:{title:'',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(t=>t.label),tickfont:{size:9},range:[-5.95,5.95],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},showlegend:false,font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
+  Plotly.react('chart', traces, {uirevision:'keep',margin:{l:110,r:30,t:24,b:45},paper_bgcolor:'#fff',plot_bgcolor:'#fff',shapes:[...yearShapes,...selectedYearShapes,todayShape],annotations:[todayAnnotation,...productBandAnnotations,...labelAnnotations],xaxis:{title:'',tickmode:'array',tickvals:years,ticktext:years.map(()=>''),range:[f.yMin-0.35,f.yMax+0.35]},yaxis:{title:'',tickmode:'array',tickvals:ticks.map(t=>t.y),ticktext:ticks.map(()=>''),tickfont:{size:9},range:[-5.95,5.95],zeroline:true,zerolinecolor:'#999',zerolinewidth:2,gridcolor:'rgba(0,0,0,.08)'},showlegend:false,font:{family:'Segoe UI,Arial',color:'#000'}},{displaylogo:false,responsive:true});
   const gd=document.getElementById('chart');
   gd.removeAllListeners && gd.removeAllListeners('plotly_click');
   gd.removeAllListeners && gd.removeAllListeners('plotly_hover');
