@@ -430,6 +430,33 @@
   color:#000!important;
   box-shadow:0 0 0 2px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.12)!important;
 }
+
+/* V23 - Timeline et années du graphique cliquables */
+.timeline-year,.timeline-segment,.chart-year-click-target{
+  cursor:pointer;
+  transition:transform .14s ease, box-shadow .14s ease, filter .14s ease;
+}
+.timeline-year:hover,.timeline-segment:hover{
+  transform:translateY(-1px);
+  filter:brightness(.96);
+}
+.timeline-year.active{
+  color:#FF7900!important;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.timeline-segment.active{
+  box-shadow:inset 0 0 0 3px rgba(255,255,255,.78),0 0 0 2px rgba(0,0,0,.18);
+  position:relative;
+  z-index:2;
+}
+.timeline-reset-note{
+  margin-top:7px;
+  font-size:10px;
+  color:#666;
+  font-weight:800;
+}
+
 </style>
 </head>
 <body onload="loadPlotly()">
@@ -511,8 +538,8 @@
         <section id="statusTimelinePanel" class="status-timeline-panel">
           <div class="timeline-head">
             <div>
-              <h2 class="timeline-title">Mini timeline des AO à venir</h2>
-              <div class="timeline-subtitle">Nombre d'AO par année, à partir de 2026, réparti par statut</div>
+              <h2 class="timeline-title">Mini timeline des AO</h2>
+              <div class="timeline-subtitle">Nombre d'AO par année, réparti par statut</div>
             </div>
             <div id="statusTimelineLegend" class="timeline-legend"></div>
           </div>
@@ -2583,6 +2610,7 @@ let dashboardKpiFilter = null;
 let dashboardCategoryFilter = null;
 let dashboardKpiFilters = new Set();
 let dashboardCategoryFilters = new Set();
+let dashboardYearFilters = new Set();
 let tableSort = { col: 'name', dir: 'asc' };
 let tableFilters = {
   name: { op: 'contains', value: '' },
@@ -2626,6 +2654,52 @@ function sameArrayValues(a,b){
   if(!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
   return a.map(String).sort().join('|') === b.map(String).sort().join('|');
 }
+function selectedDashboardYears(){
+  return [...dashboardYearFilters].map(Number).filter(Number.isFinite).sort((a,b)=>b-a);
+}
+function toggleDashboardYearFilter(year){
+  const y = Number(year);
+  if(!Number.isFinite(y)) return;
+  if(dashboardYearFilters.has(y)) dashboardYearFilters.delete(y);
+  else dashboardYearFilters.add(y);
+  syncDashboardButtonFiltersToTable();
+}
+function toggleDashboardTimelineStatusFilter(statusLabel){
+  const map = {
+    'En cours':'status-en-cours',
+    'AO à confirmer':'status-ao-confirm',
+    'Docs à venir':'status-docs',
+    'Perdu':'status-perdu',
+    'Sans statut':'status-empty'
+  };
+  const key = map[normalizeStatusLabel(statusLabel)];
+  if(!key) return;
+  toggleDashboardKpiFilter(key);
+}
+function toggleDashboardTimelineSegment(year,statusLabel){
+  const y = Number(year);
+  if(!Number.isFinite(y)) return;
+  const map = {
+    'En cours':'status-en-cours',
+    'AO à confirmer':'status-ao-confirm',
+    'Docs à venir':'status-docs',
+    'Perdu':'status-perdu',
+    'Sans statut':'status-empty'
+  };
+  const key = map[normalizeStatusLabel(statusLabel)];
+  if(!key) return;
+  const yearAlready = dashboardYearFilters.has(y);
+  const statusAlready = dashboardKpiFilters.has(key);
+  if(yearAlready && statusAlready){
+    dashboardYearFilters.delete(y);
+    dashboardKpiFilters.delete(key);
+  } else {
+    dashboardYearFilters.add(y);
+    dashboardKpiFilters.add(key);
+  }
+  dashboardKpiFilter = dashboardKpiFilters.size === 1 ? [...dashboardKpiFilters][0] : null;
+  syncDashboardButtonFiltersToTable();
+}
 function selectedDashboardCategoryValues(){  
   const map = DASHBOARD_CATEGORY_TABLE_PRESETS;  
   return [...dashboardCategoryFilters].flatMap(k => map[k] || []);  
@@ -2642,13 +2716,16 @@ function selectedDashboardStatusValues(){
 function syncDashboardButtonFiltersToTable(){  
   const cats = selectedDashboardCategoryValues();  
   const statuses = selectedDashboardStatusValues();  
+  const selectedYears = selectedDashboardYears().map(String);  
   tableFilters.cat = cats.length ? cats : null;  
   tableFilters.status = statuses.length ? statuses : null;  
+  tableFilters.year = selectedYears.length ? selectedYears : null;  
   tableFilters.watch = dashboardKpiFilters.has('watch') ? ['OUI'] : null;  
 }  
 function clearDashboardButtonFilters(){  
   dashboardKpiFilters.clear();  
   dashboardCategoryFilters.clear();  
+  dashboardYearFilters.clear();  
   dashboardKpiFilter = null;  
   dashboardCategoryFilter = null;  
   tableFilters.year = null;  
@@ -2865,8 +2942,10 @@ function filteredData(){
   let rows=data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); 
   const activeCats = selectedDashboardCategoryValues(); 
   const activeStatuses = selectedDashboardStatusValues(); 
+  const activeYears = selectedDashboardYears(); 
   if(activeCats.length) rows=rows.filter(d=>activeCats.includes(d.cat)); 
   if(activeStatuses.length) rows=rows.filter(d=>activeStatuses.includes(statusForCompany(d).label)); 
+  if(activeYears.length) rows=rows.filter(d=>activeYears.includes(Number(d.year))); 
   if(dashboardKpiFilters.has('watch')) rows=rows.filter(d=>d.watch===true); 
   return rows; 
 }  
@@ -2874,10 +2953,11 @@ function baseFilteredDataForTable(){ const f=getFilterState(); return data.filte
 function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.map(ownerLabel))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); updateFilterCounters(); }
 
 function statusTimelineSourceRows(){  
-  let rows = baseFilteredDataForTable().filter(d => Number(d.year) >= 2026);  
-  // La mini timeline respecte les filtres de base et les catégories cumulées, tout en gardant la répartition par statut.  
+  let rows = baseFilteredDataForTable().filter(d => Number(d.year) >= 2021);  
   const activeCats = selectedDashboardCategoryValues();  
+  const activeYears = selectedDashboardYears();  
   if(activeCats.length) rows=rows.filter(d=>activeCats.includes(d.cat));  
+  if(activeYears.length) rows=rows.filter(d=>activeYears.includes(Number(d.year)));  
   return rows;  
 }  
 function renderStatusTimeline(){
@@ -2885,9 +2965,11 @@ function renderStatusTimeline(){
   const legend=document.getElementById('statusTimelineLegend');
   if(!body || !legend) return;
   const rows=statusTimelineSourceRows();
-  const yearsList=[...new Set(rows.map(d=>Number(d.year)).filter(y=>Number.isFinite(y) && y>=2026))].sort((a,b)=>a-b);
+  const yearsList=[...new Set(rows.map(d=>Number(d.year)).filter(y=>Number.isFinite(y) && y>=2021))].sort((a,b)=>b-a);
+  const activeYears=selectedDashboardYears();
+  const activeStatuses=selectedDashboardStatusValues();
   legend.innerHTML=STATUS_OPTIONS.map(st=>{ const meta=statusMeta(st); return `<span class="status-chip ${meta.cls}">${statusLabelContent(meta)}</span>`; }).join('');
-  if(!yearsList.length){ body.innerHTML='<div class="timeline-empty">Aucun AO à partir de 2026 avec les filtres actuels.</div>'; return; }
+  if(!yearsList.length){ body.innerHTML='<div class="timeline-empty">Aucun AO avec les filtres actuels.</div>'; return; }
   const byYear=yearsList.map(year=>{
     const yearRows=rows.filter(d=>Number(d.year)===year);
     const counts=Object.fromEntries(STATUS_OPTIONS.map(st=>[st, yearRows.filter(d=>statusForCompany(d).label===st).length]));
@@ -2902,12 +2984,15 @@ function renderStatusTimeline(){
       const meta=statusMeta(st);
       const pct=(count/row.total)*100;
       const label=count>=2 ? count : '';
-      return `<div class="timeline-segment ${meta.cls}" style="width:${pct}%" title="${escapeHtml(st)} : ${count} AO">${label}</div>`;
+      const active=activeYears.includes(row.year) && activeStatuses.includes(st);
+      return `<div class="timeline-segment ${meta.cls} ${active?'active':''}" data-timeline-year="${row.year}" data-timeline-status="${escapeHtml(st)}" style="width:${pct}%" title="${escapeHtml(row.year+' - '+st)} : ${count} AO">${label}</div>`;
     }).join('');
-    return `<div class="timeline-row"><div class="timeline-year">${row.year}</div><div class="timeline-track"><div class="timeline-fill" style="width:${fillWidth}%">${segments}</div></div><div class="timeline-total">${row.total} AO</div></div>`;
-  }).join('');
+    const yearActive=activeYears.includes(row.year);
+    return `<div class="timeline-row"><div class="timeline-year ${yearActive?'active':''}" data-timeline-year="${row.year}" title="Filtrer le graphique sur ${row.year}">${row.year}</div><div class="timeline-track"><div class="timeline-fill" style="width:${fillWidth}%">${segments}</div></div><div class="timeline-total">${row.total} AO</div></div>`;
+  }).join('') + '<div class="timeline-reset-note">Astuce : clique sur une année pour filtrer le graphique et la liste. Clique sur un bloc pour combiner année + statut. Clique à nouveau pour désélectionner.</div>';
+  body.querySelectorAll('.timeline-year').forEach(el=>el.addEventListener('click',()=>{ toggleDashboardYearFilter(el.dataset.timelineYear); updateAll(); }));
+  body.querySelectorAll('.timeline-segment').forEach(el=>el.addEventListener('click',()=>{ toggleDashboardTimelineSegment(el.dataset.timelineYear, el.dataset.timelineStatus); updateAll(); }));
 }
-
 function updateAll(){ normalizeAllData(); renderList(); renderCompanyTable(); renderEditors(); updateCockpitMetrics(); updateFilterCounters(); updateChart(); renderStatusTimeline(); saveData(); }
 function renderList(){
   const pts=filteredData().sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));
@@ -3203,6 +3288,19 @@ const hoverPoint = hoveredCompanyId == null ? null : pts.find(p=>Number(p.id)===
 
   const ticks=[...Y_BANDS_COACHING,...Y_BANDS_LANGUES].sort((a,b)=>a.y-b.y); const f=getFilterState();
   const visibleYears=years.filter(y=>y>=f.yMin && y<=f.yMax);
+  const activeYearsForChart = selectedDashboardYears();
+  if(visibleYears.length){
+    traces.push({
+      type:'scatter',mode:'markers+text',showlegend:false,hoverinfo:'none',
+      x:visibleYears,y:visibleYears.map(()=>-5.82),
+      text:visibleYears.map(y=>String(y)),
+      customdata:visibleYears.map(y=>['year-filter',y]),
+      marker:{size:28,color:'rgba(255,255,255,0)',line:{width:0,color:'rgba(255,255,255,0)'}},
+      textfont:{size:12,family:'Segoe UI,Arial',color:visibleYears.map(y=>activeYearsForChart.includes(Number(y))?'#FF7900':'rgba(0,0,0,.58)')},
+      textposition:'middle center',
+      cliponaxis:false
+    });
+  }
   const yearShapes=visibleYears.map((y,i)=>({type:'rect',xref:'x',yref:'paper',x0:y-0.5,x1:y+0.5,y0:0,y1:1,fillcolor:i%2===0?'rgba(0,0,0,0.035)':'rgba(255,121,0,0.035)',line:{width:0},layer:'below'}));
   const today=currentDecimalYear();
   const todayShape={type:'line',xref:'x',yref:'paper',x0:today,x1:today,y0:0,y1:1,line:{color:'#FF7900',width:2,dash:'dot'},layer:'above'};
@@ -3227,8 +3325,14 @@ const hoverPoint = hoveredCompanyId == null ? null : pts.find(p=>Number(p.id)===
   gd.removeAllListeners && gd.removeAllListeners('plotly_click');
   gd.removeAllListeners && gd.removeAllListeners('plotly_hover');
   gd.removeAllListeners && gd.removeAllListeners('plotly_unhover');
-  gd.on && gd.on('plotly_click', ev=>{ const pt=ev&&ev.points&&ev.points[0]; const id=pt&&pt.customdata?pt.customdata[0]:null; if(id!=null) selectCompany(id); });
-  gd.on && gd.on('plotly_hover', ev=>{ const pt=ev&&ev.points&&ev.points[0]; const id=pt&&pt.customdata?pt.customdata[0]:null; if(id!=null && Number(id)!==Number(hoveredCompanyId)){ hoveredCompanyId=Number(id); updateChart(); }});
+  gd.on && gd.on('plotly_click', ev=>{
+    const pt=ev&&ev.points&&ev.points[0];
+    const cd=pt&&pt.customdata?pt.customdata:null;
+    if(Array.isArray(cd) && cd[0]==='year-filter'){ toggleDashboardYearFilter(cd[1]); updateAll(); return; }
+    const id=cd?cd[0]:null;
+    if(id!=null) selectCompany(id);
+  });
+  gd.on && gd.on('plotly_hover', ev=>{ const pt=ev&&ev.points&&ev.points[0]; const cd=pt&&pt.customdata?pt.customdata:null; if(Array.isArray(cd) && cd[0]==='year-filter') return; const id=cd?cd[0]:null; if(id!=null && Number(id)!==Number(hoveredCompanyId)){ hoveredCompanyId=Number(id); updateChart(); }});
   gd.on && gd.on('plotly_unhover', ()=>{ if(hoveredCompanyId!=null){ hoveredCompanyId=null; updateChart(); } });
 }
 function selectCompany(id){
