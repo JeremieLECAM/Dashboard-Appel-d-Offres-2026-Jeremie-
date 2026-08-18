@@ -433,6 +433,7 @@
 
 /* V23 - Timeline et années du graphique cliquables */
 /* V24 - Repères produit taille 9 + années uniques cliquables + encadrement pointillé */
+/* V25 - Sidebar compacte + watchlist dynamique avec override manuel */
 .timeline-year,.timeline-segment,.chart-year-click-target{
   cursor:pointer;
   transition:transform .14s ease, box-shadow .14s ease, filter .14s ease;
@@ -458,6 +459,27 @@
   font-weight:800;
 }
 
+
+/* V25 - Colonne gauche compacte + nouvelle logique A surveiller */
+.dashboard-grid{grid-template-columns:200px 1fr!important;gap:10px!important;padding:10px!important;}
+.panel{padding:8px!important;}
+.panel-logo{max-width:62px!important;margin-bottom:6px!important;border-radius:14px!important;}
+.cockpit-kpis{gap:5px!important;margin-bottom:7px!important;}
+.kpi-card{min-height:46px!important;padding:6px!important;border-radius:11px!important;}
+.kpi-card .kpi-value{font-size:16px!important;}
+.kpi-card .kpi-label{font-size:8.5px!important;}
+#filters .section-head{padding:7px 8px!important;}
+.search-cockpit{padding:5px 0 6px!important;margin-bottom:6px!important;}
+.item{padding:7px 7px!important;}
+.item-name{font-size:9.5px!important;}
+.item-meta{font-size:9px!important;}
+.watch-source-badge{display:inline-flex;align-items:center;border-radius:999px;padding:2px 6px;font-size:9px;font-weight:900;border:1px solid #e5e5e5;background:#fafafa;color:#555;white-space:nowrap;}
+.watch-source-badge.auto{background:#fff6ee;border-color:rgba(255,121,0,.35);color:#9a4b00;}
+.watch-source-badge.manual-add{background:#eef8ef;border-color:#bfe4c6;color:#176b2c;}
+.watch-source-badge.manual-remove{background:#fff0f0;border-color:#ffc4c4;color:#a20f0f;}
+.watch-table tr[data-id]{cursor:pointer;}
+.watch-table tr[data-id]:hover{background:#fff6ee;}
+@media(max-width:1150px){.dashboard-grid{grid-template-columns:200px 1fr!important;}}
 </style>
 </head>
 <body onload="loadPlotly()">
@@ -505,7 +527,7 @@
         </div>
 
         <div id="filters">
-          <div class="section open"><button type="button" class="section-head">Catégorie <span>▼</span></button><div class="section-body">
+          <div class="section"><button type="button" class="section-head">Catégorie <span>▶</span></button><div class="section-body">
             <label class="cat-filter-label"><input type="checkbox" class="f-cat" value="CAC 40" checked><span class="cat-dot" style="background:#E53935"></span><span class="cat-filter-text">CAC 40</span></label>
             <label class="cat-filter-label"><input type="checkbox" class="f-cat" value="SBF 120" checked><span class="cat-dot" style="background:#8E24AA"></span><span class="cat-filter-text">SBF 120</span></label>
             <label class="cat-filter-label"><input type="checkbox" class="f-cat" value="Entreprise privée hors CAC 40/SBF 120" checked><span class="cat-dot" style="background:#1E88E5"></span><span class="cat-filter-text">Privé hors CAC/SBF</span></label>
@@ -561,11 +583,11 @@
   </div>
 
 <script>
-const SEED_DATA = [
+const data = [
   {
     "id": 1,
     "name": "Aéroport International de Genève",
-    "year": 2022,
+    "year": 2024,
     "product": "Langues",
     "revenue": 20000,
     "y": 2,
@@ -586,7 +608,7 @@ const SEED_DATA = [
   {
     "id": 2,
     "name": "Aéroports de Paris - ADP",
-    "year": 2022,
+    "year": 2023,
     "product": "Langues",
     "revenue": 2703,
     "y": 1,
@@ -607,7 +629,7 @@ const SEED_DATA = [
   {
     "id": 3,
     "name": "Air Liquide SA",
-    "year": 2024,
+    "year": 2025,
     "product": "Langues",
     "revenue": 240000,
     "y": 5,
@@ -691,7 +713,7 @@ const SEED_DATA = [
   {
     "id": 7,
     "name": "Axian group",
-    "year": 2022,
+    "year": 2024,
     "product": "Langues",
     "revenue": 53592,
     "y": 3,
@@ -712,7 +734,7 @@ const SEED_DATA = [
   {
     "id": 8,
     "name": "Banque de France",
-    "year": 2023,
+    "year": 2024,
     "product": "Langues",
     "revenue": 33500,
     "y": 2,
@@ -838,7 +860,7 @@ const SEED_DATA = [
   {
     "id": 14,
     "name": "Bpost",
-    "year": 2045,
+    "year": 2025,
     "product": "Langues",
     "revenue": 93000,
     "y": 3,
@@ -880,7 +902,7 @@ const SEED_DATA = [
   {
     "id": 16,
     "name": "Capgemini SE",
-    "year": 2023,
+    "year": 2024,
     "product": "Langues",
     "revenue": 148000,
     "y": 4,
@@ -922,7 +944,7 @@ const SEED_DATA = [
   {
     "id": 18,
     "name": "Carrefour France",
-    "year": 2023,
+    "year": 2024,
     "product": "Langues",
     "revenue": 0,
     "y": 1,
@@ -936,14 +958,14 @@ const SEED_DATA = [
     "watch": true,
     "baseYear": 2024,
     "baseY": 1,
-    "plotYear": 2024,
-    "plotY": 1,
-    "labelPosition": "top center"
+    "plotYear": 2023.84,
+    "plotY": 1.32,
+    "labelPosition": "top left"
   },
   {
     "id": 19,
     "name": "CGI France SAS",
-    "year": 2020,
+    "year": 2021,
     "product": "Langues",
     "revenue": 120000,
     "y": 4,
@@ -964,7 +986,7 @@ const SEED_DATA = [
   {
     "id": 20,
     "name": "CMA CGM S.A.",
-    "year": 2021,
+    "year": 2022,
     "product": "Langues",
     "revenue": 30000,
     "y": 2,
@@ -1006,7 +1028,7 @@ const SEED_DATA = [
   {
     "id": 22,
     "name": "CNP Assurances SA",
-    "year": 2024,
+    "year": 2025,
     "product": "Coaching",
     "revenue": 86400,
     "y": -2,
@@ -1027,7 +1049,7 @@ const SEED_DATA = [
   {
     "id": 23,
     "name": "Cofidis S.A",
-    "year": 2021,
+    "year": 2022,
     "product": "Langues",
     "revenue": 12000,
     "y": 2,
@@ -1069,7 +1091,7 @@ const SEED_DATA = [
   {
     "id": 25,
     "name": "Covéa Mutual Insurance Group Company",
-    "year": 2019,
+    "year": 2020,
     "product": "Langues",
     "revenue": 85000,
     "y": 3,
@@ -1083,14 +1105,14 @@ const SEED_DATA = [
     "watch": false,
     "baseYear": 2020,
     "baseY": 3,
-    "plotYear": 2020,
-    "plotY": 3,
-    "labelPosition": "top center"
+    "plotYear": 2019.84,
+    "plotY": 3.32,
+    "labelPosition": "top left"
   },
   {
     "id": 26,
     "name": "Danone SA",
-    "year": 2021,
+    "year": 2022,
     "product": "Langues",
     "revenue": 100000,
     "y": 3,
@@ -1111,7 +1133,7 @@ const SEED_DATA = [
   {
     "id": 27,
     "name": "Dassault Systemes SE",
-    "year": 2023,
+    "year": 2024,
     "product": "Langues",
     "revenue": 74500,
     "y": 3,
@@ -1195,7 +1217,7 @@ const SEED_DATA = [
   {
     "id": 31,
     "name": "EM Lyon",
-    "year": 2020,
+    "year": 2021,
     "product": "Langues",
     "revenue": 35000,
     "y": 2,
@@ -1272,14 +1294,14 @@ const SEED_DATA = [
     "watch": false,
     "baseYear": 2019,
     "baseY": 2,
-    "plotYear": 2019,
-    "plotY": 2,
-    "labelPosition": "top center"
+    "plotYear": 2019.16,
+    "plotY": 2.32,
+    "labelPosition": "top right"
   },
   {
     "id": 35,
     "name": "Eviden FRANCE",
-    "year": 2024,
+    "year": 2025,
     "product": "Coaching",
     "revenue": 70000,
     "y": -2,
@@ -1342,7 +1364,7 @@ const SEED_DATA = [
   {
     "id": 38,
     "name": "Groupama Holding",
-    "year": 2019,
+    "year": 2020,
     "product": "Langues",
     "revenue": 42500,
     "y": 2,
@@ -1398,9 +1420,9 @@ const SEED_DATA = [
     "watch": false,
     "baseYear": 2014,
     "baseY": 5,
-    "plotYear": 2014,
-    "plotY": 5,
-    "labelPosition": "top center"
+    "plotYear": 2013.84,
+    "plotY": 5.32,
+    "labelPosition": "top left"
   },
   {
     "id": 41,
@@ -1426,7 +1448,7 @@ const SEED_DATA = [
   {
     "id": 42,
     "name": "Groupe Limagrain Holding SA",
-    "year": 2020,
+    "year": 2022,
     "product": "Langues",
     "revenue": 50000,
     "y": 2,
@@ -1468,7 +1490,7 @@ const SEED_DATA = [
   {
     "id": 44,
     "name": "Groupe Roquette",
-    "year": 2020,
+    "year": 2021,
     "product": "Langues",
     "revenue": 5000,
     "y": 1,
@@ -1510,7 +1532,7 @@ const SEED_DATA = [
   {
     "id": 46,
     "name": "Groupe SEB",
-    "year": 2019,
+    "year": 2020,
     "product": "Langues",
     "revenue": 50000,
     "y": 2,
@@ -1531,7 +1553,7 @@ const SEED_DATA = [
   {
     "id": 47,
     "name": "Groupe SNCF",
-    "year": 2023,
+    "year": 2024,
     "product": "Coaching",
     "revenue": 84000,
     "y": -2,
@@ -1615,7 +1637,7 @@ const SEED_DATA = [
   {
     "id": 51,
     "name": "JCDecaux SA",
-    "year": 2021,
+    "year": 2022,
     "product": "Langues",
     "revenue": 15000,
     "y": 2,
@@ -1678,7 +1700,7 @@ const SEED_DATA = [
   {
     "id": 54,
     "name": "Kingfisher France",
-    "year": 2021,
+    "year": 2022,
     "product": "Langues",
     "revenue": 3000,
     "y": 1,
@@ -1755,9 +1777,9 @@ const SEED_DATA = [
     "watch": true,
     "baseYear": 2021,
     "baseY": 4,
-    "plotYear": 2021.16,
-    "plotY": 4.32,
-    "labelPosition": "top right"
+    "plotYear": 2020.84,
+    "plotY": 3.68,
+    "labelPosition": "bottom left"
   },
   {
     "id": 58,
@@ -1783,7 +1805,7 @@ const SEED_DATA = [
   {
     "id": 59,
     "name": "Manpower France",
-    "year": 2015,
+    "year": 2016,
     "product": "Langues",
     "revenue": 30000,
     "y": 2,
@@ -1797,14 +1819,14 @@ const SEED_DATA = [
     "watch": false,
     "baseYear": 2016,
     "baseY": 2,
-    "plotYear": 2016.16,
-    "plotY": 2.32,
-    "labelPosition": "top right"
+    "plotYear": 2015.84,
+    "plotY": 1.68,
+    "labelPosition": "bottom left"
   },
   {
     "id": 60,
     "name": "Mars Food France",
-    "year": 2019,
+    "year": 2020,
     "product": "Langues",
     "revenue": 0,
     "y": 1,
@@ -1825,7 +1847,7 @@ const SEED_DATA = [
   {
     "id": 61,
     "name": "MBDA Group",
-    "year": 2019,
+    "year": 2020,
     "product": "Langues",
     "revenue": 148750,
     "y": 4,
@@ -1846,7 +1868,7 @@ const SEED_DATA = [
   {
     "id": 62,
     "name": "Naval Group SA",
-    "year": 2020,
+    "year": 2021,
     "product": "Langues",
     "revenue": 60000,
     "y": 3,
@@ -1930,7 +1952,7 @@ const SEED_DATA = [
   {
     "id": 66,
     "name": "Orange SA",
-    "year": 2021,
+    "year": 2022,
     "product": "Langues",
     "revenue": 30000,
     "y": 2,
@@ -1993,7 +2015,7 @@ const SEED_DATA = [
   {
     "id": 69,
     "name": "Safran SA",
-    "year": 2024,
+    "year": 2025,
     "product": "Langues",
     "revenue": 63750,
     "y": 3,
@@ -2014,7 +2036,7 @@ const SEED_DATA = [
   {
     "id": 70,
     "name": "Sanofi SA",
-    "year": 2023,
+    "year": 2025,
     "product": "Langues",
     "revenue": 10000,
     "y": 1,
@@ -2091,9 +2113,9 @@ const SEED_DATA = [
     "watch": true,
     "baseYear": 2021,
     "baseY": 4,
-    "plotYear": 2020.84,
+    "plotYear": 2021.16,
     "plotY": 3.68,
-    "labelPosition": "bottom left"
+    "labelPosition": "bottom right"
   },
   {
     "id": 74,
@@ -2140,7 +2162,7 @@ const SEED_DATA = [
   {
     "id": 76,
     "name": "Sonepar S.A.",
-    "year": 2024,
+    "year": 2025,
     "product": "Langues",
     "revenue": 204065,
     "y": 5,
@@ -2245,7 +2267,7 @@ const SEED_DATA = [
   {
     "id": 81,
     "name": "Thales SA",
-    "year": 2021,
+    "year": 2024,
     "product": "Langues",
     "revenue": 95000,
     "y": 3,
@@ -2308,7 +2330,7 @@ const SEED_DATA = [
   {
     "id": 84,
     "name": "Unilabs SA",
-    "year": 2022,
+    "year": 2023,
     "product": "Langues",
     "revenue": 36480,
     "y": 2,
@@ -2318,7 +2340,7 @@ const SEED_DATA = [
     "owner": "Jérémie Lecamus",
     "owner_missing": false,
     "status": "Sans statut",
-    "notes": "Suisse",
+    "notes": "",
     "watch": false,
     "baseYear": 2023,
     "baseY": 2,
@@ -2329,7 +2351,7 @@ const SEED_DATA = [
   {
     "id": 85,
     "name": "Veepee France",
-    "year": 2020,
+    "year": 2021,
     "product": "Langues",
     "revenue": 57480,
     "y": 3,
@@ -2350,7 +2372,7 @@ const SEED_DATA = [
   {
     "id": 86,
     "name": "Verisure France",
-    "year": 2022,
+    "year": 2023,
     "product": "Langues",
     "revenue": 30000,
     "y": 2,
@@ -2413,7 +2435,7 @@ const SEED_DATA = [
   {
     "id": 89,
     "name": "Kering SA",
-    "year": 2020,
+    "year": 2022,
     "product": "Langues",
     "revenue": 30000,
     "y": 2,
@@ -2640,6 +2662,405 @@ const SEED_DATA = [
     "plotYear": 2026.3,
     "plotY": 2,
     "labelPosition": "middle right"
+  },
+  {
+    "id": 100,
+    "name": "Engie SA",
+    "year": 2015,
+    "product": "Langues",
+    "revenue": 42500,
+    "y": 2,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "GDF SUEZ",
+    "watch": false,
+    "baseYear": 2015,
+    "baseY": 2,
+    "plotYear": 2015,
+    "plotY": 2,
+    "labelPosition": "top center"
+  },
+  {
+    "id": 101,
+    "name": "Generali France",
+    "year": 2024,
+    "product": "Langues",
+    "revenue": 2800,
+    "y": 1,
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2024,
+    "baseY": 1,
+    "plotYear": 2024.16,
+    "plotY": 1.32,
+    "labelPosition": "top right"
+  },
+  {
+    "id": 102,
+    "name": "Groupe SNCF",
+    "year": 2018,
+    "product": "Langues",
+    "revenue": 165,
+    "y": 1,
+    "cat": "Public / Semi-Public",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Julie Pirroni",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2018,
+    "baseY": 1,
+    "plotYear": 2018,
+    "plotY": 1,
+    "labelPosition": "top center"
+  },
+  {
+    "id": 103,
+    "name": "La Poste S.A.",
+    "year": 2013,
+    "product": "Langues",
+    "revenue": 55500,
+    "y": 3,
+    "cat": "Public / Semi-Public",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2013,
+    "baseY": 3,
+    "plotYear": 2013,
+    "plotY": 3,
+    "labelPosition": "top center"
+  },
+  {
+    "id": 104,
+    "name": "Capgemini SE",
+    "year": 2019,
+    "product": "Langues",
+    "revenue": 42500,
+    "y": 2,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2019,
+    "baseY": 2,
+    "plotYear": 2018.84,
+    "plotY": 2.32,
+    "labelPosition": "top left"
+  },
+  {
+    "id": 105,
+    "name": "Dassault Systemes SE",
+    "year": 2020,
+    "product": "Langues",
+    "revenue": 57000,
+    "y": 3,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2020,
+    "baseY": 3,
+    "plotYear": 2020.16,
+    "plotY": 3.32,
+    "labelPosition": "top right"
+  },
+  {
+    "id": 106,
+    "name": "Deloitte France",
+    "year": 2018,
+    "product": "Langues",
+    "revenue": 192000,
+    "y": 4,
+    "cat": "Entreprise privée hors CAC 40/SBF 120",
+    "color": "#1E88E5",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2018,
+    "baseY": 4,
+    "plotYear": 2018,
+    "plotY": 4,
+    "labelPosition": "top center"
+  },
+  {
+    "id": 107,
+    "name": "ELECTRICITE DE FRANCE",
+    "year": 2017,
+    "product": "Langues",
+    "revenue": 0,
+    "y": 1,
+    "cat": "Public / Semi-Public",
+    "color": "#43A047",
+    "outline": "",
+    "owner": "Anaïs Guicherd",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2017,
+    "baseY": 1,
+    "plotYear": 2017,
+    "plotY": 1,
+    "labelPosition": "top center"
+  },
+  {
+    "id": 108,
+    "name": "L'Oréal SA",
+    "year": 2013,
+    "product": "Langues",
+    "revenue": 250000,
+    "y": 5,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2013,
+    "baseY": 5,
+    "plotYear": 2013,
+    "plotY": 5,
+    "labelPosition": "top center"
+  },
+  {
+    "id": 109,
+    "name": "L'Oréal SA",
+    "year": 2016,
+    "product": "Langues",
+    "revenue": 25000,
+    "y": 2,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2016,
+    "baseY": 2,
+    "plotYear": 2016.16,
+    "plotY": 2.32,
+    "labelPosition": "top right"
+  },
+  {
+    "id": 110,
+    "name": "L'Oréal SA",
+    "year": 2019,
+    "product": "Langues",
+    "revenue": 50000,
+    "y": 2,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2019,
+    "baseY": 2,
+    "plotYear": 2018.84,
+    "plotY": 1.68,
+    "labelPosition": "bottom left"
+  },
+  {
+    "id": 111,
+    "name": "L'Oréal SA",
+    "year": 2021,
+    "product": "Langues",
+    "revenue": 200000,
+    "y": 4,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Clément Le Roux",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2021,
+    "baseY": 4,
+    "plotYear": 2021.16,
+    "plotY": 4.32,
+    "labelPosition": "top right"
+  },
+  {
+    "id": 112,
+    "name": "Schneider Electric SE",
+    "year": 2014,
+    "product": "Langues",
+    "revenue": 250000,
+    "y": 5,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2014,
+    "baseY": 5,
+    "plotYear": 2014.16,
+    "plotY": 5.32,
+    "labelPosition": "top right"
+  },
+  {
+    "id": 113,
+    "name": "Société Générale SA",
+    "year": 2014,
+    "product": "Langues",
+    "revenue": 46000,
+    "y": 2,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2014,
+    "baseY": 2,
+    "plotYear": 2014,
+    "plotY": 2,
+    "labelPosition": "top center"
+  },
+  {
+    "id": 114,
+    "name": "Société Générale SA",
+    "year": 2017,
+    "product": "Langues",
+    "revenue": 418875,
+    "y": 5,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2017,
+    "baseY": 5,
+    "plotYear": 2017,
+    "plotY": 5,
+    "labelPosition": "top center"
+  },
+  {
+    "id": 115,
+    "name": "Société Générale SA",
+    "year": 2021,
+    "product": "Langues",
+    "revenue": 176400,
+    "y": 4,
+    "cat": "CAC 40",
+    "color": "#E53935",
+    "outline": "",
+    "owner": "Sarah Kureemun",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2021,
+    "baseY": 4,
+    "plotYear": 2021,
+    "plotY": 4.48,
+    "labelPosition": "top center"
+  },
+  {
+    "id": 116,
+    "name": "Sopra Steria Group SA",
+    "year": 2020,
+    "product": "Langues",
+    "revenue": 50000,
+    "y": 2,
+    "cat": "SBF 120",
+    "color": "#8E24AA",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2020,
+    "baseY": 2,
+    "plotYear": 2020,
+    "plotY": 2.48,
+    "labelPosition": "top center"
+  },
+  {
+    "id": 117,
+    "name": "Spie SA",
+    "year": 2016,
+    "product": "Langues",
+    "revenue": 64000,
+    "y": 3,
+    "cat": "SBF 120",
+    "color": "#8E24AA",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2016,
+    "baseY": 3,
+    "plotYear": 2016,
+    "plotY": 3,
+    "labelPosition": "top center"
+  },
+  {
+    "id": 118,
+    "name": "Spie SA",
+    "year": 2019,
+    "product": "Langues",
+    "revenue": 50000,
+    "y": 2,
+    "cat": "SBF 120",
+    "color": "#8E24AA",
+    "outline": "",
+    "owner": "Jérémie Lecamus",
+    "owner_missing": false,
+    "status": "Sans statut",
+    "notes": "",
+    "watch": false,
+    "baseYear": 2019,
+    "baseY": 2,
+    "plotYear": 2019.16,
+    "plotY": 1.68,
+    "labelPosition": "bottom right"
   }
 ];
 
@@ -2674,8 +3095,8 @@ let watchFilters = {
   cat: null,
   owner: null
 };
-const STORAGE_KEY = 'ao_dashboard_data_categories_excel_v2';
-const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','outline','owner','owner_missing','status','notes','watch'];
+const STORAGE_KEY = 'ao_dashboard_data_categories_excel_v3_watchrules';
+const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','outline','owner','owner_missing','status','notes','watch','watch_override'];
 const CAT_COLORS = {"CAC 40": "#E53935", "SBF 120": "#8E24AA", "Entreprise privée hors CAC 40/SBF 120": "#1E88E5", "Public / Semi-Public": "#43A047", "Écoles": "#00A6A6"}; // couleurs métier mises à jour depuis classification_entreprises_AO.xlsx
 const CAT_ORDER = ["Public / Semi-Public", "Écoles", "SBF 120", "CAC 40", "Entreprise privée hors CAC 40/SBF 120"];
 const STATUS_OPTIONS = ['En cours','Perdu','AO à confirmer','Docs à venir','Sans statut']; // Source unique des statuts affichés dans l'onglet 1 et l'onglet 2
@@ -2852,11 +3273,44 @@ function statusSelectHtml(id, selected){
 }
 function currentDecimalYear(){ const now=new Date(); const start=new Date(now.getFullYear(),0,1), end=new Date(now.getFullYear()+1,0,1); return now.getFullYear()+((now-start)/(end-start)); }
 function currentYearNumber(){ return new Date().getFullYear(); }
+function parseWatchOverride(value){
+  if(value === true || value === false) return value;
+  const raw=String(value ?? '').trim().toLowerCase();
+  if(!raw || raw==='null' || raw==='auto' || raw==='default') return null;
+  if(['true','1','oui','yes','x','add','ajout','force'].includes(raw)) return true;
+  if(['false','0','non','no','remove','suppression','exclude'].includes(raw)) return false;
+  return null;
+}
+function isAutoWatch(d){
+  const st=statusForCompany(d).label;
+  const y=Number(d && d.year);
+  const current=currentYearNumber();
+  const renewalWindow=Number.isFinite(y) && y>=current-5 && y<=current-2;
+  return ['En cours','AO à confirmer','Docs à venir'].includes(st) || renewalWindow;
+}
+function isWatch(d){
+  if(!d) return false;
+  if(d.watchOverride === true) return true;
+  if(d.watchOverride === false) return false;
+  return isAutoWatch(d);
+}
+function watchSourceLabel(d){
+  if(d.watchOverride === true) return 'Ajout manuel';
+  if(d.watchOverride === false) return 'Retrait manuel';
+  if(['En cours','AO à confirmer','Docs à venir'].includes(statusForCompany(d).label)) return 'Statut prioritaire';
+  if(isAutoWatch(d)) return 'N-5 à N-2';
+  return 'Hors règle';
+}
+function watchSourceClass(d){
+  if(d.watchOverride === true) return 'manual-add';
+  if(d.watchOverride === false) return 'manual-remove';
+  return isAutoWatch(d) ? 'auto' : '';
+}
 function cockpitMetrics(rows=data){
   const cy=currentYearNumber();
   const total=rows.length;
   const upcoming=rows.filter(d=>Number(d.year)>=cy).length;
-  const watch=rows.filter(d=>d.watch===true).length;
+  const watch=rows.filter(d=>isWatch(d)).length;
   const statusCounts = Object.fromEntries(STATUS_OPTIONS.map(st=>[st, rows.filter(d=>statusForCompany(d).label===st).length]));
   return {total,upcoming,watch,statusCounts};
 }
@@ -2928,12 +3382,12 @@ function normalizePoint(row){
   const revenue = Number(row.revenue ?? 0);
   const year = Number(row.year ?? new Date().getFullYear());
   const owner = row.owner == null || String(row.owner).trim()==='' ? null : String(row.owner).trim();
-  const rawWatch = row.watch ?? row.a_surveille ?? row.aSurveiller ?? row['à surveiller'] ?? row['A surveiller'] ?? false;
-  const watch = rawWatch === true || ['true','1','oui','yes','x'].includes(String(rawWatch).toLowerCase().trim());
+  const rawWatchOverride = row.watch_override ?? row.watchOverride ?? null;
+  const watchOverride = parseWatchOverride(rawWatchOverride);
   const notes = row.notes==null?'':String(row.notes);
   const rawStatus = row.status || row.statut || row.Statut || row.STATUS || '';
   const status = rawStatus ? normalizeStatusLabel(rawStatus) : inferStatusFromNotes(notes);
-  return { id:Number(row.id)||nextDataId(), name:String(row.name||row.entreprise||'').trim(), year:Number.isFinite(year)?year:new Date().getFullYear(), product, revenue:Number.isFinite(revenue)?revenue:0, y:computeYFromRevenue(revenue, product), cat, color:colorForCategory(cat), outline:row.outline||'', owner, owner_missing:!(owner&&String(owner).trim()), status, notes, watch };
+  return { id:Number(row.id)||nextDataId(), name:String(row.name||row.entreprise||'').trim(), year:Number.isFinite(year)?year:new Date().getFullYear(), product, revenue:Number.isFinite(revenue)?revenue:0, y:computeYFromRevenue(revenue, product), cat, color:colorForCategory(cat), outline:row.outline||'', owner, owner_missing:!(owner&&String(owner).trim()), status, notes, watchOverride, watch_override:watchOverride };
 }
 function normalizeAllData(){ data = data.map(normalizePoint).filter(d=>d.name); years = [...new Set(data.map(d=>Number(d.year)).filter(Number.isFinite))].sort((a,b)=>a-b); syncYearInputs(); }
 function saveData(){ try{localStorage.setItem(STORAGE_KEY, JSON.stringify(data));}catch(e){} }
@@ -2990,7 +3444,7 @@ function filteredData(){
   if(activeCats.length) rows=rows.filter(d=>activeCats.includes(d.cat)); 
   if(activeStatuses.length) rows=rows.filter(d=>activeStatuses.includes(statusForCompany(d).label)); 
   if(activeYears.length) rows=rows.filter(d=>activeYears.includes(Number(d.year))); 
-  if(dashboardKpiFilters.has('watch')) rows=rows.filter(d=>d.watch===true); 
+  if(dashboardKpiFilters.has('watch')) rows=rows.filter(d=>isWatch(d)); 
   return rows; 
 }  
 function baseFilteredDataForTable(){ const f=getFilterState(); return data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); }
@@ -3040,7 +3494,7 @@ function renderStatusTimeline(){
 function updateAll(){ normalizeAllData(); renderList(); renderCompanyTable(); renderEditors(); updateCockpitMetrics(); updateFilterCounters(); updateChart(); renderStatusTimeline(); saveData(); }
 function renderList(){
   const pts=filteredData().sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));
-  document.getElementById('list').innerHTML=pts.map(d=>`<div class="item ${Number(d.id)===Number(selectedCompanyId)?'selected':''}" data-id="${d.id}"><div class="item-main">${categoryIcon(d.cat)}<span class="item-name">${escapeHtml(d.name)}</span>${d.watch?' <span title="À surveiller">⭐</span>':''}</div><div class="item-meta">${escapeHtml(d.product)} • ${d.year}<br>👤 ${escapeHtml(ownerLabel(d))} &nbsp; ${statusBadgeHtmlForCompany(d)}</div></div>`).join('');
+  document.getElementById('list').innerHTML=pts.map(d=>`<div class="item ${Number(d.id)===Number(selectedCompanyId)?'selected':''}" data-id="${d.id}"><div class="item-main">${categoryIcon(d.cat)}<span class="item-name">${escapeHtml(d.name)}</span>${isWatch(d)?' <span title="À surveiller">⭐</span>':''}</div><div class="item-meta">${escapeHtml(d.product)} • ${d.year}<br>👤 ${escapeHtml(ownerLabel(d))} &nbsp; ${statusBadgeHtmlForCompany(d)}</div></div>`).join('');
   document.querySelectorAll('#list .item').forEach(el=>{
     el.addEventListener('click',()=>selectCompany(el.dataset.id));
     el.addEventListener('mouseenter',()=>highlightCompanyFromList(el.dataset.id));
@@ -3050,7 +3504,7 @@ function renderList(){
 }
 function normText(v){ return String(v ?? '').trim().toLowerCase(); }
 function uniqueSortedValues(field){
-  const vals = data.map(d => field === 'owner' ? ownerLabel(d) : field==='status' ? statusForCompany(d).label : field==='watch' ? (d.watch?'OUI':'NON') : d[field])
+  const vals = data.map(d => field === 'owner' ? ownerLabel(d) : field==='status' ? statusForCompany(d).label : field==='watch' ? (isWatch(d)?'OUI':'NON') : d[field])
     .filter(v => v !== null && v !== undefined && String(v).trim() !== '')
     .map(v => String(v));
   return [...new Set(vals)].sort((a,b)=>{
@@ -3080,7 +3534,7 @@ function checkboxFilterPass(value, col){
 function tableValueForColumn(d, col){
   if(col === 'owner') return ownerLabel(d);
   if(col === 'status') return statusForCompany(d).label;
-  if(col === 'watch') return d.watch ? 'OUI' : 'NON';
+  if(col === 'watch') return isWatch(d) ? 'OUI' : 'NON';
   if(col === 'notes') return d.notes || '';
   return d[col];
 }
@@ -3203,7 +3657,7 @@ function renderCompanyTable(){
   const wrap=document.getElementById('companyTableWrap'); if(!wrap) return;
   const q=(document.getElementById('companyTableSearch').value||'').trim().toLowerCase();
   let rows=baseFilteredDataForTable().slice()
-    .filter(d=>!q||[d.name,d.year,d.product,d.revenue,d.cat,ownerLabel(d),statusForCompany(d).label,d.watch ? 'OUI' : 'NON',d.notes].some(v=>String(v??'').toLowerCase().includes(q)))
+    .filter(d=>!q||[d.name,d.year,d.product,d.revenue,d.cat,ownerLabel(d),statusForCompany(d).label,isWatch(d) ? 'OUI' : 'NON',d.notes].some(v=>String(v??'').toLowerCase().includes(q)))
     .filter(d=>textFilterPass(d.name, tableFilters.name))
     .filter(d=>textFilterPass(d.notes || '', tableFilters.notes))
     .filter(d=>checkboxFilterPass(tableValueForColumn(d, 'year'), 'year'))
@@ -3223,9 +3677,9 @@ function renderCompanyTable(){
     ${th('À surveiller','watch',checkboxFilterMenu('watch','À surveiller'))}
     ${th('Statut','status',checkboxFilterMenu('status','Statut',{sort:true,asc:'A → Z',desc:'Z → A'}))}
     ${th('Notes','notes',textFilterMenu('notes','Notes'))}
-  </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" class="${Number(d.id)===Number(selectedCompanyId)?'selected':''}"><td><b>${escapeHtml(d.name)}</b></td><td>${d.year}</td><td>${escapeHtml(d.product)}</td><td>${Math.round(d.revenue).toLocaleString('fr-FR')} €</td><td><span class="cat-dot" style="background:${colorForCategory(d.cat)}"></span> ${escapeHtml(shortCatLabel(d.cat))}</td><td>${escapeHtml(ownerLabel(d))}</td><td class="watch-check-cell"><button type="button" class="watch-star ${d.watch?'':'off'}" data-watch-id="${d.id}" title="Ajouter à la liste À surveiller">${d.watch?'★':'☆'}</button></td><td class="status-cell">${statusBadgeHtmlForCompany(d)}</td><td class="notes-cell">${escapeHtml(d.notes||'')}</td></tr>`).join('')}</tbody></table>`;
+  </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" class="${Number(d.id)===Number(selectedCompanyId)?'selected':''}"><td><b>${escapeHtml(d.name)}</b></td><td>${d.year}</td><td>${escapeHtml(d.product)}</td><td>${Math.round(d.revenue).toLocaleString('fr-FR')} €</td><td><span class="cat-dot" style="background:${colorForCategory(d.cat)}"></span> ${escapeHtml(shortCatLabel(d.cat))}</td><td>${escapeHtml(ownerLabel(d))}</td><td class="watch-check-cell"><button type="button" class="watch-star ${isWatch(d)?'':'off'}" data-watch-id="${d.id}" title="Basculer l'ajout/retrait manuel de la liste À surveiller">${isWatch(d)?'★':'☆'}</button></td><td class="status-cell">${statusBadgeHtmlForCompany(d)}</td><td class="notes-cell">${escapeHtml(d.notes||'')}</td></tr>`).join('')}</tbody></table>`;
   wrap.querySelectorAll('tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>selectCompany(tr.dataset.id)));
-  wrap.querySelectorAll('.watch-star').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); const d=data.find(x=>Number(x.id)===Number(btn.dataset.watchId)); toggleWatch(btn.dataset.watchId, !(d&&d.watch)); }));
+  wrap.querySelectorAll('.watch-star').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); const d=data.find(x=>Number(x.id)===Number(btn.dataset.watchId)); toggleWatch(btn.dataset.watchId, !(d&&isWatch(d))); }));
   bindTableFilterEvents();
   if(window.__lastOpenFilter){
     const m=document.getElementById('filter-'+window.__lastOpenFilter);
@@ -3234,7 +3688,7 @@ function renderCompanyTable(){
 }
 function highlightCompanyFromList(id){ hoveredCompanyId = Number(id); updateChart(); }
 function clearCompanyHighlight(){ hoveredCompanyId = null; updateChart(); }
-function toggleWatch(id, checked){ const d=data.find(x=>Number(x.id)===Number(id)); if(!d) return; d.watch=!!checked; saveData(); renderCompanyTable(); renderList(); updateCockpitMetrics(); if(document.getElementById('watchModal')?.classList.contains('open')) renderWatchTable(); }
+function toggleWatch(id, checked){ const d=data.find(x=>Number(x.id)===Number(id)); if(!d) return; d.watchOverride=!!checked; d.watch_override=d.watchOverride; saveData(); renderCompanyTable(); renderList(); updateCockpitMetrics(); updateChart(); if(document.getElementById('watchModal')?.classList.contains('open')) renderWatchTable(); }
 function updateChart(){
   if(!window.Plotly || !plotlyReady) return;
   const pts=filteredData();
@@ -3508,7 +3962,7 @@ function renderDashboardFloatingPopup(){
   const productGroup = `${prefix}EditProductChoice`;
   const ownerGroup = `${prefix}EditOwnerChoice`;
   const owners = getEditorOwners(ownerLabel(d));
-  popup.innerHTML = `<div class="popup-shell"><div class="popup-hero"><h3>${escapeHtml(d.name)}</h3><div class="popup-tags"><span class="popup-tag">${escapeHtml(shortCatLabel(d.cat))}</span><span class="popup-tag">${escapeHtml(d.product)}</span><span class="popup-tag">${d.year}</span><span class="popup-tag">${Math.round(d.revenue).toLocaleString('fr-FR')} €</span><span class="popup-tag">${escapeHtml(statusForCompany(d).label)}</span>${d.watch?'<span class="popup-tag">⭐ Watchlist</span>':''}</div></div>
+  popup.innerHTML = `<div class="popup-shell"><div class="popup-hero"><h3>${escapeHtml(d.name)}</h3><div class="popup-tags"><span class="popup-tag">${escapeHtml(shortCatLabel(d.cat))}</span><span class="popup-tag">${escapeHtml(d.product)}</span><span class="popup-tag">${d.year}</span><span class="popup-tag">${Math.round(d.revenue).toLocaleString('fr-FR')} €</span><span class="popup-tag">${escapeHtml(statusForCompany(d).label)}</span>${isWatch(d)?'<span class="popup-tag">⭐ Watchlist</span>':''}</div></div>
   <div class="popup-body"><div class="popup-grid"><div class="info-card"><div class="info-label">Owner</div><div class="info-value">${escapeHtml(ownerLabel(d))}</div></div><div class="info-card"><div class="info-label">Statut</div><div class="info-value">${statusBadgeHtmlForCompany(d)}</div></div></div>
   <form id="${prefix}EditForm">
     <div class="field-label">Entreprise</div><input id="${prefix}EditName" type="text" value="${escapeHtml(d.name)}">
@@ -3553,7 +4007,7 @@ function saveFloatingEditor(id){
 
 
 function getWatchYears(){ return []; }
-function getWatchBaseRows(){ return data.filter(d=>d.watch === true); }
+function getWatchBaseRows(){ return data.filter(d=>isWatch(d)); }
 function watchUniqueValues(field){
   const rows=getWatchBaseRows();
   const vals=rows.map(d=>field==='owner'?ownerLabel(d):d[field])
@@ -3657,18 +4111,20 @@ function renderWatchTable(){
     ${watchTh('Catégorie','cat',watchCheckboxFilterMenu('cat','Catégorie'))}
     ${watchTh('Produit','product',watchCheckboxFilterMenu('product','Produit'))}
     ${watchTh('Owner / BDR','owner',watchCheckboxFilterMenu('owner','Owner / BDR'))}
-  </tr></thead><tbody>${rows.map(d=>`<tr><td class="watch-year">${d.year}</td><td><b>${escapeHtml(d.name)}</b></td><td><span class="cat-dot" style="background:${colorForCategory(d.cat)}"></span> ${escapeHtml(shortCatLabel(d.cat))}</td><td>${escapeHtml(d.product)}</td><td>${escapeHtml(ownerLabel(d))}</td></tr>`).join('')}</tbody></table>` : '<p>Aucune entreprise cochée “À surveiller” pour le moment.</p>';
-  document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">⭐ A surveiller (${rows.length})</h2><div class="mini-note">Liste manuelle : coche/décoche la case "À surveiller" dans l’onglet 2 pour gérer cette liste.</div>${body}`;
+    <th>Statut</th><th>Source</th><th>Manuel</th>
+  </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" title="Cliquer pour modifier la fiche entreprise"><td class="watch-year">${d.year}</td><td><b>${escapeHtml(d.name)}</b></td><td><span class="cat-dot" style="background:${colorForCategory(d.cat)}"></span> ${escapeHtml(shortCatLabel(d.cat))}</td><td>${escapeHtml(d.product)}</td><td>${escapeHtml(ownerLabel(d))}</td><td>${statusBadgeHtmlForCompany(d)}</td><td><span class="watch-source-badge ${watchSourceClass(d)}">${escapeHtml(watchSourceLabel(d))}</span></td><td class="watch-check-cell"><button type="button" class="watch-star ${isWatch(d)?'':'off'}" data-watch-id="${d.id}" title="Basculer l'ajout/retrait manuel">${isWatch(d)?'★':'☆'}</button></td></tr>`).join('')}</tbody></table>` : '<p>Aucune entreprise dans la liste “À surveiller” pour le moment.</p>';
+  document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">⭐ A surveiller (${rows.length})</h2><div class="mini-note">Liste dynamique : statuts En cours / AO à confirmer / Docs à venir, ou années N-5 à N-2. Ton ajout ou retrait manuel prévaut toujours sur la règle par défaut. Clique sur une ligne pour modifier la fiche entreprise.</div>${body}`;
   bindWatchFilterEvents();
+  document.querySelectorAll('#watchModal tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>{ document.getElementById('watchModal').classList.remove('open'); switchTab('list'); selectCompany(tr.dataset.id); }));
+  document.querySelectorAll('#watchModal .watch-star').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); const d=data.find(x=>Number(x.id)===Number(btn.dataset.watchId)); toggleWatch(btn.dataset.watchId, !(d&&isWatch(d))); }));
 }
-
 function renderWatchList(){
   document.getElementById('watchModal').classList.add('open');
   renderWatchTable();
 }
 function exportConstData(){ const out='const data = '+JSON.stringify(data,null,2)+';\n'; downloadTextFile('const_data_AO_dashboard.js',out,'application/javascript;charset=utf-8'); document.getElementById('dataToolsStatus').textContent='Export const_data généré.'; }
 function csvEscape(v){ if(v==null)return''; const s=String(v); return /[";\n\r,]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
-function exportCsv(){ const rows=[CSV_HEADERS.join(';')].concat(data.map(d=>CSV_HEADERS.map(h=>csvEscape(d[h])).join(';'))); downloadTextFile('ao_dashboard_data.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8'); document.getElementById('dataToolsStatus').textContent='Export CSV généré.'; }
+function exportCsv(){ const rows=[CSV_HEADERS.join(';')].concat(data.map(d=>CSV_HEADERS.map(h=>csvEscape(h==='watch'?isWatch(d):(h==='watch_override'?(d.watchOverride===null||d.watchOverride===undefined?'':d.watchOverride):d[h]))).join(';'))); downloadTextFile('ao_dashboard_data.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8'); document.getElementById('dataToolsStatus').textContent='Export CSV généré.'; }
 function parseCsvLine(line,delimiter){ const out=[]; let cur='',q=false; for(let i=0;i<line.length;i++){const ch=line[i],nx=line[i+1]; if(ch==='"'&&q&&nx==='"'){cur+='"';i++;continue;} if(ch==='"'){q=!q;continue;} if(ch===delimiter&&!q){out.push(cur);cur='';continue;} cur+=ch;} out.push(cur); return out; }
 function importCsv(e){ const file=e.target.files&&e.target.files[0]; if(!file)return; file.text().then(text=>{ const clean=String(text||'').replace(/^\ufeff/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim(); if(!clean)return; const lines=clean.split('\n').filter(Boolean); const delim=lines[0].split(';').length>=lines[0].split(',').length?';':','; const headers=parseCsvLine(lines[0],delim).map(h=>h.trim()); const rows=lines.slice(1).map(line=>{const cells=parseCsvLine(line,delim),o={}; headers.forEach((h,i)=>o[h]=cells[i]??''); return normalizePoint(o);}); rows.forEach(row=>{ const idx=data.findIndex(d=>Number(d.id)===Number(row.id) || (d.name.toLowerCase()===row.name.toLowerCase()&&Number(d.year)===Number(row.year)&&d.product===row.product)); if(idx>=0)data[idx]={...data[idx],...row,id:data[idx].id}; else data.push({...row,id:nextDataId()}); }); renderOwners(); updateAll(); document.getElementById('dataToolsStatus').textContent='Import CSV terminé : '+rows.length+' ligne(s).'; e.target.value=''; }); }
 </script>
