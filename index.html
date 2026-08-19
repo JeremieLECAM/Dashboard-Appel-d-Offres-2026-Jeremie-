@@ -498,6 +498,18 @@
 #watchDetail{margin-top:12px;border:2px solid var(--orange);border-radius:14px;background:#fffaf5;padding:10px;box-shadow:0 10px 24px rgba(0,0,0,.12);} 
 #watchDetail h3{margin:0 0 8px;font-size:14px;}
 
+
+/* V29 - Watchlist side editor + click outside close + Gagne hidden by default */
+#watchModal.open{display:flex!important;align-items:center;justify-content:center;gap:14px;padding:18px;}
+#watchCard{position:static!important;top:auto!important;left:auto!important;transform:none!important;width:min(900px,62vw)!important;max-height:82vh!important;overflow:auto!important;background:#fff;border-radius:16px;padding:15px;box-shadow:var(--shadow);}
+#watchCard > button{display:none!important;}
+#watchSideEditor{display:none;width:min(390px,28vw);max-height:82vh;overflow:auto;background:#fff;border:2px solid var(--orange);border-radius:16px;padding:12px;box-shadow:0 18px 42px rgba(0,0,0,.28);font-size:10px;}
+#watchSideEditor.open{display:block;}
+#watchSideEditor h3{margin:0 0 8px;font-size:14px;line-height:1.25;}
+#watchSideEditor .editor-actions{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(255,255,255,.88),#fff 36%);padding-top:9px;}
+#watchDetail{display:none!important;}
+@media(max-width:1150px){#watchModal.open{align-items:flex-start;overflow:auto;}#watchCard{width:92vw!important;}#watchSideEditor{position:fixed;right:12px;top:58px;width:min(370px,88vw);max-height:76vh;z-index:20010;}}
+
 </style>
 </head>
 <body onload="loadPlotly()">
@@ -3160,7 +3172,8 @@ function selectedDashboardStatusValues(){
   if(dashboardKpiFilters.has('status-en-cours')) out.push('En cours');  
   if(dashboardKpiFilters.has('status-ao-confirm')) out.push('AO à confirmer');  
   if(dashboardKpiFilters.has('status-docs')) out.push('Docs à venir');  
-  if(dashboardKpiFilters.has('status-perdu')) out.push('Perdu');  
+  if(dashboardKpiFilters.has('status-perdu')) out.push('Perdu');
+  if(dashboardKpiFilters.has('status-gagne')) out.push('Gagné');  
   if(dashboardKpiFilters.has('status-empty')) out.push('Sans statut');  
   return out;  
 }  
@@ -3260,6 +3273,14 @@ function statusBorderColor(d){ return statusForCompany(d).outline || 'rgba(0,0,0
 function statusBorderWidth(d){ return statusForCompany(d).label === 'Sans statut' ? 0 : 4; }
 function statusFromNotes(notes){ return statusMeta(inferStatusFromNotes(notes)); }
 function statusForCompany(d){ return statusMeta(d && d.status ? d.status : inferStatusFromNotes(d && d.notes)); }
+function isWonCompany(d){ return statusForCompany(d).label === 'Gagné'; }
+function shouldIncludeWonRows(){
+  return dashboardKpiFilters.has('status-gagne') || (Array.isArray(tableFilters.status) && tableFilters.status.includes('Gagné'));
+}
+function excludeWonUnlessSelected(rows){
+  return shouldIncludeWonRows() ? rows : rows.filter(d=>!isWonCompany(d));
+}
+
 function statusBadgeHtml(notes){ const st=statusFromNotes(notes); return `<span class="status-chip ${st.cls}">${statusLabelContent(st)}</span>`; }
 function statusBadgeHtmlForCompany(d){ const st=statusForCompany(d); return `<span class="status-chip ${st.cls}">${statusLabelContent(st)}</span>`; }
 function statusSelectHtml(id, selected){
@@ -3434,7 +3455,8 @@ function resizeChart(){ if(window.Plotly) try{Plotly.Plots.resize('chart');}catc
 function getFilterState(){ const q=document.getElementById('search').value.trim().toLowerCase(); const cats=[...document.querySelectorAll('.f-cat:checked')].map(e=>e.value); const prods=[...document.querySelectorAll('.f-prod:checked')].map(e=>e.value); const owners=[...document.querySelectorAll('.f-owner:checked')].map(e=>e.value); let yMin=parseInt(document.getElementById('yearMin').value,10), yMax=parseInt(document.getElementById('yearMax').value,10); if(Number.isNaN(yMin)) yMin=Math.min(...years); if(Number.isNaN(yMax)) yMax=Math.max(...years); if(yMin>yMax){const t=yMin;yMin=yMax;yMax=t;} return {q,cats,prods,owners,yMin,yMax}; }
 function filteredData(){ 
   const f=getFilterState(); 
-  let rows=data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && ownerFilterPass(d, f.owners) && d.year>=f.yMin && d.year<=f.yMax); 
+  let rows=data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && ownerFilterPass(d, f.owners) && d.year>=f.yMin && d.year<=f.yMax);
+  rows = excludeWonUnlessSelected(rows); 
   const activeCats = selectedDashboardCategoryValues(); 
   const activeStatuses = selectedDashboardStatusValues(); 
   const activeYears = selectedDashboardYears(); 
@@ -3444,7 +3466,7 @@ function filteredData(){
   if(dashboardKpiFilters.has('watch')) rows=rows.filter(d=>isWatch(d)); 
   return rows; 
 }  
-function baseFilteredDataForTable(){ const f=getFilterState(); return data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && ownerFilterPass(d, f.owners) && d.year>=f.yMin && d.year<=f.yMax); }
+function baseFilteredDataForTable(){ const f=getFilterState(); return excludeWonUnlessSelected(data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && ownerFilterPass(d, f.owners) && d.year>=f.yMin && d.year<=f.yMax)); }
 function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.flatMap(ownerNames))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); updateFilterCounters(); }
 
 function statusTimelineSourceRows(){  
@@ -4014,7 +4036,7 @@ function saveFloatingEditor(id){
 
 
 function getWatchYears(){ return []; }
-function getWatchBaseRows(){ return data.filter(d=>isWatch(d)); }
+function getWatchBaseRows(){ return excludeWonUnlessSelected(data.filter(d=>isWatch(d))); }
 function watchUniqueValues(field){
   const rows=getWatchBaseRows();
   const vals=rows.map(d=>field==='owner'?ownerLabel(d):d[field])
@@ -4112,10 +4134,12 @@ function bindWatchFilterEvents(){
 }
 
 function renderWatchCompanyPanel(){
-  const holder=document.getElementById('watchDetail'); if(!holder) return;
+  const holder=document.getElementById('watchSideEditor') || document.getElementById('watchDetail');
+  if(!holder) return;
   const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));
-  if(!d){ holder.innerHTML='<div class="mini-note">Clique sur une entreprise de la liste pour ouvrir sa fiche ici, sans fermer la vue A surveiller.</div>'; return; }
+  if(!d){ holder.classList.remove('open'); holder.innerHTML=''; return; }
   const prefix='watch'; const productGroup=`${prefix}EditProductChoice`; const ownerGroup=`${prefix}EditOwnerChoice`;
+  holder.classList.add('open');
   holder.innerHTML=`<h3>Fiche entreprise<br><span style="font-weight:600;color:#444">${escapeHtml(d.name)}</span></h3><form id="${prefix}EditForm"><div class="field-label">Entreprise</div><input id="${prefix}EditName" type="text" value="${escapeHtml(d.name)}"><div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div><div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching'], d.product)}<div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='SBF 120'?'selected':''}>SBF 120</option><option ${d.cat==='Entreprise privée hors CAC 40/SBF 120'?'selected':''}>Entreprise privée hors CAC 40/SBF 120</option><option ${d.cat==='Public / Semi-Public'?'selected':''}>Public / Semi-Public</option><option ${d.cat==='Écoles'?'selected':''}>Écoles</option></select><div class="field-label">Owner / BDR</div>${ownerMultiSelectorHtml(ownerGroup, ownerLabel(d))}<div class="field-label">Statut</div>${statusSelectHtml(`${prefix}EditStatus`, d.status || inferStatusFromNotes(d.notes))}<div class="field-label">Notes</div><textarea id="${prefix}EditNotes">${escapeHtml(d.notes||'')}</textarea><div class="editor-actions"><button type="submit" class="editor-save">Enregistrer</button><button type="button" id="${prefix}EditClose" class="editor-close">Fermer la fiche</button></div></form>`;
   bindSingleCheckboxGroups(holder); bindOwnerMultiSelectors(holder);
   document.getElementById(`${prefix}EditForm`).onsubmit=e=>{e.preventDefault(); saveWatchEditor(d.id);};
@@ -4137,13 +4161,32 @@ function renderWatchTable(){
     ${watchTh('Owner / BDR','owner',watchCheckboxFilterMenu('owner','Owner / BDR'))}
     <th>Statut</th><th>Source</th><th>Manuel</th>
   </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" title="Cliquer pour modifier la fiche entreprise"><td class="watch-year">${d.year}</td><td><b>${escapeHtml(d.name)}</b></td><td><span class="cat-dot" style="background:${colorForCategory(d.cat)}"></span> ${escapeHtml(shortCatLabel(d.cat))}</td><td>${escapeHtml(d.product)}</td><td>${escapeHtml(ownerLabel(d))}</td><td>${statusBadgeHtmlForCompany(d)}</td><td><span class="watch-source-badge ${watchSourceClass(d)}">${escapeHtml(watchSourceLabel(d))}</span></td><td class="watch-check-cell"><button type="button" class="watch-star ${isWatch(d)?'':'off'}" data-watch-id="${d.id}" title="Basculer l'ajout/retrait manuel">${isWatch(d)?'★':'☆'}</button></td></tr>`).join('')}</tbody></table>` : '<p>Aucune entreprise dans la liste “À surveiller” pour le moment.</p>';
-  document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">⭐ A surveiller (${rows.length})</h2><div class="mini-note">Liste dynamique : statuts En cours / AO à confirmer / Docs à venir, ou années N-5 à N-2. Ton ajout ou retrait manuel prévaut toujours sur la règle par défaut. Clique sur une ligne pour modifier la fiche entreprise.</div>${body}<div id="watchDetail"><div class="mini-note">Clique sur une entreprise de la liste pour ouvrir sa fiche ici, sans fermer la vue A surveiller.</div></div>`;
+  document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">⭐ A surveiller (${rows.length})</h2><div class="mini-note">Liste dynamique : statuts En cours / AO à confirmer / Docs à venir, ou années N-5 à N-2. Ton ajout ou retrait manuel prévaut toujours sur la règle par défaut. Clique sur une ligne pour modifier la fiche entreprise.</div>${body}`;
   bindWatchFilterEvents();
   document.querySelectorAll('#watchModal tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>{ selectedCompanyId=Number(tr.dataset.id); renderList(); renderCompanyTable(); renderWatchCompanyPanel(); }));
   document.querySelectorAll('#watchModal .watch-star').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); const d=data.find(x=>Number(x.id)===Number(btn.dataset.watchId)); toggleWatch(btn.dataset.watchId, !(d&&isWatch(d))); }));
 }
+function closeWatchModal(){
+  const modal=document.getElementById('watchModal');
+  const side=document.getElementById('watchSideEditor');
+  if(modal) modal.classList.remove('open');
+  if(side){ side.classList.remove('open'); side.innerHTML=''; }
+}
+function bindWatchModalClose(){
+  const modal=document.getElementById('watchModal');
+  const card=document.getElementById('watchCard');
+  const side=document.getElementById('watchSideEditor');
+  if(!modal || modal.dataset.closeBound==='1') return;
+  modal.dataset.closeBound='1';
+  modal.addEventListener('click',e=>{ if(e.target===modal) closeWatchModal(); });
+  card && card.addEventListener('click',e=>e.stopPropagation());
+  side && side.addEventListener('click',e=>e.stopPropagation());
+}
 function renderWatchList(){
-  document.getElementById('watchModal').classList.add('open');
+  const modal=document.getElementById('watchModal');
+  if(!modal) return;
+  modal.classList.add('open');
+  bindWatchModalClose();
   renderWatchTable();
   renderWatchCompanyPanel();
 }
@@ -4154,5 +4197,5 @@ function parseCsvLine(line,delimiter){ const out=[]; let cur='',q=false; for(let
 function importCsv(e){ const file=e.target.files&&e.target.files[0]; if(!file)return; file.text().then(text=>{ const clean=String(text||'').replace(/^\ufeff/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim(); if(!clean)return; const lines=clean.split('\n').filter(Boolean); const delim=lines[0].split(';').length>=lines[0].split(',').length?';':','; const headers=parseCsvLine(lines[0],delim).map(h=>h.trim()); const rows=lines.slice(1).map(line=>{const cells=parseCsvLine(line,delim),o={}; headers.forEach((h,i)=>o[h]=cells[i]??''); return normalizePoint(o);}); rows.forEach(row=>{ const idx=data.findIndex(d=>Number(d.id)===Number(row.id) || (d.name.toLowerCase()===row.name.toLowerCase()&&Number(d.year)===Number(row.year)&&d.product===row.product)); if(idx>=0)data[idx]={...data[idx],...row,id:data[idx].id}; else data.push({...row,id:nextDataId()}); }); renderOwners(); updateAll(); document.getElementById('dataToolsStatus').textContent='Import CSV terminé : '+rows.length+' ligne(s).'; e.target.value=''; }); }
 </script>
 <div id="floatingCompanyPopup" class="floating-company-popup"></div>
-<div id="watchModal"><div id="watchCard"><button onclick="document.getElementById('watchModal').classList.remove('open')">Fermer</button><div id="watchContent"></div></div></div></body>
+<div id="watchModal"><div id="watchCard"><div id="watchContent"></div></div><div id="watchSideEditor"></div></div></body>
 </html>
