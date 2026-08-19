@@ -340,7 +340,7 @@
 .summary-pill.status-progress-pill{border-color:#FF9800!important;background:#FFF3E0!important;color:#8A4B00!important;}
 .summary-pill.status-confirm-pill{border-color:#FFD400!important;background:#FFF9C4!important;color:#5F4B00!important;}
 .summary-pill.status-docs-pill{border-color:#FF1493!important;background:#FFE3F4!important;color:#8A0050!important;}
-.summary-pill.status-lost-pill{border-color:#000!important;background:#000!important;color:#fff!important;}
+.summary-pill.status-lost-pill{border-color:#000!important;background:#fff!important;color:#000!important;}
 .summary-pill.status-empty-pill{border-color:#d8d8d8!important;background:#fff!important;color:#555!important;}
 .status-progress{background:#FFF3E0!important;border-color:#FF9800!important;color:#8A4B00!important;}
 .status-toconfirm{background:#FFF9C4!important;border-color:#FFD400!important;color:#5F4B00!important;}
@@ -3163,6 +3163,11 @@ function toggleDashboardTimelineSegment(year,statusLabel){
   dashboardKpiFilter = dashboardKpiFilters.size === 1 ? [...dashboardKpiFilters][0] : null;
   syncDashboardButtonFiltersToTable();
 }
+function syncTableFiltersToDashboard(){
+  if(Array.isArray(tableFilters.cat)){dashboardCategoryFilters.clear();Object.entries(DASHBOARD_CATEGORY_TABLE_PRESETS).forEach(([k,v])=>{if(v.some(x=>tableFilters.cat.includes(x))) dashboardCategoryFilters.add(k);});}
+  if(Array.isArray(tableFilters.status)){dashboardKpiFilters.clear();const map={'En cours':'status-en-cours','AO à confirmer':'status-ao-confirm','Docs à venir':'status-docs','Perdu':'status-perdu','Gagné':'status-gagne','Sans statut':'status-empty'};tableFilters.status.forEach(st=>{if(map[st]) dashboardKpiFilters.add(map[st]);});}
+  if(Array.isArray(tableFilters.year)){dashboardYearFilters=new Set(tableFilters.year.map(Number));}
+}
 function selectedDashboardCategoryValues(){  
   const map = DASHBOARD_CATEGORY_TABLE_PRESETS;  
   return [...dashboardCategoryFilters].flatMap(k => map[k] || []);  
@@ -3444,7 +3449,7 @@ function switchTab(tab){
   document.getElementById('tabListBtn').classList.toggle('active',list);
   if(list){
     closeFloatingCompanyPopup();
-    renderCompanyTable();
+    syncTableFiltersToDashboard(); renderCompanyTable();
     renderEditors();
   } else if(selectedCompanyId != null){
     renderDashboardFloatingPopup();
@@ -3510,7 +3515,7 @@ function renderStatusTimeline(){
   body.querySelectorAll('.timeline-year').forEach(el=>el.addEventListener('click',()=>{ toggleDashboardYearFilter(el.dataset.timelineYear); updateAll(); }));
   body.querySelectorAll('.timeline-segment').forEach(el=>el.addEventListener('click',()=>{ toggleDashboardTimelineSegment(el.dataset.timelineYear, el.dataset.timelineStatus); updateAll(); }));
 }
-function updateAll(){ normalizeAllData(); renderList(); renderCompanyTable(); renderEditors(); updateCockpitMetrics(); updateFilterCounters(); updateChart(); renderStatusTimeline(); saveData(); }
+function updateAll(){ normalizeAllData(); renderList(); syncTableFiltersToDashboard(); renderCompanyTable(); renderEditors(); updateCockpitMetrics(); updateFilterCounters(); updateChart(); renderStatusTimeline(); saveData(); }
 function renderList(){
   const pts=filteredData().sort((a,b)=>a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));
   document.getElementById('list').innerHTML=pts.map(d=>`<div class="item ${Number(d.id)===Number(selectedCompanyId)?'selected':''}" data-id="${d.id}"><div class="item-main">${categoryIcon(d.cat)}<span class="item-name">${escapeHtml(d.name)}</span>${isWatch(d)?' <span title="À surveiller">⭐</span>':''}</div><div class="item-meta">${escapeHtml(d.product)} • ${d.year}<br>👤 ${escapeHtml(ownerLabel(d))} &nbsp; ${statusBadgeHtmlForCompany(d)}</div></div>`).join('');
@@ -3614,18 +3619,18 @@ function bindTableFilterEvents(){
   document.querySelectorAll('[data-sort]').forEach(btn=>btn.addEventListener('click',()=>{
     tableSort={col:btn.dataset.sort,dir:btn.dataset.dir};
     window.__lastOpenFilter = btn.closest('.filter-menu')?.id?.replace('filter-','') || null;
-    renderCompanyTable();
+    syncTableFiltersToDashboard(); renderCompanyTable();
   }));
   document.querySelectorAll('[data-apply-text]').forEach(btn=>btn.addEventListener('click',()=>{
     const col=btn.dataset.applyText;
     tableFilters[col]={op:document.getElementById(col+'FilterOp').value,value:document.getElementById(col+'FilterValue').value};
     window.__lastOpenFilter = col;
-    renderCompanyTable();
+    syncTableFiltersToDashboard(); renderCompanyTable();
   }));
   function applyCheckboxColumn(col){
     tableFilters[col]=[...document.querySelectorAll(`.tf-check[data-col="${col}"]:checked`)].map(cb=>cb.value);
     window.__lastOpenFilter = col;
-    renderCompanyTable();
+    syncTableFiltersToDashboard(); renderCompanyTable();
   }
   document.querySelectorAll('[data-select-all]').forEach(btn=>btn.addEventListener('click',()=>{
     const col=btn.dataset.selectAll;
@@ -3649,7 +3654,7 @@ function bindTableFilterEvents(){
     else if(['year','product','cat','owner','status','watch'].includes(col)) tableFilters[col]=null;
     if(col==='revenue'||(tableSort&&tableSort.col===col)) tableSort={col:'name',dir:'asc'};
     window.__lastOpenFilter = col;
-    renderCompanyTable();
+    syncTableFiltersToDashboard(); renderCompanyTable();
   }));
 }
 function getEditorOwners(currentOwner){
@@ -3714,7 +3719,7 @@ function renderCompanyTable(){
 }
 function highlightCompanyFromList(id){ hoveredCompanyId = Number(id); updateChart(); }
 function clearCompanyHighlight(){ hoveredCompanyId = null; updateChart(); }
-function toggleWatch(id, checked){ const d=data.find(x=>Number(x.id)===Number(id)); if(!d) return; d.watchOverride=!!checked; d.watch_override=d.watchOverride; saveData(); renderCompanyTable(); renderList(); updateCockpitMetrics(); updateChart(); if(document.getElementById('watchModal')?.classList.contains('open')) renderWatchTable(); }
+function toggleWatch(id, checked){ const d=data.find(x=>Number(x.id)===Number(id)); if(!d) return; d.watchOverride=!!checked; d.watch_override=d.watchOverride; saveData(); syncTableFiltersToDashboard(); renderCompanyTable(); renderList(); updateCockpitMetrics(); updateChart(); if(document.getElementById('watchModal')?.classList.contains('open')) renderWatchTable(); }
 function updateChart(){
   if(!window.Plotly || !plotlyReady) return;
   const pts=filteredData();
@@ -3882,14 +3887,14 @@ function selectCompany(id){
   if(selectedCompanyId===id){
     selectedCompanyId=null;
     renderList();
-    renderCompanyTable();
+    syncTableFiltersToDashboard(); renderCompanyTable();
     closeFloatingCompanyPopup();
     renderEditors();
     return;
   }
   selectedCompanyId=id;
   renderList();
-  renderCompanyTable();
+  syncTableFiltersToDashboard(); renderCompanyTable();
   if(isDashboardActive()){
     // Important V11 : ouverture du popup sans toucher à Plotly, donc le graphique ne se déforme plus.
     renderDashboardFloatingPopup();
@@ -3922,7 +3927,7 @@ function renderEditor(containerId,prefix){
   bindSingleCheckboxGroups(box);
   bindOwnerMultiSelectors(box);
   document.getElementById(`${prefix}EditForm`).onsubmit=e=>{e.preventDefault(); saveEditor(prefix,d.id);};
-  document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderList();renderCompanyTable();renderEditors();};
+  document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderList();syncTableFiltersToDashboard(); renderCompanyTable();renderEditors();};
 }
 function saveEditor(prefix,id){
   const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return;
@@ -4007,7 +4012,7 @@ function renderDashboardFloatingPopup(){
   bindSingleCheckboxGroups(popup);
   bindOwnerMultiSelectors(popup);
   document.getElementById(`${prefix}EditForm`).onsubmit=e=>{e.preventDefault(); saveFloatingEditor(d.id);};
-  document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderList();renderCompanyTable();closeFloatingCompanyPopup();};
+  document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderList();syncTableFiltersToDashboard(); renderCompanyTable();closeFloatingCompanyPopup();};
   syncFloatingPopupPosition();
 }
 function saveFloatingEditor(id){  
@@ -4029,7 +4034,7 @@ function saveFloatingEditor(id){
   updateAll();  
   selectedCompanyId=null;  
   renderList();  
-  renderCompanyTable();  
+  syncTableFiltersToDashboard(); renderCompanyTable();  
   closeFloatingCompanyPopup();  
   updateChart();  
 }
@@ -4143,7 +4148,7 @@ function renderWatchCompanyPanel(){
   holder.innerHTML=`<h3>Fiche entreprise<br><span style="font-weight:600;color:#444">${escapeHtml(d.name)}</span></h3><form id="${prefix}EditForm"><div class="field-label">Entreprise</div><input id="${prefix}EditName" type="text" value="${escapeHtml(d.name)}"><div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div><div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching'], d.product)}<div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='SBF 120'?'selected':''}>SBF 120</option><option ${d.cat==='Entreprise privée hors CAC 40/SBF 120'?'selected':''}>Entreprise privée hors CAC 40/SBF 120</option><option ${d.cat==='Public / Semi-Public'?'selected':''}>Public / Semi-Public</option><option ${d.cat==='Écoles'?'selected':''}>Écoles</option></select><div class="field-label">Owner / BDR</div>${ownerMultiSelectorHtml(ownerGroup, ownerLabel(d))}<div class="field-label">Statut</div>${statusSelectHtml(`${prefix}EditStatus`, d.status || inferStatusFromNotes(d.notes))}<div class="field-label">Notes</div><textarea id="${prefix}EditNotes">${escapeHtml(d.notes||'')}</textarea><div class="editor-actions"><button type="submit" class="editor-save">Enregistrer</button><button type="button" id="${prefix}EditClose" class="editor-close">Fermer la fiche</button></div></form>`;
   bindSingleCheckboxGroups(holder); bindOwnerMultiSelectors(holder);
   document.getElementById(`${prefix}EditForm`).onsubmit=e=>{e.preventDefault(); saveWatchEditor(d.id);};
-  document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderWatchCompanyPanel();renderList();renderCompanyTable();};
+  document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderWatchCompanyPanel();renderList();syncTableFiltersToDashboard(); renderCompanyTable();};
 }
 function saveWatchEditor(id){
   const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return; const prefix='watch';
@@ -4163,7 +4168,7 @@ function renderWatchTable(){
   </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" title="Cliquer pour modifier la fiche entreprise"><td class="watch-year">${d.year}</td><td><b>${escapeHtml(d.name)}</b></td><td><span class="cat-dot" style="background:${colorForCategory(d.cat)}"></span> ${escapeHtml(shortCatLabel(d.cat))}</td><td>${escapeHtml(d.product)}</td><td>${escapeHtml(ownerLabel(d))}</td><td>${statusBadgeHtmlForCompany(d)}</td><td><span class="watch-source-badge ${watchSourceClass(d)}">${escapeHtml(watchSourceLabel(d))}</span></td><td class="watch-check-cell"><button type="button" class="watch-star ${isWatch(d)?'':'off'}" data-watch-id="${d.id}" title="Basculer l'ajout/retrait manuel">${isWatch(d)?'★':'☆'}</button></td></tr>`).join('')}</tbody></table>` : '<p>Aucune entreprise dans la liste “À surveiller” pour le moment.</p>';
   document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">⭐ A surveiller (${rows.length})</h2><div class="mini-note">Liste dynamique : statuts En cours / AO à confirmer / Docs à venir, ou années N-5 à N-2. Ton ajout ou retrait manuel prévaut toujours sur la règle par défaut. Clique sur une ligne pour modifier la fiche entreprise.</div>${body}`;
   bindWatchFilterEvents();
-  document.querySelectorAll('#watchModal tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>{ selectedCompanyId=Number(tr.dataset.id); renderList(); renderCompanyTable(); renderWatchCompanyPanel(); }));
+  document.querySelectorAll('#watchModal tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>{ selectedCompanyId=Number(tr.dataset.id); renderList(); syncTableFiltersToDashboard(); renderCompanyTable(); renderWatchCompanyPanel(); }));
   document.querySelectorAll('#watchModal .watch-star').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); const d=data.find(x=>Number(x.id)===Number(btn.dataset.watchId)); toggleWatch(btn.dataset.watchId, !(d&&isWatch(d))); }));
 }
 function closeWatchModal(){
