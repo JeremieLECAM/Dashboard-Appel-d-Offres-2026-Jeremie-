@@ -482,6 +482,22 @@
 .watch-table tr[data-id]{cursor:pointer;}
 .watch-table tr[data-id]:hover{background:#fff6ee;}
 @media(max-width:1150px){.dashboard-grid{grid-template-columns:200px 1fr!important;}}
+
+/* V28 - Statut Gagne + owner multi-select + detail A surveiller */
+.status-won{background:#E9FFE9!important;border-color:#39FF14!important;color:#006B00!important;}
+.summary-pill.status-won-pill{border-color:#39FF14!important;background:#E9FFE9!important;color:#006B00!important;}
+#portfolioSummary .summary-pill.status-won-pill.active{background:#39FF14!important;border-color:#39FF14!important;color:#000!important;box-shadow:0 0 0 2px rgba(57,255,20,.25),0 4px 12px rgba(57,255,20,.25)!important;}
+.filter-menu label.status-filter-choice.status-won{background:#E9FFE9!important;border-color:#39FF14!important;color:#006B00!important;}
+.timeline-segment.status-won{background:#39FF14!important;color:#000!important;}
+.owner-picker{border:1px solid #ddd;border-radius:10px;padding:7px;background:#fff;}
+.owner-picker-search{margin-bottom:6px!important;}
+.owner-picker-list{max-height:130px;overflow:auto;border:1px solid #eee;border-radius:9px;padding:5px;background:#fafafa;}
+.owner-picker-list label{display:block;font-size:10px;margin:3px 0;color:#000;}
+.owner-picker-create{width:100%;border:1px solid #000;background:#fff;color:#000;border-radius:8px;padding:5px 6px;font-size:9px;font-weight:800;cursor:pointer;margin-top:6px;}
+.owner-picker-limit{font-size:9px;color:#666;font-weight:800;margin-top:5px;line-height:1.2;}
+#watchDetail{margin-top:12px;border:2px solid var(--orange);border-radius:14px;background:#fffaf5;padding:10px;box-shadow:0 10px 24px rgba(0,0,0,.12);} 
+#watchDetail h3{margin:0 0 8px;font-size:14px;}
+
 </style>
 </head>
 <body onload="loadPlotly()">
@@ -508,8 +524,8 @@
               </div>
               <div class="field-label">Produit</div><select id="newCompanyProduct"><option>Langues</option><option>Coaching</option></select>
               <div class="field-label">Catégorie</div><select id="newCompanyCat"><option>CAC 40</option><option>SBF 120</option><option>Entreprise privée hors CAC 40/SBF 120</option><option>Public / Semi-Public</option><option>Écoles</option></select>
-              <div class="field-label">Owner / BDR</div><input id="newCompanyOwner" type="text" placeholder="Ex: Jérémie Lecamus" />
-              <div class="field-label">Statut</div><select id="newCompanyStatusManual"><option>En cours</option><option>Perdu</option><option>AO à confirmer</option><option>Docs à venir</option><option>Sans statut</option></select>
+              <div class="field-label">Owner / BDR</div><div id="newCompanyOwnerSelector"></div>
+              <div class="field-label">Statut</div><select id="newCompanyStatusManual"><option>En cours</option><option>Perdu</option><option>Gagné</option><option>AO à confirmer</option><option>Docs à venir</option><option>Sans statut</option></select>
               <div class="field-label">Notes</div><textarea id="newCompanyNotes" placeholder="Notes libres sur l’entreprise…"></textarea>
               <button class="btn" type="submit">Ajouter au dashboard</button>
               <div id="newCompanyStatus" class="mini-note">L’ajout est immédiat. Utilise ensuite export CSV ou const_data pour conserver/partager.</div>
@@ -3066,12 +3082,13 @@ function removeDeletedCompaniesAndReindex(rows){
 
 const CAT_COLORS = {"CAC 40": "#E53935", "SBF 120": "#8E24AA", "Entreprise privée hors CAC 40/SBF 120": "#1E88E5", "Public / Semi-Public": "#43A047", "Écoles": "#00A6A6"}; // couleurs métier mises à jour depuis classification_entreprises_AO.xlsx
 const CAT_ORDER = ["Public / Semi-Public", "Écoles", "SBF 120", "CAC 40", "Entreprise privée hors CAC 40/SBF 120"];
-const STATUS_OPTIONS = ['En cours','Perdu','AO à confirmer','Docs à venir','Sans statut']; // Source unique des statuts affichés dans l'onglet 1 et l'onglet 2
+const STATUS_OPTIONS = ['En cours','AO à confirmer','Docs à venir','Perdu','Gagné','Sans statut']; // Source unique des statuts affichés dans l'onglet 1 et l'onglet 2
 const DASHBOARD_KPI_TABLE_PRESETS = {
   'status-en-cours': {col:'status', values:['En cours']},
   'status-ao-confirm': {col:'status', values:['AO à confirmer']},
   'status-docs': {col:'status', values:['Docs à venir']},
   'status-perdu': {col:'status', values:['Perdu']},
+  'status-gagne': {col:'status', values:['Gagné']},
   'status-empty': {col:'status', values:['Sans statut']},
   'watch': {col:'watch', values:['OUI']}
 };
@@ -3102,6 +3119,7 @@ function toggleDashboardTimelineStatusFilter(statusLabel){
     'AO à confirmer':'status-ao-confirm',
     'Docs à venir':'status-docs',
     'Perdu':'status-perdu',
+    'Gagné':'status-gagne',
     'Sans statut':'status-empty'
   };
   const key = map[normalizeStatusLabel(statusLabel)];
@@ -3116,6 +3134,7 @@ function toggleDashboardTimelineSegment(year,statusLabel){
     'AO à confirmer':'status-ao-confirm',
     'Docs à venir':'status-docs',
     'Perdu':'status-perdu',
+    'Gagné':'status-gagne',
     'Sans statut':'status-empty'
   };
   const key = map[normalizeStatusLabel(statusLabel)];
@@ -3196,7 +3215,13 @@ function computeYFromRevenue(revenue, product){ const v = Number.isFinite(Number
 function colorForCategory(cat){ return CAT_COLORS[cat] || '#1E88E5'; }
 function shortCatLabel(cat){ const labels = {"CAC 40": "CAC40", "SBF 120": "SBF120", "Entreprise privée hors CAC 40/SBF 120": "Privé hors CAC/SBF", "Public / Semi-Public": "Public / semi-public", "Écoles": "Écoles"}; return labels[cat] || cat; }
 
-function ownerLabel(d){ return d && d.owner && String(d.owner).trim() ? String(d.owner).trim() : 'Owner / BDR manquant'; }
+function splitOwners(value){ return String(value ?? '').split(/[;,]/).map(v=>v.trim()).filter(Boolean).slice(0,2); }
+function ownerNames(d){ if(!d || !d.owner || String(d.owner).trim()==='') return ['Owner / BDR manquant']; const owners=splitOwners(d.owner); return owners.length ? owners : ['Owner / BDR manquant']; }
+function ownerFilterPass(d, selectedOwners){ if(!Array.isArray(selectedOwners) || !selectedOwners.length) return true; const names=ownerNames(d); return selectedOwners.some(o=>names.includes(o)); }
+function ownerTableFilterPass(d){ const selected=tableFilters.owner; if(!Array.isArray(selected)) return true; return ownerFilterPass(d, selected); }
+
+
+function ownerLabel(d){ return ownerNames(d).join(', '); }
 function catBadge(cat){ return 'b-dynamic'; }  
 function catColor(cat){ return colorForCategory(cat); }
 function categoryIcon(cat){ return `<span class="cat-dot" style="background:${catColor(cat)}"></span>`; }
@@ -3205,10 +3230,12 @@ function normalizeStatusLabel(status){
   const n = normText(raw);
   if(raw === 'En cours') return 'En cours';
   if(raw === 'Perdu') return 'Perdu';
+  if(raw === 'Gagné') return 'Gagné';
   if(raw === 'AO à confirmer') return 'AO à confirmer';
   if(raw === 'Docs à venir') return 'Docs à venir';
   if(raw === 'Sans statut') return 'Sans statut';
   if(!raw || n === 'note' || n === 'sans statut') return 'Sans statut';
+  if(n.includes('gagne') || n.includes('gagné') || n.includes('won')) return 'Gagné';
   if(n.includes('perdu') || n.includes('lost')) return 'Perdu';
   if(n.includes('attente') || n.includes('cdc') || n.includes('cahier des charges') || n.includes('a venir') || n.includes('docs')) return 'Docs à venir';
   if(n.includes('a confirmer') || n.includes('confirme') || n.includes('q1') || n.includes('q2') || n.includes('q3') || n.includes('q4')) return 'AO à confirmer';
@@ -3221,6 +3248,7 @@ function statusMeta(status){
   const map = {
     'En cours': {cls:'status-progress', icon:'🟠', outline:'#FF9800'},
     'Perdu': {cls:'status-lost', icon:'⚫', outline:'#000000'},
+    'Gagné': {cls:'status-won', icon:'🟢', outline:'#39FF14'},
     'AO à confirmer': {cls:'status-toconfirm', icon:'🟡', outline:'#FFD400'},
     'Docs à venir': {cls:'status-waiting', icon:'💗', outline:'#FF1493'},
     'Sans statut': {cls:'status-empty', icon:'', outline:'rgba(0,0,0,0)'}
@@ -3301,7 +3329,7 @@ function updateCockpitMetrics(){
     <div class="kpi-card"><div class="kpi-value">${m.statusCounts['Docs à venir']}</div><div class="kpi-label">Docs à venir</div></div>`; }  
   const s=document.getElementById('portfolioSummary');  
   const noDashboardButtons = dashboardKpiFilters.size===0 && dashboardCategoryFilters.size===0 && dashboardYearFilters.size===0;  
-  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${noDashboardButtons?'active':''}" data-kpi="all">${m.total} AO</span><span class="summary-pill cat-pill cat-pill-cac kpi-filter ${dashboardCategoryFilters.has('cac')?'active':''}" data-cat="cac">${c.cac} CAC40</span><span class="summary-pill cat-pill cat-pill-sbf kpi-filter ${dashboardCategoryFilters.has('sbf')?'active':''}" data-cat="sbf">${c.sbf} SBF120</span><span class="summary-pill cat-pill cat-pill-priv kpi-filter ${dashboardCategoryFilters.has('priv')?'active':''}" data-cat="priv">${c.priv} Privé</span><span class="summary-pill cat-pill cat-pill-pub kpi-filter ${dashboardCategoryFilters.has('pub')?'active':''}" data-cat="pub">${c.pub} Public</span><span class="summary-pill cat-pill cat-pill-eco kpi-filter ${dashboardCategoryFilters.has('eco')?'active':''}" data-cat="eco">${c.eco} Écoles</span></div><div class="summary-secondary"><span class="summary-pill status-progress-pill kpi-filter ${dashboardKpiFilters.has('status-en-cours')?'active':''}" data-kpi="status-en-cours">${m.statusCounts['En cours']} En cours</span><span class="summary-pill status-confirm-pill kpi-filter ${dashboardKpiFilters.has('status-ao-confirm')?'active':''}" data-kpi="status-ao-confirm">${m.statusCounts['AO à confirmer']} AO à confirmer</span><span class="summary-pill status-docs-pill kpi-filter ${dashboardKpiFilters.has('status-docs')?'active':''}" data-kpi="status-docs">${m.statusCounts['Docs à venir']} Docs à venir</span><span class="summary-pill status-lost-pill kpi-filter ${dashboardKpiFilters.has('status-perdu')?'active':''}" data-kpi="status-perdu">${m.statusCounts['Perdu']} Perdu</span><span class="summary-pill status-empty-pill kpi-filter ${dashboardKpiFilters.has('status-empty')?'active':''}" data-kpi="status-empty">${m.statusCounts['Sans statut']} Sans statut</span><span class="summary-pill kpi-filter ${dashboardKpiFilters.has('watch')?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`; 
+  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${noDashboardButtons?'active':''}" data-kpi="all">${m.total} AO</span><span class="summary-pill cat-pill cat-pill-cac kpi-filter ${dashboardCategoryFilters.has('cac')?'active':''}" data-cat="cac">${c.cac} CAC40</span><span class="summary-pill cat-pill cat-pill-sbf kpi-filter ${dashboardCategoryFilters.has('sbf')?'active':''}" data-cat="sbf">${c.sbf} SBF120</span><span class="summary-pill cat-pill cat-pill-priv kpi-filter ${dashboardCategoryFilters.has('priv')?'active':''}" data-cat="priv">${c.priv} Privé</span><span class="summary-pill cat-pill cat-pill-pub kpi-filter ${dashboardCategoryFilters.has('pub')?'active':''}" data-cat="pub">${c.pub} Public</span><span class="summary-pill cat-pill cat-pill-eco kpi-filter ${dashboardCategoryFilters.has('eco')?'active':''}" data-cat="eco">${c.eco} Écoles</span></div><div class="summary-secondary"><span class="summary-pill status-progress-pill kpi-filter ${dashboardKpiFilters.has('status-en-cours')?'active':''}" data-kpi="status-en-cours">${m.statusCounts['En cours']} En cours</span><span class="summary-pill status-confirm-pill kpi-filter ${dashboardKpiFilters.has('status-ao-confirm')?'active':''}" data-kpi="status-ao-confirm">${m.statusCounts['AO à confirmer']} AO à confirmer</span><span class="summary-pill status-docs-pill kpi-filter ${dashboardKpiFilters.has('status-docs')?'active':''}" data-kpi="status-docs">${m.statusCounts['Docs à venir']} Docs à venir</span><span class="summary-pill status-lost-pill kpi-filter ${dashboardKpiFilters.has('status-perdu')?'active':''}" data-kpi="status-perdu">${m.statusCounts['Perdu']} Perdu</span><span class="summary-pill status-won-pill kpi-filter ${dashboardKpiFilters.has('status-gagne')?'active':''}" data-kpi="status-gagne">${m.statusCounts['Gagné']} Gagné</span><span class="summary-pill status-empty-pill kpi-filter ${dashboardKpiFilters.has('status-empty')?'active':''}" data-kpi="status-empty">${m.statusCounts['Sans statut']} Sans statut</span><span class="summary-pill kpi-filter ${dashboardKpiFilters.has('watch')?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`; 
     s.querySelectorAll('.kpi-filter[data-kpi]').forEach(btn=>btn.onclick=()=>{ toggleDashboardKpiFilter(btn.dataset.kpi); updateAll();}); 
     s.querySelectorAll('.kpi-filter[data-cat]').forEach(btn=>btn.onclick=()=>{ toggleDashboardCategoryFilter(btn.dataset.cat); updateAll();}); 
   }  
@@ -3367,6 +3395,7 @@ function initApp(){
 }
 function wireUI(){
   arrangeCockpit();
+  renderNewCompanyOwnerSelector();
   document.addEventListener('click', closeFilterMenus);
   document.querySelectorAll('.section-head').forEach(btn=>btn.addEventListener('click', e=>{ if(btn.id==='ownerToggle' || btn.id==='listToggle') return; const sec=btn.closest('.section'); const span=btn.querySelector('span:last-child'); const open=sec.classList.toggle('open'); if(span)span.textContent=open?'▼':'▶'; }));
   document.getElementById('tabDashboardBtn').onclick=()=>switchTab('dashboard'); document.getElementById('tabListBtn').onclick=()=>switchTab('list');
@@ -3405,7 +3434,7 @@ function resizeChart(){ if(window.Plotly) try{Plotly.Plots.resize('chart');}catc
 function getFilterState(){ const q=document.getElementById('search').value.trim().toLowerCase(); const cats=[...document.querySelectorAll('.f-cat:checked')].map(e=>e.value); const prods=[...document.querySelectorAll('.f-prod:checked')].map(e=>e.value); const owners=[...document.querySelectorAll('.f-owner:checked')].map(e=>e.value); let yMin=parseInt(document.getElementById('yearMin').value,10), yMax=parseInt(document.getElementById('yearMax').value,10); if(Number.isNaN(yMin)) yMin=Math.min(...years); if(Number.isNaN(yMax)) yMax=Math.max(...years); if(yMin>yMax){const t=yMin;yMin=yMax;yMax=t;} return {q,cats,prods,owners,yMin,yMax}; }
 function filteredData(){ 
   const f=getFilterState(); 
-  let rows=data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); 
+  let rows=data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && ownerFilterPass(d, f.owners) && d.year>=f.yMin && d.year<=f.yMax); 
   const activeCats = selectedDashboardCategoryValues(); 
   const activeStatuses = selectedDashboardStatusValues(); 
   const activeYears = selectedDashboardYears(); 
@@ -3415,8 +3444,8 @@ function filteredData(){
   if(dashboardKpiFilters.has('watch')) rows=rows.filter(d=>isWatch(d)); 
   return rows; 
 }  
-function baseFilteredDataForTable(){ const f=getFilterState(); return data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && f.owners.includes(ownerLabel(d)) && d.year>=f.yMin && d.year<=f.yMax); }
-function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.map(ownerLabel))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); updateFilterCounters(); }
+function baseFilteredDataForTable(){ const f=getFilterState(); return data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && ownerFilterPass(d, f.owners) && d.year>=f.yMin && d.year<=f.yMax); }
+function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.flatMap(ownerNames))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); updateFilterCounters(); }
 
 function statusTimelineSourceRows(){  
   let rows = baseFilteredDataForTable().filter(d => Number(d.year) >= 2021);  
@@ -3472,7 +3501,7 @@ function renderList(){
 }
 function normText(v){ return String(v ?? '').trim().toLowerCase(); }
 function uniqueSortedValues(field){
-  const vals = data.map(d => field === 'owner' ? ownerLabel(d) : field==='status' ? statusForCompany(d).label : field==='watch' ? (isWatch(d)?'OUI':'NON') : d[field])
+  const vals = (field === 'owner' ? data.flatMap(ownerNames) : data.map(d => field==='status' ? statusForCompany(d).label : field==='watch' ? (isWatch(d)?'OUI':'NON') : d[field]))
     .filter(v => v !== null && v !== undefined && String(v).trim() !== '')
     .map(v => String(v));
   return [...new Set(vals)].sort((a,b)=>{
@@ -3621,6 +3650,13 @@ function selectedGroupValue(groupName, fallback){
   const checked = document.querySelector(`input[name="${groupName}"]:checked`);
   return checked ? checked.value : fallback;
 }
+
+function getAllOwnerOptions(extra=[]){ const set=new Set(data.flatMap(ownerNames).filter(o=>o && o !== 'Owner / BDR manquant')); extra.forEach(o=>{ if(o && o !== 'Owner / BDR manquant') set.add(o); }); return [...set].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); }
+function ownerMultiSelectorHtml(name, selectedOwners=[]){ const selected=splitOwners(Array.isArray(selectedOwners)?selectedOwners.join(','):selectedOwners).filter(o=>o !== 'Owner / BDR manquant'); const owners=getAllOwnerOptions(selected); return `<div class="owner-picker" data-owner-picker="${name}"><input type="text" class="owner-picker-search" data-owner-search="${name}" placeholder="Rechercher ou créer un owner..."><div class="owner-picker-list">${owners.map(v=>`<label data-owner-option="${escapeHtml(v).toLowerCase()}"><input type="checkbox" name="${name}" value="${escapeHtml(v)}" ${selected.includes(v)?'checked':''}> ${escapeHtml(v)}</label>`).join('')}</div><button type="button" class="owner-picker-create" data-owner-create="${name}">Créer / ajouter le nom recherché</button><div class="owner-picker-limit">2 owners maximum par entreprise.</div></div>`; }
+function bindOwnerMultiSelectors(scope=document){ scope.querySelectorAll('[data-owner-picker]').forEach(picker=>{ const name=picker.dataset.ownerPicker; const search=picker.querySelector(`[data-owner-search="${name}"]`); const list=picker.querySelector('.owner-picker-list'); function enforce(changed){ const checked=[...picker.querySelectorAll(`input[name="${name}"]:checked`)]; if(checked.length>2){ changed.checked=false; } } function bindChecks(){ picker.querySelectorAll(`input[name="${name}"]`).forEach(cb=>cb.onchange=()=>enforce(cb)); } bindChecks(); if(search){ search.addEventListener('input',()=>{ const q=normText(search.value); picker.querySelectorAll('[data-owner-option]').forEach(label=>{ label.style.display=!q||normText(label.textContent).includes(q)?'block':'none'; }); }); } const create=picker.querySelector(`[data-owner-create="${name}"]`); if(create){ create.onclick=()=>{ const v=(search&&search.value?search.value:'').trim(); if(!v) return; let existing=[...picker.querySelectorAll(`input[name="${name}"]`)].find(cb=>normText(cb.value)===normText(v)); const checked=[...picker.querySelectorAll(`input[name="${name}"]:checked`)]; if(!existing){ const safe=escapeHtml(v); const label=document.createElement('label'); label.setAttribute('data-owner-option', normText(v)); label.innerHTML=`<input type="checkbox" name="${name}" value="${safe}"> ${safe}`; list.appendChild(label); existing=label.querySelector('input'); existing.onchange=()=>enforce(existing); } if(checked.length<2) existing.checked=true; search.value=''; picker.querySelectorAll('[data-owner-option]').forEach(label=>label.style.display='block'); }; } }); }
+function selectedOwnerValues(groupName, fallback){ const vals=[...document.querySelectorAll(`input[name="${groupName}"]:checked`)].map(cb=>cb.value.trim()).filter(Boolean).slice(0,2); if(vals.length) return vals.join(', '); return fallback && fallback !== 'Owner / BDR manquant' ? fallback : null; }
+function renderNewCompanyOwnerSelector(){ const el=document.getElementById('newCompanyOwnerSelector'); if(!el) return; el.innerHTML=ownerMultiSelectorHtml('newCompanyOwnerChoice', []); bindOwnerMultiSelectors(el); }
+
 function renderCompanyTable(){
   const wrap=document.getElementById('companyTableWrap'); if(!wrap) return;
   const q=(document.getElementById('companyTableSearch').value||'').trim().toLowerCase();
@@ -3631,7 +3667,7 @@ function renderCompanyTable(){
     .filter(d=>checkboxFilterPass(tableValueForColumn(d, 'year'), 'year'))
     .filter(d=>checkboxFilterPass(tableValueForColumn(d, 'product'), 'product'))
     .filter(d=>checkboxFilterPass(tableValueForColumn(d, 'cat'), 'cat'))
-    .filter(d=>checkboxFilterPass(tableValueForColumn(d, 'owner'), 'owner'))
+    .filter(d=>ownerTableFilterPass(d))
     .filter(d=>checkboxFilterPass(tableValueForColumn(d, 'watch'), 'watch'))
     .filter(d=>checkboxFilterPass(tableValueForColumn(d, 'status'), 'status'));
   rows=sortRows(rows);
@@ -3856,12 +3892,13 @@ function renderEditor(containerId,prefix){
     <div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div>
     <div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching'], d.product)}
     <div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='SBF 120'?'selected':''}>SBF 120</option><option ${d.cat==='Entreprise privée hors CAC 40/SBF 120'?'selected':''}>Entreprise privée hors CAC 40/SBF 120</option><option ${d.cat==='Public / Semi-Public'?'selected':''}>Public / Semi-Public</option><option ${d.cat==='Écoles'?'selected':''}>Écoles</option></select>
-    <div class="field-label">Owner / BDR</div>${singleCheckboxGroupHtml(ownerGroup, owners, ownerLabel(d))}
+    <div class="field-label">Owner / BDR</div>${ownerMultiSelectorHtml(ownerGroup, ownerLabel(d))}
     <div class="field-label">Statut</div>${statusSelectHtml(`${prefix}EditStatus`, d.status || inferStatusFromNotes(d.notes))}
     <div class="field-label">Notes</div><textarea id="${prefix}EditNotes">${escapeHtml(d.notes||'')}</textarea>
     <div class="editor-actions"><button type="submit" class="editor-save">Enregistrer</button><button type="button" id="${prefix}EditClose" class="editor-close">Fermer</button></div>
   </form>`;
   bindSingleCheckboxGroups(box);
+  bindOwnerMultiSelectors(box);
   document.getElementById(`${prefix}EditForm`).onsubmit=e=>{e.preventDefault(); saveEditor(prefix,d.id);};
   document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderList();renderCompanyTable();renderEditors();};
 }
@@ -3873,7 +3910,7 @@ function saveEditor(prefix,id){
   d.product=selectedGroupValue(`${prefix}EditProductChoice`, d.product);
   d.cat=document.getElementById(`${prefix}EditCat`).value;
   d.color=colorForCategory(d.cat);
-  d.owner=selectedGroupValue(`${prefix}EditOwnerChoice`, ownerLabel(d));
+  d.owner=selectedOwnerValues(`${prefix}EditOwnerChoice`, ownerLabel(d));
   if(d.owner === 'Owner / BDR manquant') d.owner = null;
   d.owner_missing=!d.owner;
   d.status=document.getElementById(`${prefix}EditStatus`).value;
@@ -3881,7 +3918,7 @@ function saveEditor(prefix,id){
   d.y=computeYFromRevenue(d.revenue,d.product);
   renderOwners(); updateAll(); selectCompany(d.id);
 }
-function addCompanyFromForm(e){ e.preventDefault(); const d=normalizePoint({id:nextDataId(),name:document.getElementById('newCompanyName').value,year:document.getElementById('newCompanyYear').value,revenue:document.getElementById('newCompanyRevenue').value,product:document.getElementById('newCompanyProduct').value,cat:document.getElementById('newCompanyCat').value,owner:document.getElementById('newCompanyOwner').value,status:document.getElementById('newCompanyStatusManual').value,notes:document.getElementById('newCompanyNotes').value}); if(!d.name)return; data.push(d); e.target.reset(); document.getElementById('newCompanyYear').value=new Date().getFullYear(); document.getElementById('newCompanyStatusManual').value='Sans statut'; document.getElementById('newCompanyStatus').textContent='Entreprise ajoutée : '+d.name; renderOwners(); updateAll(); selectCompany(d.id); }
+function addCompanyFromForm(e){ e.preventDefault(); const d=normalizePoint({id:nextDataId(),name:document.getElementById('newCompanyName').value,year:document.getElementById('newCompanyYear').value,revenue:document.getElementById('newCompanyRevenue').value,product:document.getElementById('newCompanyProduct').value,cat:document.getElementById('newCompanyCat').value,owner:selectedOwnerValues('newCompanyOwnerChoice', null),status:document.getElementById('newCompanyStatusManual').value,notes:document.getElementById('newCompanyNotes').value}); if(!d.name)return; data.push(d); e.target.reset(); document.getElementById('newCompanyYear').value=new Date().getFullYear(); document.getElementById('newCompanyStatusManual').value='Sans statut'; renderNewCompanyOwnerSelector(); document.getElementById('newCompanyStatus').textContent='Entreprise ajoutée : '+d.name; renderOwners(); updateAll(); selectCompany(d.id); }
 function downloadTextFile(filename,text,mime='text/plain;charset=utf-8'){ const blob=new Blob([text],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
 
 
@@ -3938,7 +3975,7 @@ function renderDashboardFloatingPopup(){
     <div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div>
     <div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching'], d.product)}
     <div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='SBF 120'?'selected':''}>SBF 120</option><option ${d.cat==='Entreprise privée hors CAC 40/SBF 120'?'selected':''}>Entreprise privée hors CAC 40/SBF 120</option><option ${d.cat==='Public / Semi-Public'?'selected':''}>Public / Semi-Public</option><option ${d.cat==='Écoles'?'selected':''}>Écoles</option></select>
-    <div class="field-label">Owner / BDR</div>${singleCheckboxGroupHtml(ownerGroup, owners, ownerLabel(d))}
+    <div class="field-label">Owner / BDR</div>${ownerMultiSelectorHtml(ownerGroup, ownerLabel(d))}
     <div class="field-label">Statut</div>${statusSelectHtml(`${prefix}EditStatus`, d.status || inferStatusFromNotes(d.notes))}
     <div class="field-label">Notes</div><div class="notes-zone"><textarea id="${prefix}EditNotes">${escapeHtml(d.notes||'')}</textarea></div>
     <div class="editor-actions"><button type="submit" class="editor-save">Enregistrer</button><button type="button" id="${prefix}EditClose" class="editor-close">Fermer</button></div>
@@ -3946,6 +3983,7 @@ function renderDashboardFloatingPopup(){
   popup.classList.add('open');
   popup.style.display='flex';
   bindSingleCheckboxGroups(popup);
+  bindOwnerMultiSelectors(popup);
   document.getElementById(`${prefix}EditForm`).onsubmit=e=>{e.preventDefault(); saveFloatingEditor(d.id);};
   document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderList();renderCompanyTable();closeFloatingCompanyPopup();};
   syncFloatingPopupPosition();
@@ -3959,7 +3997,7 @@ function saveFloatingEditor(id){
   d.product=selectedGroupValue(`${prefix}EditProductChoice`, d.product);  
   d.cat=document.getElementById(`${prefix}EditCat`).value;  
   d.color=colorForCategory(d.cat);  
-  d.owner=selectedGroupValue(`${prefix}EditOwnerChoice`, ownerLabel(d));  
+  d.owner=selectedOwnerValues(`${prefix}EditOwnerChoice`, ownerLabel(d));  
   if(d.owner === 'Owner / BDR manquant') d.owner = null;  
   d.owner_missing=!d.owner;  
   d.status=document.getElementById(`${prefix}EditStatus`).value;  
@@ -4072,6 +4110,23 @@ function bindWatchFilterEvents(){
     renderWatchTable();
   }));
 }
+
+function renderWatchCompanyPanel(){
+  const holder=document.getElementById('watchDetail'); if(!holder) return;
+  const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));
+  if(!d){ holder.innerHTML='<div class="mini-note">Clique sur une entreprise de la liste pour ouvrir sa fiche ici, sans fermer la vue A surveiller.</div>'; return; }
+  const prefix='watch'; const productGroup=`${prefix}EditProductChoice`; const ownerGroup=`${prefix}EditOwnerChoice`;
+  holder.innerHTML=`<h3>Fiche entreprise<br><span style="font-weight:600;color:#444">${escapeHtml(d.name)}</span></h3><form id="${prefix}EditForm"><div class="field-label">Entreprise</div><input id="${prefix}EditName" type="text" value="${escapeHtml(d.name)}"><div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div><div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching'], d.product)}<div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='SBF 120'?'selected':''}>SBF 120</option><option ${d.cat==='Entreprise privée hors CAC 40/SBF 120'?'selected':''}>Entreprise privée hors CAC 40/SBF 120</option><option ${d.cat==='Public / Semi-Public'?'selected':''}>Public / Semi-Public</option><option ${d.cat==='Écoles'?'selected':''}>Écoles</option></select><div class="field-label">Owner / BDR</div>${ownerMultiSelectorHtml(ownerGroup, ownerLabel(d))}<div class="field-label">Statut</div>${statusSelectHtml(`${prefix}EditStatus`, d.status || inferStatusFromNotes(d.notes))}<div class="field-label">Notes</div><textarea id="${prefix}EditNotes">${escapeHtml(d.notes||'')}</textarea><div class="editor-actions"><button type="submit" class="editor-save">Enregistrer</button><button type="button" id="${prefix}EditClose" class="editor-close">Fermer la fiche</button></div></form>`;
+  bindSingleCheckboxGroups(holder); bindOwnerMultiSelectors(holder);
+  document.getElementById(`${prefix}EditForm`).onsubmit=e=>{e.preventDefault(); saveWatchEditor(d.id);};
+  document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderWatchCompanyPanel();renderList();renderCompanyTable();};
+}
+function saveWatchEditor(id){
+  const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return; const prefix='watch';
+  d.name=document.getElementById(`${prefix}EditName`).value.trim(); d.year=Number(document.getElementById(`${prefix}EditYear`).value)||new Date().getFullYear(); d.revenue=Number(document.getElementById(`${prefix}EditRevenue`).value||0); d.product=selectedGroupValue(`${prefix}EditProductChoice`, d.product); d.cat=document.getElementById(`${prefix}EditCat`).value; d.color=colorForCategory(d.cat); d.owner=selectedOwnerValues(`${prefix}EditOwnerChoice`, ownerLabel(d)); if(d.owner === 'Owner / BDR manquant') d.owner = null; d.owner_missing=!d.owner; d.status=document.getElementById(`${prefix}EditStatus`).value; d.notes=document.getElementById(`${prefix}EditNotes`).value; d.y=computeYFromRevenue(d.revenue,d.product);
+  renderOwners(); updateAll(); selectedCompanyId=Number(id); renderWatchTable(); renderWatchCompanyPanel();
+}
+
 function renderWatchTable(){
   const rows=getFilteredWatchRows();
   const body = rows.length ? `<table class="watch-table"><thead><tr>
@@ -4082,14 +4137,15 @@ function renderWatchTable(){
     ${watchTh('Owner / BDR','owner',watchCheckboxFilterMenu('owner','Owner / BDR'))}
     <th>Statut</th><th>Source</th><th>Manuel</th>
   </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" title="Cliquer pour modifier la fiche entreprise"><td class="watch-year">${d.year}</td><td><b>${escapeHtml(d.name)}</b></td><td><span class="cat-dot" style="background:${colorForCategory(d.cat)}"></span> ${escapeHtml(shortCatLabel(d.cat))}</td><td>${escapeHtml(d.product)}</td><td>${escapeHtml(ownerLabel(d))}</td><td>${statusBadgeHtmlForCompany(d)}</td><td><span class="watch-source-badge ${watchSourceClass(d)}">${escapeHtml(watchSourceLabel(d))}</span></td><td class="watch-check-cell"><button type="button" class="watch-star ${isWatch(d)?'':'off'}" data-watch-id="${d.id}" title="Basculer l'ajout/retrait manuel">${isWatch(d)?'★':'☆'}</button></td></tr>`).join('')}</tbody></table>` : '<p>Aucune entreprise dans la liste “À surveiller” pour le moment.</p>';
-  document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">⭐ A surveiller (${rows.length})</h2><div class="mini-note">Liste dynamique : statuts En cours / AO à confirmer / Docs à venir, ou années N-5 à N-2. Ton ajout ou retrait manuel prévaut toujours sur la règle par défaut. Clique sur une ligne pour modifier la fiche entreprise.</div>${body}`;
+  document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">⭐ A surveiller (${rows.length})</h2><div class="mini-note">Liste dynamique : statuts En cours / AO à confirmer / Docs à venir, ou années N-5 à N-2. Ton ajout ou retrait manuel prévaut toujours sur la règle par défaut. Clique sur une ligne pour modifier la fiche entreprise.</div>${body}<div id="watchDetail"><div class="mini-note">Clique sur une entreprise de la liste pour ouvrir sa fiche ici, sans fermer la vue A surveiller.</div></div>`;
   bindWatchFilterEvents();
-  document.querySelectorAll('#watchModal tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>{ document.getElementById('watchModal').classList.remove('open'); switchTab('list'); selectCompany(tr.dataset.id); }));
+  document.querySelectorAll('#watchModal tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>{ selectedCompanyId=Number(tr.dataset.id); renderList(); renderCompanyTable(); renderWatchCompanyPanel(); }));
   document.querySelectorAll('#watchModal .watch-star').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); const d=data.find(x=>Number(x.id)===Number(btn.dataset.watchId)); toggleWatch(btn.dataset.watchId, !(d&&isWatch(d))); }));
 }
 function renderWatchList(){
   document.getElementById('watchModal').classList.add('open');
   renderWatchTable();
+  renderWatchCompanyPanel();
 }
 function exportConstData(){ const out='const data = '+JSON.stringify(data,null,2)+';\n'; downloadTextFile('const_data_AO_dashboard.js',out,'application/javascript;charset=utf-8'); document.getElementById('dataToolsStatus').textContent='Export const_data généré.'; }
 function csvEscape(v){ if(v==null)return''; const s=String(v); return /[";\n\r,]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
