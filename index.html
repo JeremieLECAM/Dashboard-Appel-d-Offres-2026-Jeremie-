@@ -500,6 +500,7 @@
 
 
 /* V29 - Watchlist side editor + click outside close + Gagne hidden by default */
+/* V30 - Bouton AO Tout selectionner / Tout deselectionner */
 #watchModal.open{display:flex!important;align-items:center;justify-content:center;gap:14px;padding:18px;}
 #watchCard{position:static!important;top:auto!important;left:auto!important;transform:none!important;width:min(900px,62vw)!important;max-height:82vh!important;overflow:auto!important;background:#fff;border-radius:16px;padding:15px;box-shadow:var(--shadow);}
 #watchCard > button{display:none!important;}
@@ -3191,19 +3192,42 @@ function syncDashboardButtonFiltersToTable(){
   tableFilters.year = selectedYears.length ? selectedYears : null;  
   tableFilters.watch = dashboardKpiFilters.has('watch') ? ['OUI'] : null;  
 }  
-function clearDashboardButtonFilters(){  
-  dashboardKpiFilters.clear();  
-  dashboardCategoryFilters.clear();  
-  dashboardYearFilters.clear();  
-  dashboardKpiFilter = null;  
-  dashboardCategoryFilter = null;  
-  tableFilters.year = null;  
-  tableFilters.cat = null;  
-  tableFilters.status = null;  
-  tableFilters.watch = null;  
-}  
-function toggleDashboardKpiFilter(key){  
-  if(key === 'all'){ clearDashboardButtonFilters(); return; }  
+function clearDashboardButtonFilters(){
+  dashboardKpiFilters.clear();
+  dashboardCategoryFilters.clear();
+  dashboardYearFilters.clear();
+  dashboardKpiFilter = null;
+  dashboardCategoryFilter = null;
+  tableFilters.year = null;
+  tableFilters.cat = [];
+  tableFilters.status = [];
+  tableFilters.watch = null;
+}
+function isAoAllSelected(){
+  const defaultStatuses=['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty'];
+  const defaultCategories=['cac','sbf','priv','pub','eco'];
+  return dashboardYearFilters.size===0 &&
+    defaultStatuses.every(k=>dashboardKpiFilters.has(k)) &&
+    !dashboardKpiFilters.has('status-gagne') &&
+    !dashboardKpiFilters.has('watch') &&
+    dashboardKpiFilters.size===defaultStatuses.length &&
+    defaultCategories.every(k=>dashboardCategoryFilters.has(k)) &&
+    dashboardCategoryFilters.size===defaultCategories.length;
+}
+function toggleDashboardAoAll(){
+  if(isAoAllSelected()){
+    clearDashboardButtonFilters();
+  } else {
+    dashboardCategoryFilters = new Set(['cac','sbf','priv','pub','eco']);
+    dashboardKpiFilters = new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty']);
+    dashboardYearFilters.clear();
+    dashboardKpiFilter = null;
+    dashboardCategoryFilter = null;
+    syncDashboardButtonFiltersToTable();
+  }
+}
+function toggleDashboardKpiFilter(key){
+  if(key === 'all'){ toggleDashboardAoAll(); return; }  
   if(dashboardKpiFilters.has(key)) dashboardKpiFilters.delete(key);  
   else dashboardKpiFilters.add(key);  
   dashboardKpiFilter = dashboardKpiFilters.size === 1 ? [...dashboardKpiFilters][0] : null;  
@@ -3354,9 +3378,12 @@ function updateCockpitMetrics(){
     <div class="kpi-card"><div class="kpi-value">${m.statusCounts['AO à confirmer']}</div><div class="kpi-label">AO à confirmer</div></div>  
     <div class="kpi-card"><div class="kpi-value">${m.statusCounts['Docs à venir']}</div><div class="kpi-label">Docs à venir</div></div>`; }  
   const s=document.getElementById('portfolioSummary');  
-  const aoActive = dashboardCategoryFilters.size===5 && ['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty'].every(k=>dashboardKpiFilters.has(k)) && dashboardYearFilters.size===0;  
-  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${aoActive?'active':''}" data-kpi="all">${m.total} AO</span><span class="summary-pill cat-pill cat-pill-cac kpi-filter ${dashboardCategoryFilters.has('cac')?'active':''}" data-cat="cac">${c.cac} CAC40</span><span class="summary-pill cat-pill cat-pill-sbf kpi-filter ${dashboardCategoryFilters.has('sbf')?'active':''}" data-cat="sbf">${c.sbf} SBF120</span><span class="summary-pill cat-pill cat-pill-priv kpi-filter ${dashboardCategoryFilters.has('priv')?'active':''}" data-cat="priv">${c.priv} Privé</span><span class="summary-pill cat-pill cat-pill-pub kpi-filter ${dashboardCategoryFilters.has('pub')?'active':''}" data-cat="pub">${c.pub} Public</span><span class="summary-pill cat-pill cat-pill-eco kpi-filter ${dashboardCategoryFilters.has('eco')?'active':''}" data-cat="eco">${c.eco} Écoles</span></div><div class="summary-secondary"><span class="summary-pill status-progress-pill kpi-filter ${dashboardKpiFilters.has('status-en-cours')?'active':''}" data-kpi="status-en-cours">${m.statusCounts['En cours']} En cours</span><span class="summary-pill status-confirm-pill kpi-filter ${dashboardKpiFilters.has('status-ao-confirm')?'active':''}" data-kpi="status-ao-confirm">${m.statusCounts['AO à confirmer']} AO à confirmer</span><span class="summary-pill status-docs-pill kpi-filter ${dashboardKpiFilters.has('status-docs')?'active':''}" data-kpi="status-docs">${m.statusCounts['Docs à venir']} Docs à venir</span><span class="summary-pill status-lost-pill kpi-filter ${dashboardKpiFilters.has('status-perdu')?'active':''}" data-kpi="status-perdu">${m.statusCounts['Perdu']} Perdu</span><span class="summary-pill status-won-pill kpi-filter ${dashboardKpiFilters.has('status-gagne')?'active':''}" data-kpi="status-gagne">${m.statusCounts['Gagné']} Gagné</span><span class="summary-pill status-empty-pill kpi-filter ${dashboardKpiFilters.has('status-empty')?'active':''}" data-kpi="status-empty">${m.statusCounts['Sans statut']} Sans statut</span><span class="summary-pill kpi-filter ${dashboardKpiFilters.has('watch')?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`; 
-    s.querySelectorAll('.kpi-filter[data-kpi]').forEach(btn=>btn.onclick=()=>{ toggleDashboardKpiFilter(btn.dataset.kpi); updateAll();}); 
+  const aoActive = isAoAllSelected();  
+  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${aoActive?'active':''}" data-kpi="all" role="button" tabindex="0" title="Tout sélectionner / Tout désélectionner" aria-label="Tout sélectionner ou tout désélectionner">${m.total} AO</span><span class="summary-pill cat-pill cat-pill-cac kpi-filter ${dashboardCategoryFilters.has('cac')?'active':''}" data-cat="cac">${c.cac} CAC40</span><span class="summary-pill cat-pill cat-pill-sbf kpi-filter ${dashboardCategoryFilters.has('sbf')?'active':''}" data-cat="sbf">${c.sbf} SBF120</span><span class="summary-pill cat-pill cat-pill-priv kpi-filter ${dashboardCategoryFilters.has('priv')?'active':''}" data-cat="priv">${c.priv} Privé</span><span class="summary-pill cat-pill cat-pill-pub kpi-filter ${dashboardCategoryFilters.has('pub')?'active':''}" data-cat="pub">${c.pub} Public</span><span class="summary-pill cat-pill cat-pill-eco kpi-filter ${dashboardCategoryFilters.has('eco')?'active':''}" data-cat="eco">${c.eco} Écoles</span></div><div class="summary-secondary"><span class="summary-pill status-progress-pill kpi-filter ${dashboardKpiFilters.has('status-en-cours')?'active':''}" data-kpi="status-en-cours">${m.statusCounts['En cours']} En cours</span><span class="summary-pill status-confirm-pill kpi-filter ${dashboardKpiFilters.has('status-ao-confirm')?'active':''}" data-kpi="status-ao-confirm">${m.statusCounts['AO à confirmer']} AO à confirmer</span><span class="summary-pill status-docs-pill kpi-filter ${dashboardKpiFilters.has('status-docs')?'active':''}" data-kpi="status-docs">${m.statusCounts['Docs à venir']} Docs à venir</span><span class="summary-pill status-lost-pill kpi-filter ${dashboardKpiFilters.has('status-perdu')?'active':''}" data-kpi="status-perdu">${m.statusCounts['Perdu']} Perdu</span><span class="summary-pill status-won-pill kpi-filter ${dashboardKpiFilters.has('status-gagne')?'active':''}" data-kpi="status-gagne">${m.statusCounts['Gagné']} Gagné</span><span class="summary-pill status-empty-pill kpi-filter ${dashboardKpiFilters.has('status-empty')?'active':''}" data-kpi="status-empty">${m.statusCounts['Sans statut']} Sans statut</span><span class="summary-pill kpi-filter ${dashboardKpiFilters.has('watch')?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`; 
+    s.querySelectorAll('.kpi-filter[data-kpi]').forEach(btn=>{
+      btn.onclick=()=>{ toggleDashboardKpiFilter(btn.dataset.kpi); updateAll();};
+      if(btn.dataset.kpi==='all') btn.onkeydown=e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); btn.click(); } };
+    }); 
     s.querySelectorAll('.kpi-filter[data-cat]').forEach(btn=>btn.onclick=()=>{ toggleDashboardCategoryFilter(btn.dataset.cat); updateAll();}); 
   }  
   document.getElementById('watchTopCount') && (document.getElementById('watchTopCount').textContent=m.watch);  
@@ -3465,8 +3492,11 @@ function filteredData(){
   const activeCats = selectedDashboardCategoryValues(); 
   const activeStatuses = selectedDashboardStatusValues(); 
   const activeYears = selectedDashboardYears(); 
-  if(activeCats.length) rows=rows.filter(d=>activeCats.includes(d.cat)); 
-  if(activeStatuses.length) rows=rows.filter(d=>activeStatuses.includes(statusForCompany(d).label)); 
+  if(dashboardCategoryFilters.size===0 || activeCats.length===0) return [];
+  rows=rows.filter(d=>activeCats.includes(d.cat));
+  const statusFilterCount=[...dashboardKpiFilters].filter(k=>k.startsWith('status-')).length;
+  if(statusFilterCount===0 || activeStatuses.length===0) return [];
+  rows=rows.filter(d=>activeStatuses.includes(statusForCompany(d).label)); 
   if(activeYears.length) rows=rows.filter(d=>activeYears.includes(Number(d.year))); 
   if(dashboardKpiFilters.has('watch')) rows=rows.filter(d=>isWatch(d)); 
   return rows; 
