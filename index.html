@@ -4257,5 +4257,81 @@ function parseCsvLine(line,delimiter){ const out=[]; let cur='',q=false; for(let
 function importCsv(e){ const file=e.target.files&&e.target.files[0]; if(!file)return; file.text().then(text=>{ const clean=String(text||'').replace(/^\ufeff/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim(); if(!clean)return; const lines=clean.split('\n').filter(Boolean); const delim=lines[0].split(';').length>=lines[0].split(',').length?';':','; const headers=parseCsvLine(lines[0],delim).map(h=>h.trim()); const rows=lines.slice(1).map(line=>{const cells=parseCsvLine(line,delim),o={}; headers.forEach((h,i)=>o[h]=cells[i]??''); return normalizePoint(o);}); rows.forEach(row=>{ const idx=data.findIndex(d=>Number(d.id)===Number(row.id) || (d.name.toLowerCase()===row.name.toLowerCase()&&Number(d.year)===Number(row.year)&&d.product===row.product)); if(idx>=0)data[idx]={...data[idx],...row,id:data[idx].id}; else data.push({...row,id:nextDataId()}); }); renderOwners(); updateAll(); document.getElementById('dataToolsStatus').textContent='Import CSV terminé : '+rows.length+' ligne(s).'; e.target.value=''; }); }
 </script>
 <div id="floatingCompanyPopup" class="floating-company-popup"></div>
-<div id="watchModal"><div id="watchCard"><div id="watchContent"></div></div><div id="watchSideEditor"></div></div></body>
+<div id="watchModal"><div id="watchCard"><div id="watchContent"></div></div><div id="watchSideEditor"></div></div>
+<style>
+:root{--newbiz:#7B1FA2;--existing:#795548}
+.biz-chip{display:inline-flex;align-items:center;border-radius:999px;padding:2px 7px;font-size:9px;font-weight:950;color:#fff;white-space:nowrap}
+.biz-new{background:var(--newbiz)}.biz-existing{background:var(--existing)}
+.summary-pill.biz-new-pill{border:2px solid var(--newbiz);background:#f5eafa;color:#55136d;font-weight:950}
+.summary-pill.biz-existing-pill{border:2px solid var(--existing);background:#f3ece9;color:#553a31;font-weight:950}
+.summary-pill.biz-new-pill.active{background:var(--newbiz)!important;color:#fff!important}
+.summary-pill.biz-existing-pill.active{background:var(--existing)!important;color:#fff!important}
+.bulk-toolbar{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:8px 0;padding:8px;border:1px solid #ddd;border-radius:12px;background:#fafafa}
+.bulk-toolbar select,.bulk-toolbar input{width:auto!important;min-width:120px}
+.bulk-toolbar .btn{width:auto;margin:0;padding:6px 9px}.bulk-count{font-weight:900;font-size:10px}
+.bulk-select{width:16px;height:16px;accent-color:var(--orange)}
+.biz-filter-label{display:flex!important;align-items:center;gap:6px;border-radius:8px;padding:4px 5px;margin:3px 0;font-weight:900}
+.biz-filter-label.new{background:#f5eafa;color:#55136d}.biz-filter-label.existing{background:#f3ece9;color:#553a31}
+</style>
+<script>
+/* V31 - New Biz / Existing + bulk edit */
+const BIZ_OPTIONS=['New Biz','Existing'];
+let dashboardBizFilters=new Set(['New Biz']);
+let bulkSelectedIds=new Set();
+function normalizeBiz(v){ return String(v||'').trim().toLowerCase()==='existing'?'Existing':'New Biz'; }
+function bizMeta(v){ const label=normalizeBiz(v); return {label,cls:label==='Existing'?'biz-existing':'biz-new'}; }
+function bizBadgeHtml(d){const b=bizMeta(d&&d.bizType);return `<span class="biz-chip ${b.cls}">${b.label}</span>`;}
+
+const _normalizePointV31=normalizePoint;
+normalizePoint=function(row){const out=_normalizePointV31(row);out.bizType=normalizeBiz(row.bizType||row.biz_type||row.businessType);return out;};
+if(!CSV_HEADERS.includes('bizType')) CSV_HEADERS.splice(CSV_HEADERS.indexOf('status'),0,'bizType');
+
+function installBizUi(){
+  const prodSection=document.querySelector('#filters .section:nth-child(2)');
+  if(prodSection&&!document.getElementById('bizFilterSection')){
+    prodSection.insertAdjacentHTML('afterend',`<div id="bizFilterSection" class="section"><button type="button" class="section-head">Business type <span>▶</span></button><div class="section-body"><label class="biz-filter-label new"><input type="checkbox" class="f-biz" value="New Biz" checked> New Biz</label><label class="biz-filter-label existing"><input type="checkbox" class="f-biz" value="Existing"> Existing</label></div></div>`);
+    const sec=document.getElementById('bizFilterSection');sec.querySelector('.section-head').onclick=()=>{const open=sec.classList.toggle('open');sec.querySelector('span').textContent=open?'▼':'▶';};
+    sec.querySelectorAll('.f-biz').forEach(cb=>cb.onchange=()=>{dashboardBizFilters=new Set([...document.querySelectorAll('.f-biz:checked')].map(x=>x.value));renderCompanyTable();updateCockpitMetrics();updateChart();renderList();});
+  }
+  const nf=document.getElementById('newCompanyStatusManual');
+  if(nf&&!document.getElementById('newCompanyBizType')) nf.parentElement && nf.insertAdjacentHTML('beforebegin','<div class="field-label">Business type</div><select id="newCompanyBizType"><option>New Biz</option><option>Existing</option></select>');
+  const toolbar=document.querySelector('#tabList .list-toolbar');
+  if(toolbar&&!document.getElementById('bulkToolbar')) toolbar.insertAdjacentHTML('afterend',`<div id="bulkToolbar" class="bulk-toolbar"><span class="bulk-count"><span id="bulkCount">0</span> sélectionnée(s)</span><select id="bulkField"><option value="bizType">Business type</option><option value="status">Statut</option><option value="product">Produit</option><option value="cat">Catégorie</option><option value="owner">Owner / BDR</option><option value="year">Année</option></select><select id="bulkValue"></select><button type="button" id="bulkApply" class="btn">Appliquer</button><button type="button" id="bulkVisible" class="btn secondary">Sélectionner les lignes visibles</button><button type="button" id="bulkClear" class="btn secondary">Vider</button></div>`);
+  const field=document.getElementById('bulkField'); if(field){field.onchange=refreshBulkValues;document.getElementById('bulkApply').onclick=applyBulkEdit;document.getElementById('bulkVisible').onclick=()=>{document.querySelectorAll('#companyTableWrap tr[data-id]').forEach(tr=>bulkSelectedIds.add(Number(tr.dataset.id)));renderCompanyTable();};document.getElementById('bulkClear').onclick=()=>{bulkSelectedIds.clear();renderCompanyTable();};refreshBulkValues();}
+}
+function refreshBulkValues(){const field=document.getElementById('bulkField'),v=document.getElementById('bulkValue');if(!field||!v)return;const opts={bizType:BIZ_OPTIONS,status:STATUS_OPTIONS,product:['Langues','Coaching'],cat:CAT_ORDER,owner:getAllOwnerOptions(),year:[...new Set(data.map(d=>d.year))].sort((a,b)=>b-a)}[field.value]||[];v.innerHTML=opts.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');}
+function applyBulkEdit(){const field=document.getElementById('bulkField')?.value,value=document.getElementById('bulkValue')?.value;if(!field||!bulkSelectedIds.size)return;data.forEach(d=>{if(!bulkSelectedIds.has(Number(d.id)))return;if(field==='year')d.year=Number(value)||d.year;else if(field==='owner'){d.owner=value;d.owner_missing=!value;}else{d[field]=value;}if(field==='cat')d.color=colorForCategory(d.cat);if(field==='product')d.y=computeYFromRevenue(d.revenue,d.product);});saveData();renderOwners();updateAll();bulkSelectedIds.clear();renderCompanyTable();}
+
+const _initAppV31=initApp;
+initApp=function(){installBizUi();_initAppV31();data=data.map(normalizePoint);updateAll();};
+
+const _filteredDataV31=filteredData;
+filteredData=function(){return _filteredDataV31().filter(d=>dashboardBizFilters.has(normalizeBiz(d.bizType)));};
+const _baseFilteredV31=baseFilteredDataForTable;
+baseFilteredDataForTable=function(){return _baseFilteredV31().filter(d=>dashboardBizFilters.has(normalizeBiz(d.bizType)));};
+
+const _updateCockpitV31=updateCockpitMetrics;
+updateCockpitMetrics=function(){_updateCockpitV31();const s=document.getElementById('portfolioSummary');if(!s)return;const main=s.querySelector('.summary-main'),secondary=s.querySelector('.summary-secondary');if(!main||!secondary)return;const rows=data;const n=rows.filter(d=>normalizeBiz(d.bizType)==='New Biz').length,e=rows.filter(d=>normalizeBiz(d.bizType)==='Existing').length;const holder=document.createElement('span');holder.style.display='contents';holder.innerHTML=`<span class="summary-pill biz-new-pill ${dashboardBizFilters.has('New Biz')?'active':''}" data-biz="New Biz">${n} New Biz</span><span class="summary-pill biz-existing-pill ${dashboardBizFilters.has('Existing')?'active':''}" data-biz="Existing">${e} Existing</span>`;main.parentNode.insertBefore(holder,secondary);s.querySelectorAll('[data-biz]').forEach(btn=>btn.onclick=()=>{const k=btn.dataset.biz;if(dashboardBizFilters.has(k))dashboardBizFilters.delete(k);else dashboardBizFilters.add(k);document.querySelectorAll('.f-biz').forEach(cb=>cb.checked=dashboardBizFilters.has(cb.value));updateAll();});};
+
+const _renderCompanyTableV31=renderCompanyTable;
+renderCompanyTable=function(){_renderCompanyTableV31();const table=document.querySelector('#companyTableWrap table');if(!table)return;const hr=table.tHead?.rows[0];if(hr&&!hr.querySelector('.bulk-head')){const th=document.createElement('th');th.className='bulk-head';th.innerHTML='<input type="checkbox" class="bulk-select" id="bulkMaster" title="Sélectionner toutes les lignes visibles">';hr.insertBefore(th,hr.firstChild);document.getElementById('bulkMaster').onchange=e=>{table.querySelectorAll('tbody tr[data-id]').forEach(tr=>{const id=Number(tr.dataset.id);e.target.checked?bulkSelectedIds.add(id):bulkSelectedIds.delete(id);});renderCompanyTable();};const tagTh=document.createElement('th');tagTh.textContent='Business type';hr.insertBefore(tagTh,hr.cells[7]||null);}
+ table.querySelectorAll('tbody tr[data-id]').forEach(tr=>{const id=Number(tr.dataset.id);const d=data.find(x=>Number(x.id)===id);const td=document.createElement('td');td.innerHTML=`<input type="checkbox" class="bulk-select" ${bulkSelectedIds.has(id)?'checked':''}>`;td.querySelector('input').onclick=e=>e.stopPropagation();td.querySelector('input').onchange=e=>{e.target.checked?bulkSelectedIds.add(id):bulkSelectedIds.delete(id);document.getElementById('bulkCount').textContent=bulkSelectedIds.size;};tr.insertBefore(td,tr.firstChild);const tag=document.createElement('td');tag.innerHTML=bizBadgeHtml(d);tr.insertBefore(tag,tr.cells[7]||null);});const count=document.getElementById('bulkCount');if(count)count.textContent=bulkSelectedIds.size;};
+
+function injectBizIntoEditor(box,prefix,d){if(!box||box.querySelector(`#${prefix}EditBizType`))return;const status=box.querySelector(`#${prefix}EditStatus`);if(status)status.insertAdjacentHTML('beforebegin',`<div class="field-label">Business type</div><select id="${prefix}EditBizType"><option ${normalizeBiz(d.bizType)==='New Biz'?'selected':''}>New Biz</option><option ${normalizeBiz(d.bizType)==='Existing'?'selected':''}>Existing</option></select>`);}
+const _renderEditorV31=renderEditor;
+renderEditor=function(containerId,prefix){_renderEditorV31(containerId,prefix);const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d)injectBizIntoEditor(document.getElementById(containerId),prefix,d);};
+const _renderFloatV31=renderDashboardFloatingPopup;
+renderDashboardFloatingPopup=function(){_renderFloatV31();const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d)injectBizIntoEditor(document.getElementById('floatingCompanyPopup'),'float',d);};
+const _renderWatchPanelV31=renderWatchCompanyPanel;
+renderWatchCompanyPanel=function(){_renderWatchPanelV31();const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d)injectBizIntoEditor(document.getElementById('watchSideEditor'),'watch',d);};
+function captureBiz(prefix,id){const d=data.find(x=>Number(x.id)===Number(id)),el=document.getElementById(prefix+'EditBizType');if(d&&el)d.bizType=normalizeBiz(el.value);}
+const _saveEditorV31=saveEditor;saveEditor=function(prefix,id){captureBiz(prefix,id);_saveEditorV31(prefix,id);};
+const _saveFloatV31=saveFloatingEditor;saveFloatingEditor=function(id){captureBiz('float',id);_saveFloatV31(id);};
+const _saveWatchV31=saveWatchEditor;saveWatchEditor=function(id){captureBiz('watch',id);_saveWatchV31(id);};
+
+const _addCompanyV31=addCompanyFromForm;
+addCompanyFromForm=function(e){const before=new Set(data.map(d=>d.id));_addCompanyV31(e);data.filter(d=>!before.has(d.id)).forEach(d=>d.bizType=normalizeBiz(document.getElementById('newCompanyBizType')?.value));saveData();};
+</script>
+
+</body>
 </html>
