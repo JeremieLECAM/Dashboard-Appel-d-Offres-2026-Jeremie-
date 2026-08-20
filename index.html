@@ -239,6 +239,8 @@
 .filter-menu label.status-filter-choice.status-toconfirm{background:#fff9df;border-color:#f3df8a;color:#775d00;}
 .filter-menu label.status-filter-choice.status-waiting{background:#eef4ff;border-color:#c9dcff;color:#254f92;}
 .filter-menu label.status-filter-choice.status-empty{background:#f4f4f4;border-color:#e4e4e4;color:#555;}
+#filters label.status-filter-choice{display:flex;align-items:center;gap:6px;border-radius:8px;padding:4px 5px;margin:3px 0;border:1px solid transparent;font-weight:800;}
+#filters label.status-filter-choice input{flex:0 0 auto;}
 .item{padding:8px 8px;border-radius:11px;margin-top:6px;border:1px solid #eeeeee;background:#fff;}
 .item-main{display:flex;align-items:center;gap:7px;min-width:0;}
 .cat-dot{width:10px;height:10px;border-radius:999px;display:inline-block;flex:0 0 auto;box-shadow:0 0 0 2px rgba(0,0,0,.05);}
@@ -568,6 +570,14 @@
           <div class="section"><button type="button" class="section-head">Produit <span>▶</span></button><div class="section-body">
             <label><input type="checkbox" class="f-prod" value="Langues" checked> Langues</label>
             <label><input type="checkbox" class="f-prod" value="Coaching" checked> Coaching</label>
+          </div></div>
+          <div class="section"><button type="button" class="section-head">Statut <span>▶</span></button><div class="section-body">
+            <label class="status-filter-choice status-progress"><input type="checkbox" class="f-status" value="En cours" checked> En cours</label>
+            <label class="status-filter-choice status-toconfirm"><input type="checkbox" class="f-status" value="AO à confirmer" checked> AO à confirmer</label>
+            <label class="status-filter-choice status-waiting"><input type="checkbox" class="f-status" value="Docs à venir" checked> Docs à venir</label>
+            <label class="status-filter-choice status-lost"><input type="checkbox" class="f-status" value="Perdu" checked> Perdu</label>
+            <label class="status-filter-choice status-won"><input type="checkbox" class="f-status" value="Gagné"> Gagné</label>
+            <label class="status-filter-choice status-empty"><input type="checkbox" class="f-status" value="Sans statut" checked> Sans statut</label>
           </div></div>
           <div class="section"><button type="button" class="section-head">Année <span>▶</span></button><div class="section-body">
             <div class="row2"><input id="yearMin" type="number" value="2012"><input id="yearMax" type="number" value="2028"></div>
@@ -3225,14 +3235,20 @@ function toggleDashboardAoAll(){
     dashboardCategoryFilter = null;
     syncDashboardButtonFiltersToTable();
   }
+  syncStatusSidebarFromDashboard();
+}
+function syncStatusSidebarFromDashboard(){
+  const selected = new Set(selectedDashboardStatusValues());
+  document.querySelectorAll('.f-status').forEach(cb=>{ cb.checked = selected.has(cb.value); });
 }
 function toggleDashboardKpiFilter(key){
-  if(key === 'all'){ toggleDashboardAoAll(); return; }  
-  if(dashboardKpiFilters.has(key)) dashboardKpiFilters.delete(key);  
-  else dashboardKpiFilters.add(key);  
-  dashboardKpiFilter = dashboardKpiFilters.size === 1 ? [...dashboardKpiFilters][0] : null;  
-  syncDashboardButtonFiltersToTable();  
-}  
+  if(key === 'all'){ toggleDashboardAoAll(); syncStatusSidebarFromDashboard(); return; }
+  if(dashboardKpiFilters.has(key)) dashboardKpiFilters.delete(key);
+  else dashboardKpiFilters.add(key);
+  dashboardKpiFilter = dashboardKpiFilters.size === 1 ? [...dashboardKpiFilters][0] : null;
+  syncDashboardButtonFiltersToTable();
+  syncStatusSidebarFromDashboard();
+}
 function toggleDashboardCategoryFilter(key){  
   if(dashboardCategoryFilters.has(key)) dashboardCategoryFilters.delete(key);  
   else dashboardCategoryFilters.add(key);  
@@ -3393,13 +3409,15 @@ function updateCockpitMetrics(){
 function updateFilterCounters(){
   const cats=document.querySelectorAll('.f-cat:checked').length;
   const prods=document.querySelectorAll('.f-prod:checked').length;
+  const statuses=document.querySelectorAll('.f-status:checked').length;
   const owners=document.querySelectorAll('.f-owner:checked').length;
   const yMin=document.getElementById('yearMin')?.value || '';
   const yMax=document.getElementById('yearMax')?.value || '';
   const labels=[
     ['#filters .section:nth-child(1) .section-head','🏷 Catégorie', cats],
     ['#filters .section:nth-child(2) .section-head','📚 Produit', prods],
-    ['#filters .section:nth-child(3) .section-head','📅 Année', `${yMin} → ${yMax}`],
+    ['#filters .section:nth-child(3) .section-head','● Statut', statuses],
+    ['#filters .section:nth-child(4) .section-head','📅 Année', `${yMin} → ${yMax}`],
     ['#ownerToggle','👤 Owner', owners]
   ];
   labels.forEach(([sel,title,count])=>{ const btn=document.querySelector(sel); if(!btn) return; const arrow=btn.querySelector('span:last-child')?.textContent || '▶'; const arrowId=sel==='#ownerToggle'?' id="ownerArrow"':''; btn.innerHTML=`${title} <span class="section-count">${count}</span><span${arrowId}>${arrow}</span>`; });
@@ -3459,6 +3477,13 @@ function wireUI(){
   document.querySelector('#tabDashboard .panel')?.addEventListener('scroll', syncFloatingPopupPosition);
   document.getElementById('labelBtn').onclick=()=>{ showNames=!showNames; document.getElementById('labelBtn').textContent=showNames?'🙈 Masquer les noms':'👁️ Afficher les noms'; updateChart(); };
   document.querySelectorAll('.f-cat,.f-prod,#yearMin,#yearMax').forEach(el=>el.addEventListener('change', updateAll));
+  document.querySelectorAll('.f-status').forEach(el=>el.addEventListener('change', ()=>{
+    const map={'En cours':'status-en-cours','AO à confirmer':'status-ao-confirm','Docs à venir':'status-docs','Perdu':'status-perdu','Gagné':'status-gagne','Sans statut':'status-empty'};
+    dashboardKpiFilters = new Set([...document.querySelectorAll('.f-status:checked')].map(cb=>map[cb.value]).filter(Boolean));
+    dashboardKpiFilter = dashboardKpiFilters.size === 1 ? [...dashboardKpiFilters][0] : null;
+    syncDashboardButtonFiltersToTable();
+    updateAll();
+  }));
   document.getElementById('search').addEventListener('input', updateAll);
   document.getElementById('companyTableSearch').addEventListener('input', renderCompanyTable);
   document.getElementById('ownerToggle').onclick=()=>{ const s=document.getElementById('ownerFilterSection'); const open=s.classList.toggle('open'); document.getElementById('ownerArrow').textContent=open?'▼':'▶'; };
