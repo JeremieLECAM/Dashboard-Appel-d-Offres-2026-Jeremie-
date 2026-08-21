@@ -3118,7 +3118,7 @@ let selectedCompanyId = null;
 let hoveredCompanyId = null;
 let dashboardKpiFilter = null;
 let dashboardCategoryFilter = null;
-let dashboardKpiFilters = new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty']);
+let dashboardKpiFilters = new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty','watch']);
 let dashboardCategoryFilters = new Set(['cac','sbf','priv','pub','eco']);
 let dashboardYearFilters = new Set();
 let tableSort = { col: 'name', dir: 'asc' };
@@ -3221,8 +3221,10 @@ function toggleDashboardTimelineSegment(year,statusLabel){
   syncDashboardButtonFiltersToTable();
 }
 function syncTableFiltersToDashboard(){
+  const watchIncluded = !Array.isArray(tableFilters.watch) || !tableFilters.watch.includes('NON');
   if(Array.isArray(tableFilters.cat)){dashboardCategoryFilters.clear();Object.entries(DASHBOARD_CATEGORY_TABLE_PRESETS).forEach(([k,v])=>{if(v.some(x=>tableFilters.cat.includes(x))) dashboardCategoryFilters.add(k);});}
   if(Array.isArray(tableFilters.status)){dashboardKpiFilters.clear();const map={'En cours':'status-en-cours','AO à confirmer':'status-ao-confirm','Docs à venir':'status-docs','Perdu':'status-perdu','Gagné':'status-gagne','Sans statut':'status-empty'};tableFilters.status.forEach(st=>{if(map[st]) dashboardKpiFilters.add(map[st]);});}
+  if(watchIncluded) dashboardKpiFilters.add('watch'); else dashboardKpiFilters.delete('watch');
   if(Array.isArray(tableFilters.year)){dashboardYearFilters=new Set(tableFilters.year.map(Number));}
 }
 function selectedDashboardCategoryValues(){  
@@ -3246,7 +3248,7 @@ function syncDashboardButtonFiltersToTable(){
   tableFilters.cat = cats.length ? cats : null;  
   tableFilters.status = statuses.length ? statuses : null;  
   tableFilters.year = selectedYears.length ? selectedYears : null;  
-  tableFilters.watch = dashboardKpiFilters.has('watch') ? ['OUI'] : null;  
+  tableFilters.watch = dashboardKpiFilters.has('watch') ? null : ['NON'];  
 }  
 function clearDashboardButtonFilters(){
   dashboardKpiFilters.clear();
@@ -3265,8 +3267,8 @@ function isAoAllSelected(){
   return dashboardYearFilters.size===0 &&
     defaultStatuses.every(k=>dashboardKpiFilters.has(k)) &&
     !dashboardKpiFilters.has('status-gagne') &&
-    !dashboardKpiFilters.has('watch') &&
-    dashboardKpiFilters.size===defaultStatuses.length &&
+    dashboardKpiFilters.has('watch') &&
+    dashboardKpiFilters.size===defaultStatuses.length+1 &&
     defaultCategories.every(k=>dashboardCategoryFilters.has(k)) &&
     dashboardCategoryFilters.size===defaultCategories.length;
 }
@@ -3275,7 +3277,7 @@ function toggleDashboardAoAll(){
     clearDashboardButtonFilters();
   } else {
     dashboardCategoryFilters = new Set(['cac','sbf','priv','pub','eco']);
-    dashboardKpiFilters = new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty']);
+    dashboardKpiFilters = new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty','watch']);
     dashboardYearFilters.clear();
     dashboardKpiFilter = null;
     dashboardCategoryFilter = null;
@@ -3525,7 +3527,9 @@ function wireUI(){
   document.querySelectorAll('.f-cat,.f-prod,#yearMin,#yearMax').forEach(el=>el.addEventListener('change', updateAll));
   document.querySelectorAll('.f-status').forEach(el=>el.addEventListener('change', ()=>{
     const map={'En cours':'status-en-cours','AO à confirmer':'status-ao-confirm','Docs à venir':'status-docs','Perdu':'status-perdu','Gagné':'status-gagne','Sans statut':'status-empty'};
+    const watchIncluded=dashboardKpiFilters.has('watch');
     dashboardKpiFilters = new Set([...document.querySelectorAll('.f-status:checked')].map(cb=>map[cb.value]).filter(Boolean));
+    if(watchIncluded) dashboardKpiFilters.add('watch');
     dashboardKpiFilter = dashboardKpiFilters.size === 1 ? [...dashboardKpiFilters][0] : null;
     syncDashboardButtonFiltersToTable();
     updateAll();
@@ -3569,7 +3573,7 @@ function filteredData(){
   if(statusFilterCount===0 || activeStatuses.length===0) return [];
   rows=rows.filter(d=>activeStatuses.includes(statusForCompany(d).label)); 
   if(activeYears.length) rows=rows.filter(d=>activeYears.includes(Number(d.year))); 
-  if(dashboardKpiFilters.has('watch')) rows=rows.filter(d=>isWatch(d)); 
+  if(!dashboardKpiFilters.has('watch')) rows=rows.filter(d=>!isWatch(d)); 
   return rows; 
 }  
 function baseFilteredDataForTable(){ const f=getFilterState(); return excludeWonUnlessSelected(data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && ownerFilterPass(d, f.owners) && d.year>=f.yMin && d.year<=f.yMax)); }
@@ -4328,14 +4332,22 @@ function switchBusinessScope(scope){
   selectedCompanyId=null; hoveredCompanyId=null; bulkSelectedIds.clear();
   closeFloatingCompanyPopup(); closeWatchModal();
   dashboardYearFilters.clear();
-  dashboardKpiFilters=new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty']);
+  dashboardKpiFilters=new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty','watch']);
   dashboardCategoryFilters=new Set(['cac','sbf','priv','pub','eco']);
   tableFilters={name:{op:'contains',value:''},notes:{op:'contains',value:''},year:null,product:null,cat:null,owner:null,status:null,watch:null};
   document.querySelectorAll('.f-cat,.f-prod,.f-owner').forEach(cb=>cb.checked=true);
   document.querySelectorAll('.f-status').forEach(cb=>cb.checked=cb.value!=='Gagné');
   const search=document.getElementById('search'); if(search) search.value='';
   const tableSearch=document.getElementById('companyTableSearch'); if(tableSearch) tableSearch.value='';
-  refreshMainTabs(); renderOwners(); syncDashboardButtonFiltersToTable(); updateAll();
+  refreshMainTabs(); renderOwners();
+  document.querySelectorAll('.f-owner').forEach(cb=>cb.checked=true);
+  const scopeYears=scopeRows(data).map(d=>Number(d.year)).filter(Number.isFinite);
+  if(scopeYears.length){
+    const yearMin=document.getElementById('yearMin'),yearMax=document.getElementById('yearMax');
+    if(yearMin) yearMin.value=Math.min(...scopeYears);
+    if(yearMax) yearMax.value=Math.max(...scopeYears);
+  }
+  syncDashboardButtonFiltersToTable(); updateAll();
   if(document.getElementById('tabDashboard')?.classList.contains('active')) setTimeout(resizeChart,40);
 }
 function installTwoDashboardNavigation(){
