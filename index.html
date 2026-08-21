@@ -4536,5 +4536,91 @@ const _bindWatchFilterEventsV39=bindWatchFilterEvents;
 bindWatchFilterEvents=function(){_bindWatchFilterEventsV39();document.querySelectorAll('[data-watch-filter-trigger]').forEach(b=>b.addEventListener('click',()=>{watchOpenFilterV39=b.dataset.watchFilterTrigger}));if(watchOpenFilterV39){const m=document.getElementById('watch-filter-'+watchOpenFilterV39);if(m)m.classList.add('open');}};
 document.addEventListener('click',e=>{if(!e.target.closest('.summary-filter-menu')&&!e.target.closest('[data-sum-open]'))summaryOpenFilterV39=null;});
 </script>
+
+<script>
+/* V40 - Etats de filtres strictement independants pour New Biz et Existing */
+const businessScopeFilterStatesV40 = Object.create(null);
+
+function cloneFilterValueV40(value){
+  if(value instanceof Set) return new Set(value);
+  if(Array.isArray(value)) return value.slice();
+  if(value && typeof value === 'object'){
+    return Object.fromEntries(Object.entries(value).map(([key,item])=>[key,cloneFilterValueV40(item)]));
+  }
+  return value;
+}
+
+function captureBusinessScopeFiltersV40(){
+  const checked = selector => [...document.querySelectorAll(selector+':checked')].map(input=>input.value);
+  return {
+    dashboardKpiFilters:new Set(dashboardKpiFilters),
+    dashboardCategoryFilters:new Set(dashboardCategoryFilters),
+    dashboardYearFilters:new Set(dashboardYearFilters),
+    tableFilters:cloneFilterValueV40(tableFilters),
+    tableSort:cloneFilterValueV40(tableSort),
+    watchFilters:cloneFilterValueV40(watchFilters),
+    watchSort:cloneFilterValueV40(watchSort),
+    categories:checked('.f-cat'),
+    products:checked('.f-prod'),
+    statuses:checked('.f-status'),
+    owners:checked('.f-owner'),
+    yearMin:document.getElementById('yearMin')?.value || '',
+    yearMax:document.getElementById('yearMax')?.value || '',
+    search:document.getElementById('search')?.value || '',
+    tableSearch:document.getElementById('companyTableSearch')?.value || ''
+  };
+}
+
+function applyCheckboxValuesV40(selector, values){
+  const selected = new Set(Array.isArray(values) ? values.map(String) : []);
+  document.querySelectorAll(selector).forEach(input=>{ input.checked=selected.has(String(input.value)); });
+}
+
+function restoreBusinessScopeFiltersV40(state){
+  if(!state) return;
+  dashboardKpiFilters=new Set(state.dashboardKpiFilters || []);
+  dashboardCategoryFilters=new Set(state.dashboardCategoryFilters || []);
+  dashboardYearFilters=new Set(state.dashboardYearFilters || []);
+  tableFilters=cloneFilterValueV40(state.tableFilters);
+  tableSort=cloneFilterValueV40(state.tableSort);
+  watchFilters=cloneFilterValueV40(state.watchFilters);
+  watchSort=cloneFilterValueV40(state.watchSort);
+
+  renderOwners();
+  applyCheckboxValuesV40('.f-cat',state.categories);
+  applyCheckboxValuesV40('.f-prod',state.products);
+  applyCheckboxValuesV40('.f-status',state.statuses);
+  applyCheckboxValuesV40('.f-owner',state.owners);
+
+  const assign=(id,value)=>{ const element=document.getElementById(id); if(element) element.value=value ?? ''; };
+  assign('yearMin',state.yearMin);
+  assign('yearMax',state.yearMax);
+  assign('search',state.search);
+  assign('companyTableSearch',state.tableSearch);
+  dashboardKpiFilter=dashboardKpiFilters.size===1 ? [...dashboardKpiFilters][0] : null;
+  dashboardCategoryFilter=dashboardCategoryFilters.size===1 ? [...dashboardCategoryFilters][0] : null;
+  updateAll();
+}
+
+const switchBusinessScopeV40 = switchBusinessScope;
+switchBusinessScope=function(scope){
+  const nextScope=scope==='Existing'?'Existing':'New Biz';
+  if(nextScope===activeBusinessScope){
+    leaveSummary();
+    return;
+  }
+  businessScopeFilterStatesV40[activeBusinessScope]=captureBusinessScopeFiltersV40();
+  switchBusinessScopeV40(nextScope);
+  if(businessScopeFilterStatesV40[nextScope]){
+    restoreBusinessScopeFiltersV40(businessScopeFilterStatesV40[nextScope]);
+  } else {
+    businessScopeFilterStatesV40[nextScope]=captureBusinessScopeFiltersV40();
+  }
+};
+
+document.addEventListener('DOMContentLoaded',()=>{
+  businessScopeFilterStatesV40[activeBusinessScope]=captureBusinessScopeFiltersV40();
+});
+</script>
 </body>
 </html>
