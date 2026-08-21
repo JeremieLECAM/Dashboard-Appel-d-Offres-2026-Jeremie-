@@ -4290,11 +4290,16 @@ function installBizUi(){
   const prodSection=document.querySelector('#filters .section:nth-child(2)');
   if(prodSection&&!document.getElementById('bizFilterSection')){
     prodSection.insertAdjacentHTML('afterend',`<div id="bizFilterSection" class="section"><button type="button" class="section-head">Business type <span>▶</span></button><div class="section-body"><label class="biz-filter-label new"><input type="checkbox" class="f-biz" value="New Biz" checked> New Biz</label><label class="biz-filter-label existing"><input type="checkbox" class="f-biz" value="Existing"> Existing</label></div></div>`);
+    const sec=document.getElementById('bizFilterSection');
     // V32.2 : aucun onclick dédié ici. Le gestionnaire générique de wireUI gère l'ouverture une seule fois.
     sec.querySelectorAll('.f-biz').forEach(cb=>cb.onchange=()=>{dashboardBizFilters=new Set([...document.querySelectorAll('.f-biz:checked')].map(x=>x.value));renderCompanyTable();updateCockpitMetrics();updateChart();renderList();});
   }
   const nf=document.getElementById('newCompanyStatusManual');
-  if(nf&&!document.getElementById('newCompanyBizType')) nf.parentElement && nf.insertAdjacentHTML('beforebegin','<div class="field-label">Business type</div><select id="newCompanyBizType"><option>New Biz</option><option>Existing</option></select>');
+  if(nf&&!document.getElementById('newCompanyBizType')){
+    const statusLabel=nf.previousElementSibling;
+    const anchor=statusLabel&&statusLabel.classList.contains('field-label')?statusLabel:nf;
+    anchor.insertAdjacentHTML('beforebegin','<div class="field-label">Business type</div><select id="newCompanyBizType"><option>New Biz</option><option>Existing</option></select>');
+  }
   const toolbar=document.querySelector('#tabList .list-toolbar');
   if(toolbar&&!document.getElementById('bulkToolbar')) toolbar.insertAdjacentHTML('afterend',`<div id="bulkToolbar" class="bulk-toolbar"><span class="bulk-count"><span id="bulkCount">0</span> sélectionnée(s)</span><select id="bulkField"><option value="bizType">Business type</option><option value="status">Statut</option><option value="product">Produit</option><option value="cat">Catégorie</option><option value="owner">Owner / BDR</option><option value="year">Année</option></select><select id="bulkValue"></select><button type="button" id="bulkApply" class="btn">Appliquer</button><button type="button" id="bulkVisible" class="btn secondary">Sélectionner les lignes visibles</button><button type="button" id="bulkClear" class="btn secondary">Vider</button></div>`);
   const field=document.getElementById('bulkField'); if(field){field.onchange=refreshBulkValues;document.getElementById('bulkApply').onclick=applyBulkEdit;document.getElementById('bulkVisible').onclick=()=>{document.querySelectorAll('#companyTableWrap tr[data-id]').forEach(tr=>bulkSelectedIds.add(Number(tr.dataset.id)));renderCompanyTable();};document.getElementById('bulkClear').onclick=()=>{bulkSelectedIds.clear();renderCompanyTable();};refreshBulkValues();}
@@ -4317,7 +4322,14 @@ const _renderCompanyTableV31=renderCompanyTable;
 renderCompanyTable=function(){_renderCompanyTableV31();const table=document.querySelector('#companyTableWrap table');if(!table)return;const hr=table.tHead?.rows[0];if(hr&&!hr.querySelector('.bulk-head')){const th=document.createElement('th');th.className='bulk-head';th.innerHTML='<input type="checkbox" class="bulk-select" id="bulkMaster" title="Sélectionner toutes les lignes visibles">';hr.insertBefore(th,hr.firstChild);document.getElementById('bulkMaster').onchange=e=>{table.querySelectorAll('tbody tr[data-id]').forEach(tr=>{const id=Number(tr.dataset.id);e.target.checked?bulkSelectedIds.add(id):bulkSelectedIds.delete(id);});renderCompanyTable();};const tagTh=document.createElement('th');tagTh.textContent='Business type';hr.insertBefore(tagTh,hr.cells[7]||null);}
  table.querySelectorAll('tbody tr[data-id]').forEach(tr=>{const id=Number(tr.dataset.id);const d=data.find(x=>Number(x.id)===id);const td=document.createElement('td');td.innerHTML=`<input type="checkbox" class="bulk-select" ${bulkSelectedIds.has(id)?'checked':''}>`;td.querySelector('input').onclick=e=>e.stopPropagation();td.querySelector('input').onchange=e=>{e.target.checked?bulkSelectedIds.add(id):bulkSelectedIds.delete(id);document.getElementById('bulkCount').textContent=bulkSelectedIds.size;};tr.insertBefore(td,tr.firstChild);const tag=document.createElement('td');tag.innerHTML=bizBadgeHtml(d);tr.insertBefore(tag,tr.cells[7]||null);});const count=document.getElementById('bulkCount');if(count)count.textContent=bulkSelectedIds.size;};
 
-function injectBizIntoEditor(box,prefix,d){if(!box||box.querySelector(`#${prefix}EditBizType`))return;const status=box.querySelector(`#${prefix}EditStatus`);if(status)status.insertAdjacentHTML('beforebegin',`<div class="field-label">Business type</div><select id="${prefix}EditBizType"><option ${normalizeBiz(d.bizType)==='New Biz'?'selected':''}>New Biz</option><option ${normalizeBiz(d.bizType)==='Existing'?'selected':''}>Existing</option></select>`);}
+function injectBizIntoEditor(box,prefix,d){
+  if(!box||box.querySelector(`#${prefix}EditBizType`))return;
+  const status=box.querySelector(`#${prefix}EditStatus`);
+  if(!status)return;
+  const statusLabel=status.previousElementSibling;
+  const anchor=statusLabel&&statusLabel.classList.contains('field-label')?statusLabel:status;
+  anchor.insertAdjacentHTML('beforebegin',`<div class="field-label">Business type</div><select id="${prefix}EditBizType"><option ${normalizeBiz(d.bizType)==='New Biz'?'selected':''}>New Biz</option><option ${normalizeBiz(d.bizType)==='Existing'?'selected':''}>Existing</option></select>`);
+}
 const _renderEditorV31=renderEditor;
 renderEditor=function(containerId,prefix){_renderEditorV31(containerId,prefix);const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d)injectBizIntoEditor(document.getElementById(containerId),prefix,d);};
 const _renderFloatV31=renderDashboardFloatingPopup;
@@ -4470,7 +4482,8 @@ renderCompanyTable = function(){
       if(!d || !tableFilters.bizType.includes(normalizeBiz(d.bizType))) tr.remove();
     });
   }
-  bindTableFilterEvents();
+  // Evénements déjà liés par le rendu de base : éviter le double clic ouverture/fermeture.
+
   if(window.__lastOpenFilter){const menu=document.getElementById('filter-'+window.__lastOpenFilter);if(menu)menu.classList.add('open');}
 };
 
@@ -4522,7 +4535,7 @@ installBizUi = function(){
 
 
 <script>
-/* V32.2 - synchronisation immediate des boutons Business Type + correction ouverture du filtre */
+/* V33 - affichage restaure, filtres onglet 2 corriges, champs Statut et Business Type separes */
 const _updateCockpitMetricsV321=updateCockpitMetrics;
 updateCockpitMetrics=function(){
   _updateCockpitMetricsV321();
