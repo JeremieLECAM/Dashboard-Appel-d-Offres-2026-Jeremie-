@@ -4562,5 +4562,168 @@ installBizUi=function(){
 };
 </script>
 
+<script>
+/* V34 - synchronisation bidirectionnelle stricte des filtres entre Dashboard et Liste */
+(function(){
+  const STATUS_KEY_BY_LABEL={
+    'En cours':'status-en-cours','AO à confirmer':'status-ao-confirm','Docs à venir':'status-docs',
+    'Perdu':'status-perdu','Gagné':'status-gagne','Sans statut':'status-empty'
+  };
+  const CATEGORY_KEY_BY_VALUE={
+    'CAC 40':'cac','SBF 120':'sbf','Entreprise privée hors CAC 40/SBF 120':'priv',
+    'Public / Semi-Public':'pub','Écoles':'eco'
+  };
+  let syncingFilters=false;
+
+  function checkedValues(selector){
+    return [...document.querySelectorAll(selector+':checked')].map(cb=>cb.value);
+  }
+  function setChecks(selector,values){
+    const selected=new Set(values);
+    document.querySelectorAll(selector).forEach(cb=>{cb.checked=selected.has(cb.value);});
+  }
+  function allValues(selector){
+    return [...document.querySelectorAll(selector)].map(cb=>cb.value);
+  }
+  function yearsInsideSidebarRange(){
+    const min=Number(document.getElementById('yearMin')?.value);
+    const max=Number(document.getElementById('yearMax')?.value);
+    return [...new Set(data.map(d=>Number(d.year)).filter(Number.isFinite))]
+      .filter(y=>(!Number.isFinite(min)||y>=min)&&(!Number.isFinite(max)||y<=max))
+      .map(String);
+  }
+  function syncDashboardControlsToStateV34(){
+    const watchActive=dashboardKpiFilters.has('watch');
+    dashboardCategoryFilters=new Set(checkedValues('.f-cat').map(v=>CATEGORY_KEY_BY_VALUE[v]).filter(Boolean));
+    dashboardKpiFilters=new Set(checkedValues('.f-status').map(v=>STATUS_KEY_BY_LABEL[v]).filter(Boolean));
+    if(watchActive) dashboardKpiFilters.add('watch');
+    dashboardBizFilters=new Set(checkedValues('.f-biz').map(normalizeBiz));
+
+    tableFilters.cat=checkedValues('.f-cat');
+    tableFilters.product=checkedValues('.f-prod');
+    tableFilters.status=checkedValues('.f-status');
+    tableFilters.bizType=checkedValues('.f-biz').map(normalizeBiz);
+    tableFilters.owner=checkedValues('.f-owner');
+    tableFilters.year=dashboardYearFilters.size ? selectedDashboardYears().map(String) : yearsInsideSidebarRange();
+    tableFilters.watch=watchActive?['OUI']:null;
+  }
+  function refreshDashboardFromSharedFiltersV34(){
+    renderList();
+    updateCockpitMetrics();
+    updateFilterCounters();
+    updateChart();
+    renderStatusTimeline();
+  }
+
+  const previousSyncTableToDashboard=syncTableFiltersToDashboard;
+  syncTableFiltersToDashboard=function(){
+    if(syncingFilters) return;
+    syncingFilters=true;
+    try{
+      previousSyncTableToDashboard();
+
+      const cats=Array.isArray(tableFilters.cat)?tableFilters.cat:allValues('.f-cat');
+      const products=Array.isArray(tableFilters.product)?tableFilters.product:allValues('.f-prod');
+      const statuses=Array.isArray(tableFilters.status)?tableFilters.status:allValues('.f-status');
+      const biz=Array.isArray(tableFilters.bizType)?tableFilters.bizType.map(normalizeBiz):BIZ_OPTIONS.slice();
+      const owners=Array.isArray(tableFilters.owner)?tableFilters.owner:allValues('.f-owner');
+
+      setChecks('.f-cat',cats);
+      setChecks('.f-prod',products);
+      setChecks('.f-status',statuses);
+      setChecks('.f-biz',biz);
+      setChecks('.f-owner',owners);
+
+      dashboardCategoryFilters=new Set(cats.map(v=>CATEGORY_KEY_BY_VALUE[v]).filter(Boolean));
+      const watchActive=Array.isArray(tableFilters.watch)&&tableFilters.watch.includes('OUI');
+      dashboardKpiFilters=new Set(statuses.map(v=>STATUS_KEY_BY_LABEL[v]).filter(Boolean));
+      if(watchActive) dashboardKpiFilters.add('watch');
+      dashboardBizFilters=new Set(biz);
+
+      if(Array.isArray(tableFilters.year)){
+        dashboardYearFilters=new Set(tableFilters.year.map(Number).filter(Number.isFinite));
+        if(dashboardYearFilters.size){
+          const selected=[...dashboardYearFilters];
+          const min=document.getElementById('yearMin'),max=document.getElementById('yearMax');
+          if(min) min.value=Math.min(...selected);
+          if(max) max.value=Math.max(...selected);
+        }
+      }else{
+        dashboardYearFilters.clear();
+      }
+    }finally{
+      syncingFilters=false;
+    }
+    queueMicrotask(refreshDashboardFromSharedFiltersV34);
+  };
+
+  updateAll=function(){
+    normalizeAllData();
+    if(!syncingFilters) syncDashboardControlsToStateV34();
+    renderList();
+    renderCompanyTable();
+    renderEditors();
+    updateCockpitMetrics();
+    updateFilterCounters();
+    updateChart();
+    renderStatusTimeline();
+    saveData();
+  };
+
+  const previousDashboardRows=dashboardRowsV32;
+  dashboardRowsV32=function(){
+    let rows=previousDashboardRows();
+    rows=rows
+      .filter(d=>textFilterPass(d.name,tableFilters.name))
+      .filter(d=>textFilterPass(d.notes||'',tableFilters.notes))
+      .filter(d=>checkboxFilterPass(tableValueForColumn(d,'product'),'product'))
+      .filter(d=>ownerTableFilterPass(d))
+      .filter(d=>checkboxFilterPass(tableValueForColumn(d,'watch'),'watch'));
+    return rows;
+  };
+  filteredData=function(){return dashboardRowsV32();};
+  baseFilteredDataForTable=function(){return dashboardRowsV32();};
+
+  const previousToggleCategory=toggleDashboardCategoryFilter;
+  toggleDashboardCategoryFilter=function(key){
+    previousToggleCategory(key);
+    const selected=new Set(selectedDashboardCategoryValues());
+    document.querySelectorAll('.f-cat').forEach(cb=>{cb.checked=selected.has(cb.value);});
+  };
+
+  const previousClearAll=clearDashboardButtonFilters;
+  clearDashboardButtonFilters=function(){
+    previousClearAll();
+    document.querySelectorAll('.f-cat,.f-status,.f-biz').forEach(cb=>{cb.checked=false;});
+  };
+
+  const previousToggleAll=toggleDashboardAoAll;
+  toggleDashboardAoAll=function(){
+    previousToggleAll();
+    const cats=new Set(selectedDashboardCategoryValues());
+    document.querySelectorAll('.f-cat').forEach(cb=>{cb.checked=cats.has(cb.value);});
+    syncStatusSidebarFromDashboard();
+    document.querySelectorAll('.f-biz').forEach(cb=>{cb.checked=dashboardBizFilters.has(cb.value);});
+    syncDashboardButtonFiltersToTable();
+  };
+
+  switchTab=function(tab){
+    const list=tab==='list';
+    document.getElementById('tabDashboard').classList.toggle('active',!list);
+    document.getElementById('tabList').classList.toggle('active',list);
+    document.getElementById('tabDashboardBtn').classList.toggle('active',!list);
+    document.getElementById('tabListBtn').classList.toggle('active',list);
+    if(list){
+      closeFloatingCompanyPopup();
+      renderCompanyTable();
+      renderEditors();
+    }else{
+      refreshDashboardFromSharedFiltersV34();
+      if(selectedCompanyId!=null) renderDashboardFloatingPopup();
+    }
+  };
+})();
+</script>
+
 </body>
 </html>
