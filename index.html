@@ -4634,5 +4634,59 @@ document.addEventListener('DOMContentLoaded',()=>{
   businessScopeFilterStatesV40[activeBusinessScope]=captureBusinessScopeFiltersV40();
 });
 </script>
+
+<style>
+/* V41 - Taille stable des menus de filtres apres Tout deselectionner */
+.company-table .filter-menu,
+.watch-table .filter-menu,
+.summary-table .summary-filter-menu{
+  box-sizing:border-box!important;
+  min-width:290px!important;
+  min-height:285px!important;
+  height:auto!important;
+  max-height:min(76vh,560px)!important;
+  overflow:auto!important;
+}
+.company-table .filter-menu .fm-bulk,
+.watch-table .filter-menu .fm-bulk,
+.summary-table .summary-filter-menu .bulk{
+  position:sticky!important;
+  top:0!important;
+  z-index:3!important;
+  box-sizing:border-box!important;
+  min-height:38px!important;
+  padding:4px 0!important;
+  margin:4px 0 7px!important;
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  gap:6px!important;
+  visibility:visible!important;
+  background:#fff!important;
+}
+.company-table .filter-menu .fm-bulk button,
+.watch-table .filter-menu .fm-bulk button,
+.summary-table .summary-filter-menu .bulk button{
+  display:inline-flex!important;
+  flex:1 1 0!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:0!important;
+  min-height:30px!important;
+  white-space:nowrap!important;
+  visibility:visible!important;
+}
+.company-table .filter-menu .fm-checks,
+.watch-table .filter-menu .fm-checks,
+.summary-table .summary-filter-menu .checks{
+  box-sizing:border-box!important;
+  min-height:165px!important;
+  height:165px!important;
+  max-height:230px!important;
+  overflow-y:auto!important;
+  display:block!important;
+  flex:none!important;
+}
+</style>
 </body>
 </html>
