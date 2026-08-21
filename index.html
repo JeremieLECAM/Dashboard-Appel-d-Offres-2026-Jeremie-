@@ -4290,7 +4290,7 @@ function installBizUi(){
   const prodSection=document.querySelector('#filters .section:nth-child(2)');
   if(prodSection&&!document.getElementById('bizFilterSection')){
     prodSection.insertAdjacentHTML('afterend',`<div id="bizFilterSection" class="section"><button type="button" class="section-head">Business type <span>▶</span></button><div class="section-body"><label class="biz-filter-label new"><input type="checkbox" class="f-biz" value="New Biz" checked> New Biz</label><label class="biz-filter-label existing"><input type="checkbox" class="f-biz" value="Existing"> Existing</label></div></div>`);
-    const sec=document.getElementById('bizFilterSection');sec.querySelector('.section-head').onclick=()=>{const open=sec.classList.toggle('open');sec.querySelector('span').textContent=open?'▼':'▶';};
+    // V32.2 : aucun onclick dédié ici. Le gestionnaire générique de wireUI gère l'ouverture une seule fois.
     sec.querySelectorAll('.f-biz').forEach(cb=>cb.onchange=()=>{dashboardBizFilters=new Set([...document.querySelectorAll('.f-biz:checked')].map(x=>x.value));renderCompanyTable();updateCockpitMetrics();updateChart();renderList();});
   }
   const nf=document.getElementById('newCompanyStatusManual');
@@ -4522,7 +4522,7 @@ installBizUi = function(){
 
 
 <script>
-/* V32.1 - synchronisation immediate des boutons Business Type */
+/* V32.2 - synchronisation immediate des boutons Business Type + correction ouverture du filtre */
 const _updateCockpitMetricsV321=updateCockpitMetrics;
 updateCockpitMetrics=function(){
   _updateCockpitMetricsV321();
