@@ -597,7 +597,7 @@
             <label class="status-filter-choice status-toconfirm"><input type="checkbox" class="f-status" value="AO à confirmer" checked> AO à confirmer</label>
             <label class="status-filter-choice status-waiting"><input type="checkbox" class="f-status" value="Docs à venir" checked> Docs à venir</label>
             <label class="status-filter-choice status-lost"><input type="checkbox" class="f-status" value="Perdu" checked> Perdu</label>
-            <label class="status-filter-choice status-won"><input type="checkbox" class="f-status" value="Gagné"> Gagné</label>
+            <label class="status-filter-choice status-won"><input type="checkbox" class="f-status" value="Gagné" checked> Gagné</label>
             <label class="status-filter-choice status-empty"><input type="checkbox" class="f-status" value="Sans statut" checked> Sans statut</label>
           </div></div>
           <div class="section"><button type="button" class="section-head">Année <span>▶</span></button><div class="section-body">
@@ -3118,7 +3118,7 @@ let selectedCompanyId = null;
 let hoveredCompanyId = null;
 let dashboardKpiFilter = null;
 let dashboardCategoryFilter = null;
-let dashboardKpiFilters = new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty','watch']);
+let dashboardKpiFilters = new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-gagne','status-empty','watch']);
 let dashboardCategoryFilters = new Set(['cac','sbf','priv','pub','eco']);
 let dashboardYearFilters = new Set();
 let tableSort = { col: 'name', dir: 'asc' };
@@ -3262,11 +3262,10 @@ function clearDashboardButtonFilters(){
   tableFilters.watch = null;
 }
 function isAoAllSelected(){
-  const defaultStatuses=['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty'];
+  const defaultStatuses=['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-gagne','status-empty'];
   const defaultCategories=['cac','sbf','priv','pub','eco'];
   return dashboardYearFilters.size===0 &&
     defaultStatuses.every(k=>dashboardKpiFilters.has(k)) &&
-    !dashboardKpiFilters.has('status-gagne') &&
     dashboardKpiFilters.has('watch') &&
     dashboardKpiFilters.size===defaultStatuses.length+1 &&
     defaultCategories.every(k=>dashboardCategoryFilters.has(k)) &&
@@ -3277,7 +3276,7 @@ function toggleDashboardAoAll(){
     clearDashboardButtonFilters();
   } else {
     dashboardCategoryFilters = new Set(['cac','sbf','priv','pub','eco']);
-    dashboardKpiFilters = new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty','watch']);
+    dashboardKpiFilters = new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-gagne','status-empty','watch']);
     dashboardYearFilters.clear();
     dashboardKpiFilter = null;
     dashboardCategoryFilter = null;
@@ -3370,9 +3369,7 @@ function isWonCompany(d){ return statusForCompany(d).label === 'Gagné'; }
 function shouldIncludeWonRows(){
   return dashboardKpiFilters.has('status-gagne') || (Array.isArray(tableFilters.status) && tableFilters.status.includes('Gagné'));
 }
-function excludeWonUnlessSelected(rows){
-  return shouldIncludeWonRows() ? rows : rows.filter(d=>!isWonCompany(d));
-}
+function excludeWonUnlessSelected(rows){ return rows; }
 
 function statusBadgeHtml(notes){ const st=statusFromNotes(notes); return `<span class="status-chip ${st.cls}">${statusLabelContent(st)}</span>`; }
 function statusBadgeHtmlForCompany(d){ const st=statusForCompany(d); return `<span class="status-chip ${st.cls}">${statusLabelContent(st)}</span>`; }
@@ -4332,11 +4329,11 @@ function switchBusinessScope(scope){
   selectedCompanyId=null; hoveredCompanyId=null; bulkSelectedIds.clear();
   closeFloatingCompanyPopup(); closeWatchModal();
   dashboardYearFilters.clear();
-  dashboardKpiFilters=new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty','watch']);
+  dashboardKpiFilters=new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-gagne','status-empty','watch']);
   dashboardCategoryFilters=new Set(['cac','sbf','priv','pub','eco']);
   tableFilters={name:{op:'contains',value:''},notes:{op:'contains',value:''},year:null,product:null,cat:null,owner:null,status:null,watch:null};
   document.querySelectorAll('.f-cat,.f-prod,.f-owner').forEach(cb=>cb.checked=true);
-  document.querySelectorAll('.f-status').forEach(cb=>cb.checked=cb.value!=='Gagné');
+  document.querySelectorAll('.f-status').forEach(cb=>cb.checked=true);
   const search=document.getElementById('search'); if(search) search.value='';
   const tableSearch=document.getElementById('companyTableSearch'); if(tableSearch) tableSearch.value='';
   refreshMainTabs(); renderOwners();
@@ -4688,5 +4685,87 @@ document.addEventListener('DOMContentLoaded',()=>{
   flex:none!important;
 }
 </style>
+
+<script>
+/* V42 - Registre persistant des owners, separe entre New Biz et Existing */
+const OWNER_REGISTRY_STORAGE_V42='ao_dashboard_owner_registry_v42';
+const EXISTING_OWNER_SEEDS_V42=['Julie Pirroni','Karen Bernard','Thierry Le Boeuf'];
+
+function normalizeOwnerRegistryV42(value){
+  const seen=new Set();
+  return (Array.isArray(value)?value:[]).map(v=>String(v||'').trim()).filter(v=>{
+    const key=normText(v);
+    if(!key || key===normText('Owner / BDR manquant') || seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+}
+
+function loadOwnerRegistryV42(){
+  let saved={};
+  try{ saved=JSON.parse(localStorage.getItem(OWNER_REGISTRY_STORAGE_V42)||'{}')||{}; }catch(e){ saved={}; }
+  const registry={
+    'New Biz':normalizeOwnerRegistryV42(saved['New Biz']),
+    'Existing':normalizeOwnerRegistryV42([...(saved.Existing||[]),...EXISTING_OWNER_SEEDS_V42])
+  };
+  try{ localStorage.setItem(OWNER_REGISTRY_STORAGE_V42,JSON.stringify(registry)); }catch(e){}
+  return registry;
+}
+
+const ownerRegistryV42=loadOwnerRegistryV42();
+
+function ownerRegistryScopeV42(){
+  return typeof activeBusinessScope!=='undefined' && activeBusinessScope==='Existing' ? 'Existing' : 'New Biz';
+}
+
+function persistentOwnerOptionsV42(scope=ownerRegistryScopeV42()){
+  const seeds=scope==='Existing'?EXISTING_OWNER_SEEDS_V42:[];
+  return normalizeOwnerRegistryV42([...(ownerRegistryV42[scope]||[]),...seeds]);
+}
+
+function registerPersistentOwnerV42(value,scope=ownerRegistryScopeV42()){
+  const owner=String(value||'').trim();
+  if(!owner || normText(owner)===normText('Owner / BDR manquant')) return;
+  ownerRegistryV42[scope]=normalizeOwnerRegistryV42([...(ownerRegistryV42[scope]||[]),owner]);
+  try{ localStorage.setItem(OWNER_REGISTRY_STORAGE_V42,JSON.stringify(ownerRegistryV42)); }catch(e){}
+}
+
+const getAllOwnerOptionsBeforeV42=getAllOwnerOptions;
+getAllOwnerOptions=function(extra=[]){
+  const values=[...getAllOwnerOptionsBeforeV42(extra),...persistentOwnerOptionsV42(),...(Array.isArray(extra)?extra:[])];
+  return normalizeOwnerRegistryV42(values).sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'}));
+};
+
+const uniqueSortedValuesBeforeV42=uniqueSortedValues;
+uniqueSortedValues=function(field){
+  if(field!=='owner') return uniqueSortedValuesBeforeV42(field);
+  const values=[...uniqueSortedValuesBeforeV42(field),...persistentOwnerOptionsV42()];
+  return normalizeOwnerRegistryV42(values).sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'}));
+};
+
+renderOwners=function(){
+  const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value));
+  const values=[...scopeRows(data).flatMap(ownerNames),...persistentOwnerOptionsV42()];
+  const owners=[...new Map(values.filter(Boolean).map(v=>[normText(v),v])).values()]
+    .sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'}));
+  const box=document.getElementById('ownerFilters'); if(!box)return;
+  box.innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join('');
+  document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change',updateAll));
+  updateFilterCounters();
+};
+
+const bindOwnerMultiSelectorsBeforeV42=bindOwnerMultiSelectors;
+bindOwnerMultiSelectors=function(scope=document){
+  bindOwnerMultiSelectorsBeforeV42(scope);
+  scope.querySelectorAll('[data-owner-create]').forEach(button=>{
+    if(button.dataset.registryBoundV42)return;
+    button.dataset.registryBoundV42='1';
+    button.addEventListener('click',()=>{
+      const picker=button.closest('[data-owner-picker]');
+      const search=picker?.querySelector('.owner-picker-search');
+      registerPersistentOwnerV42(search?.value||'');
+    },true);
+  });
+};
+</script>
 </body>
 </html>
