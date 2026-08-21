@@ -45,8 +45,13 @@
     .topbar{height:46px;display:flex;align-items:end;gap:8px;padding:8px 12px 0;border-bottom:3px solid var(--orange);background:var(--black);}
     .tab-btn{border:1px solid var(--orange);border-bottom:0;background:var(--black);color:var(--white);border-radius:13px 13px 0 0;padding:9px 15px;font-size:12px;font-weight:900;cursor:pointer;}
     .tab-btn.active{background:var(--orange);color:var(--black);}
-    .tab-content{display:none;height:calc(100vh - 46px);background:var(--white);}
+    .tab-content{display:none;height:calc(100vh - 84px);background:var(--white);}
     .tab-content.active{display:block;}
+    .subbar{height:38px;display:flex;align-items:end;gap:7px;padding:5px 12px 0;background:#f3f3f3;border-bottom:1px solid var(--line);}
+    .subtab-btn{border:1px solid #cfcfcf;border-bottom:0;background:#fff;color:#222;border-radius:10px 10px 0 0;padding:7px 14px;font-size:11px;font-weight:900;cursor:pointer;}
+    .subtab-btn.active{background:var(--orange);border-color:var(--orange);color:#000;}
+    .main-tabs .tab-btn{min-width:145px;text-align:center;}
+
     .dashboard-grid{height:100%;display:grid;grid-template-columns:220px 1fr;gap:12px;padding:12px;}
     .panel,.chart-panel,.list-main,.list-side{background:var(--white);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:auto;}
     .panel{padding:10px;}
@@ -528,10 +533,14 @@
 </head>
 <body onload="loadPlotly()">
   <div id="envWarning" class="envwarn"><span class="closebtn" onclick="document.getElementById('envWarning').style.display='none'">✕</span><span id="envWarningText"></span></div>
-  <div class="topbar">
-    <button type="button" id="tabDashboardBtn" class="tab-btn active">1. Dashboard</button>
-    <button type="button" id="tabListBtn" class="tab-btn">2. Liste</button>
+  <div class="topbar main-tabs">
+    <button type="button" id="mainNewBizBtn" class="tab-btn active">AO New Biz</button>
+    <button type="button" id="mainExistingBtn" class="tab-btn">AO Existing</button>
     <button type="button" id="watchTopBadge" class="topbar-watch-badge">⭐ A surveiller <strong id="watchTopCount">0</strong></button>
+  </div>
+  <div class="subbar">
+    <button type="button" id="tabDashboardBtn" class="subtab-btn active">1. Dashboard</button>
+    <button type="button" id="tabListBtn" class="subtab-btn">2. Liste</button>
   </div>
 
   <div id="tabDashboard" class="tab-content active">
@@ -3113,7 +3122,7 @@ let watchFilters = {
   owner: null
 };
 const STORAGE_KEY = 'ao_dashboard_data_categories_excel_v3_watchrules';
-const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','outline','owner','owner_missing','status','notes','watch','watch_override'];
+const CSV_HEADERS = ['id','name','year','product','revenue','y','cat','color','outline','owner','owner_missing','status','notes','watch','watch_override','businessScope'];
 function removeDeletedCompaniesAndReindex(rows){
   const removedNames = new Set(['BCL - Banque Centrale du Luxembourg','Alstom University']);
   return (Array.isArray(rows) ? rows : [])
@@ -3472,7 +3481,7 @@ function normalizePoint(row){
   const notes = row.notes==null?'':String(row.notes);
   const rawStatus = row.status || row.statut || row.Statut || row.STATUS || '';
   const status = rawStatus ? normalizeStatusLabel(rawStatus) : inferStatusFromNotes(notes);
-  return { id:Number(row.id)||nextDataId(), name:String(row.name||row.entreprise||'').trim(), year:Number.isFinite(year)?year:new Date().getFullYear(), product, revenue:Number.isFinite(revenue)?revenue:0, y:computeYFromRevenue(revenue, product), cat, color:colorForCategory(cat), outline:row.outline||'', owner, owner_missing:!(owner&&String(owner).trim()), status, notes, watchOverride, watch_override:watchOverride };
+  return { id:Number(row.id)||nextDataId(), name:String(row.name||row.entreprise||'').trim(), year:Number.isFinite(year)?year:new Date().getFullYear(), product, revenue:Number.isFinite(revenue)?revenue:0, y:computeYFromRevenue(revenue, product), cat, color:colorForCategory(cat), outline:row.outline||'', owner, owner_missing:!(owner&&String(owner).trim()), status, notes, watchOverride, watch_override:watchOverride, businessScope:(String(row.businessScope||row.bizType||row.biz_type||row.businessType||'New Biz').trim().toLowerCase()==='existing'?'Existing':'New Biz') };
 }
 function normalizeAllData(){ data = data.map(normalizePoint).filter(d=>d.name); years = [...new Set(data.map(d=>Number(d.year)).filter(Number.isFinite))].sort((a,b)=>a-b); syncYearInputs(); }
 function saveData(){ try{localStorage.setItem(STORAGE_KEY, JSON.stringify(data));}catch(e){} }
@@ -4018,7 +4027,7 @@ function saveEditor(prefix,id){
   d.y=computeYFromRevenue(d.revenue,d.product);
   renderOwners(); updateAll(); selectCompany(d.id);
 }
-function addCompanyFromForm(e){ e.preventDefault(); const d=normalizePoint({id:nextDataId(),name:document.getElementById('newCompanyName').value,year:document.getElementById('newCompanyYear').value,revenue:document.getElementById('newCompanyRevenue').value,product:document.getElementById('newCompanyProduct').value,cat:document.getElementById('newCompanyCat').value,owner:selectedOwnerValues('newCompanyOwnerChoice', null),status:document.getElementById('newCompanyStatusManual').value,notes:document.getElementById('newCompanyNotes').value}); if(!d.name)return; data.push(d); e.target.reset(); document.getElementById('newCompanyYear').value=new Date().getFullYear(); document.getElementById('newCompanyStatusManual').value='Sans statut'; renderNewCompanyOwnerSelector(); document.getElementById('newCompanyStatus').textContent='Entreprise ajoutée : '+d.name; renderOwners(); updateAll(); selectCompany(d.id); }
+function addCompanyFromForm(e){ e.preventDefault(); const d=normalizePoint({id:nextDataId(),name:document.getElementById('newCompanyName').value,year:document.getElementById('newCompanyYear').value,revenue:document.getElementById('newCompanyRevenue').value,product:document.getElementById('newCompanyProduct').value,cat:document.getElementById('newCompanyCat').value,owner:selectedOwnerValues('newCompanyOwnerChoice', null),status:document.getElementById('newCompanyStatusManual').value,notes:document.getElementById('newCompanyNotes').value,businessScope:activeBusinessScope}); if(!d.name)return; data.push(d); e.target.reset(); document.getElementById('newCompanyYear').value=new Date().getFullYear(); document.getElementById('newCompanyStatusManual').value='Sans statut'; renderNewCompanyOwnerSelector(); document.getElementById('newCompanyStatus').textContent='Entreprise ajoutée : '+d.name; renderOwners(); updateAll(); selectCompany(d.id); }
 function downloadTextFile(filename,text,mime='text/plain;charset=utf-8'){ const blob=new Blob([text],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
 
 
@@ -4277,471 +4286,89 @@ function importCsv(e){ const file=e.target.files&&e.target.files[0]; if(!file)re
 <div id="floatingCompanyPopup" class="floating-company-popup"></div>
 <div id="watchModal"><div id="watchCard"><div id="watchContent"></div></div><div id="watchSideEditor"></div></div>
 <style>
-:root{--newbiz:#7B1FA2;--existing:#795548}
-.biz-chip{display:inline-flex;align-items:center;border-radius:999px;padding:2px 7px;font-size:9px;font-weight:950;color:#fff;white-space:nowrap}
-.biz-new{background:var(--newbiz)}.biz-existing{background:var(--existing)}
-.summary-pill.biz-new-pill{border:2px solid var(--newbiz);background:#f5eafa;color:#55136d;font-weight:950}
-.summary-pill.biz-existing-pill{border:2px solid var(--existing);background:#f3ece9;color:#553a31;font-weight:950}
-.summary-pill.biz-new-pill.active{background:var(--newbiz)!important;color:#fff!important}
-.summary-pill.biz-existing-pill.active{background:var(--existing)!important;color:#fff!important}
+/* V35 - Deux dashboards independants New Biz / Existing, sans tags Business Type */
 .bulk-toolbar{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:8px 0;padding:8px;border:1px solid #ddd;border-radius:12px;background:#fafafa}
 .bulk-toolbar select,.bulk-toolbar input{width:auto!important;min-width:120px}
 .bulk-toolbar .btn{width:auto;margin:0;padding:6px 9px}.bulk-count{font-weight:900;font-size:10px}
 .bulk-select{width:16px;height:16px;accent-color:var(--orange)}
-.biz-filter-label{display:flex!important;align-items:center;gap:6px;border-radius:8px;padding:4px 5px;margin:3px 0;font-weight:900}
-.biz-filter-label.new{background:#f5eafa;color:#55136d}.biz-filter-label.existing{background:#f3ece9;color:#553a31}
 </style>
 <script>
-/* V31 - New Biz / Existing + bulk edit */
-const BIZ_OPTIONS=['New Biz','Existing'];
-let dashboardBizFilters=new Set(['New Biz']);
+/* V35 - navigation principale par jeu de donnees + conservation stricte des fonctions existantes */
+let activeBusinessScope='New Biz';
 let bulkSelectedIds=new Set();
-function normalizeBiz(v){ return String(v||'').trim().toLowerCase()==='existing'?'Existing':'New Biz'; }
-function bizMeta(v){ const label=normalizeBiz(v); return {label,cls:label==='Existing'?'biz-existing':'biz-new'}; }
-function bizBadgeHtml(d){const b=bizMeta(d&&d.bizType);return `<span class="biz-chip ${b.cls}">${b.label}</span>`;}
-
-const _normalizePointV31=normalizePoint;
-normalizePoint=function(row){const out=_normalizePointV31(row);out.bizType=normalizeBiz(row.bizType||row.biz_type||row.businessType);return out;};
-if(!CSV_HEADERS.includes('bizType')) CSV_HEADERS.splice(CSV_HEADERS.indexOf('status'),0,'bizType');
-
-function installBizUi(){
-  const prodSection=document.querySelector('#filters .section:nth-child(2)');
-  if(prodSection&&!document.getElementById('bizFilterSection')){
-    prodSection.insertAdjacentHTML('afterend',`<div id="bizFilterSection" class="section"><button type="button" class="section-head">Business type <span>▶</span></button><div class="section-body"><label class="biz-filter-label new"><input type="checkbox" class="f-biz" value="New Biz" checked> New Biz</label><label class="biz-filter-label existing"><input type="checkbox" class="f-biz" value="Existing"> Existing</label></div></div>`);
-    const sec=document.getElementById('bizFilterSection');
-    // V32.2 : aucun onclick dédié ici. Le gestionnaire générique de wireUI gère l'ouverture une seule fois.
-    sec.querySelectorAll('.f-biz').forEach(cb=>cb.onchange=()=>{dashboardBizFilters=new Set([...document.querySelectorAll('.f-biz:checked')].map(x=>x.value));renderCompanyTable();updateCockpitMetrics();updateChart();renderList();});
-  }
-  const nf=document.getElementById('newCompanyStatusManual');
-  if(nf&&!document.getElementById('newCompanyBizType')){
-    const statusLabel=nf.previousElementSibling;
-    const anchor=statusLabel&&statusLabel.classList.contains('field-label')?statusLabel:nf;
-    anchor.insertAdjacentHTML('beforebegin','<div class="field-label">Business type</div><select id="newCompanyBizType"><option>New Biz</option><option>Existing</option></select>');
-  }
-  const toolbar=document.querySelector('#tabList .list-toolbar');
-  if(toolbar&&!document.getElementById('bulkToolbar')) toolbar.insertAdjacentHTML('afterend',`<div id="bulkToolbar" class="bulk-toolbar"><span class="bulk-count"><span id="bulkCount">0</span> sélectionnée(s)</span><select id="bulkField"><option value="bizType">Business type</option><option value="status">Statut</option><option value="product">Produit</option><option value="cat">Catégorie</option><option value="owner">Owner / BDR</option><option value="year">Année</option></select><select id="bulkValue"></select><button type="button" id="bulkApply" class="btn">Appliquer</button><button type="button" id="bulkVisible" class="btn secondary">Sélectionner les lignes visibles</button><button type="button" id="bulkClear" class="btn secondary">Vider</button></div>`);
-  const field=document.getElementById('bulkField'); if(field){field.onchange=refreshBulkValues;document.getElementById('bulkApply').onclick=applyBulkEdit;document.getElementById('bulkVisible').onclick=()=>{document.querySelectorAll('#companyTableWrap tr[data-id]').forEach(tr=>bulkSelectedIds.add(Number(tr.dataset.id)));renderCompanyTable();};document.getElementById('bulkClear').onclick=()=>{bulkSelectedIds.clear();renderCompanyTable();};refreshBulkValues();}
+function rowScope(d){return String(d&&d.businessScope||'New Biz').trim().toLowerCase()==='existing'?'Existing':'New Biz';}
+function scopeRows(rows){return (Array.isArray(rows)?rows:[]).filter(d=>rowScope(d)===activeBusinessScope);}
+function refreshMainTabs(){
+  document.getElementById('mainNewBizBtn')?.classList.toggle('active',activeBusinessScope==='New Biz');
+  document.getElementById('mainExistingBtn')?.classList.toggle('active',activeBusinessScope==='Existing');
+  const title=document.querySelector('#tabList .list-toolbar h2');
+  if(title) title.textContent='Liste complète des entreprises '+activeBusinessScope;
 }
-function refreshBulkValues(){const field=document.getElementById('bulkField'),v=document.getElementById('bulkValue');if(!field||!v)return;const opts={bizType:BIZ_OPTIONS,status:STATUS_OPTIONS,product:['Langues','Coaching'],cat:CAT_ORDER,owner:getAllOwnerOptions(),year:[...new Set(data.map(d=>d.year))].sort((a,b)=>b-a)}[field.value]||[];v.innerHTML=opts.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');}
-function applyBulkEdit(){const field=document.getElementById('bulkField')?.value,value=document.getElementById('bulkValue')?.value;if(!field||!bulkSelectedIds.size)return;data.forEach(d=>{if(!bulkSelectedIds.has(Number(d.id)))return;if(field==='year')d.year=Number(value)||d.year;else if(field==='owner'){d.owner=value;d.owner_missing=!value;}else{d[field]=value;}if(field==='cat')d.color=colorForCategory(d.cat);if(field==='product')d.y=computeYFromRevenue(d.revenue,d.product);});saveData();renderOwners();updateAll();bulkSelectedIds.clear();renderCompanyTable();}
-
-const _initAppV31=initApp;
-initApp=function(){installBizUi();_initAppV31();data=data.map(normalizePoint);updateAll();};
-
-const _filteredDataV31=filteredData;
-filteredData=function(){return _filteredDataV31().filter(d=>dashboardBizFilters.has(normalizeBiz(d.bizType)));};
-const _baseFilteredV31=baseFilteredDataForTable;
-baseFilteredDataForTable=function(){return _baseFilteredV31().filter(d=>dashboardBizFilters.has(normalizeBiz(d.bizType)));};
-
-const _updateCockpitV31=updateCockpitMetrics;
-updateCockpitMetrics=function(){_updateCockpitV31();const s=document.getElementById('portfolioSummary');if(!s)return;const main=s.querySelector('.summary-main'),secondary=s.querySelector('.summary-secondary');if(!main||!secondary)return;const rows=data;const n=rows.filter(d=>normalizeBiz(d.bizType)==='New Biz').length,e=rows.filter(d=>normalizeBiz(d.bizType)==='Existing').length;const holder=document.createElement('span');holder.style.display='contents';holder.innerHTML=`<span class="summary-pill biz-new-pill ${dashboardBizFilters.has('New Biz')?'active':''}" data-biz="New Biz">${n} New Biz</span><span class="summary-pill biz-existing-pill ${dashboardBizFilters.has('Existing')?'active':''}" data-biz="Existing">${e} Existing</span>`;main.parentNode.insertBefore(holder,secondary);s.querySelectorAll('[data-biz]').forEach(btn=>btn.onclick=()=>{const k=btn.dataset.biz;if(dashboardBizFilters.has(k))dashboardBizFilters.delete(k);else dashboardBizFilters.add(k);document.querySelectorAll('.f-biz').forEach(cb=>cb.checked=dashboardBizFilters.has(cb.value));updateAll();});};
-
-const _renderCompanyTableV31=renderCompanyTable;
-renderCompanyTable=function(){_renderCompanyTableV31();const table=document.querySelector('#companyTableWrap table');if(!table)return;const hr=table.tHead?.rows[0];if(hr&&!hr.querySelector('.bulk-head')){const th=document.createElement('th');th.className='bulk-head';th.innerHTML='<input type="checkbox" class="bulk-select" id="bulkMaster" title="Sélectionner toutes les lignes visibles">';hr.insertBefore(th,hr.firstChild);document.getElementById('bulkMaster').onchange=e=>{table.querySelectorAll('tbody tr[data-id]').forEach(tr=>{const id=Number(tr.dataset.id);e.target.checked?bulkSelectedIds.add(id):bulkSelectedIds.delete(id);});renderCompanyTable();};const tagTh=document.createElement('th');tagTh.textContent='Business type';hr.insertBefore(tagTh,hr.cells[7]||null);}
- table.querySelectorAll('tbody tr[data-id]').forEach(tr=>{const id=Number(tr.dataset.id);const d=data.find(x=>Number(x.id)===id);const td=document.createElement('td');td.innerHTML=`<input type="checkbox" class="bulk-select" ${bulkSelectedIds.has(id)?'checked':''}>`;td.querySelector('input').onclick=e=>e.stopPropagation();td.querySelector('input').onchange=e=>{e.target.checked?bulkSelectedIds.add(id):bulkSelectedIds.delete(id);document.getElementById('bulkCount').textContent=bulkSelectedIds.size;};tr.insertBefore(td,tr.firstChild);const tag=document.createElement('td');tag.innerHTML=bizBadgeHtml(d);tr.insertBefore(tag,tr.cells[7]||null);});const count=document.getElementById('bulkCount');if(count)count.textContent=bulkSelectedIds.size;};
-
-function injectBizIntoEditor(box,prefix,d){
-  if(!box||box.querySelector(`#${prefix}EditBizType`))return;
-  const status=box.querySelector(`#${prefix}EditStatus`);
-  if(!status)return;
-  const statusLabel=status.previousElementSibling;
-  const anchor=statusLabel&&statusLabel.classList.contains('field-label')?statusLabel:status;
-  anchor.insertAdjacentHTML('beforebegin',`<div class="field-label">Business type</div><select id="${prefix}EditBizType"><option ${normalizeBiz(d.bizType)==='New Biz'?'selected':''}>New Biz</option><option ${normalizeBiz(d.bizType)==='Existing'?'selected':''}>Existing</option></select>`);
-}
-const _renderEditorV31=renderEditor;
-renderEditor=function(containerId,prefix){_renderEditorV31(containerId,prefix);const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d)injectBizIntoEditor(document.getElementById(containerId),prefix,d);};
-const _renderFloatV31=renderDashboardFloatingPopup;
-renderDashboardFloatingPopup=function(){_renderFloatV31();const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d)injectBizIntoEditor(document.getElementById('floatingCompanyPopup'),'float',d);};
-const _renderWatchPanelV31=renderWatchCompanyPanel;
-renderWatchCompanyPanel=function(){_renderWatchPanelV31();const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d)injectBizIntoEditor(document.getElementById('watchSideEditor'),'watch',d);};
-function captureBiz(prefix,id){const d=data.find(x=>Number(x.id)===Number(id)),el=document.getElementById(prefix+'EditBizType');if(d&&el)d.bizType=normalizeBiz(el.value);}
-const _saveEditorV31=saveEditor;saveEditor=function(prefix,id){captureBiz(prefix,id);_saveEditorV31(prefix,id);};
-const _saveFloatV31=saveFloatingEditor;saveFloatingEditor=function(id){captureBiz('float',id);_saveFloatV31(id);};
-const _saveWatchV31=saveWatchEditor;saveWatchEditor=function(id){captureBiz('watch',id);_saveWatchV31(id);};
-
-const _addCompanyV31=addCompanyFromForm;
-addCompanyFromForm=function(e){const before=new Set(data.map(d=>d.id));_addCompanyV31(e);data.filter(d=>!before.has(d.id)).forEach(d=>d.bizType=normalizeBiz(document.getElementById('newCompanyBizType')?.value));saveData();};
-</script>
-
-
-<style>
-/* V32 - correctifs Business Type, AO global et sections de filtres */
-#bizFilterSection .section-body{padding:8px}
-.company-table th.business-type-head{min-width:135px}
-</style>
-<script>
-/* V32 - Business Type aligne sur les filtres categorie/statut et correctif AO */
-dashboardBizFilters = new Set(BIZ_OPTIONS);
-tableFilters.bizType = null;
-
-function selectedDashboardBusinessValues(){
-  return [...dashboardBizFilters];
-}
-
-const _syncDashboardButtonFiltersToTableV32 = syncDashboardButtonFiltersToTable;
-syncDashboardButtonFiltersToTable = function(){
-  _syncDashboardButtonFiltersToTableV32();
-  tableFilters.bizType = selectedDashboardBusinessValues();
-};
-
-const _syncTableFiltersToDashboardV32 = syncTableFiltersToDashboard;
-syncTableFiltersToDashboard = function(){
-  _syncTableFiltersToDashboardV32();
-  if(Array.isArray(tableFilters.bizType)) dashboardBizFilters = new Set(tableFilters.bizType.map(normalizeBiz));
-  document.querySelectorAll('.f-biz').forEach(cb=>cb.checked=dashboardBizFilters.has(cb.value));
-};
-
-clearDashboardButtonFilters = function(){
-  dashboardKpiFilters.clear();
-  dashboardCategoryFilters.clear();
-  dashboardBizFilters.clear();
+function switchBusinessScope(scope){
+  activeBusinessScope=scope==='Existing'?'Existing':'New Biz';
+  selectedCompanyId=null; hoveredCompanyId=null; bulkSelectedIds.clear();
+  closeFloatingCompanyPopup(); closeWatchModal();
   dashboardYearFilters.clear();
-  dashboardKpiFilter = null;
-  dashboardCategoryFilter = null;
-  tableFilters.year = [];
-  tableFilters.cat = [];
-  tableFilters.status = [];
-  tableFilters.bizType = [];
-  tableFilters.watch = null;
-  document.querySelectorAll('.f-biz').forEach(cb=>cb.checked=false);
-};
-
-isAoAllSelected = function(){
-  const defaultStatuses=['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty'];
-  const defaultCategories=['cac','sbf','priv','pub','eco'];
-  return dashboardYearFilters.size===0 &&
-    defaultStatuses.every(k=>dashboardKpiFilters.has(k)) &&
-    !dashboardKpiFilters.has('status-gagne') &&
-    !dashboardKpiFilters.has('watch') &&
-    dashboardKpiFilters.size===defaultStatuses.length &&
-    defaultCategories.every(k=>dashboardCategoryFilters.has(k)) &&
-    dashboardCategoryFilters.size===defaultCategories.length &&
-    BIZ_OPTIONS.every(k=>dashboardBizFilters.has(k)) &&
-    dashboardBizFilters.size===BIZ_OPTIONS.length;
-};
-
-toggleDashboardAoAll = function(){
-  if(isAoAllSelected()){
-    clearDashboardButtonFilters();
-  }else{
-    dashboardCategoryFilters = new Set(['cac','sbf','priv','pub','eco']);
-    dashboardKpiFilters = new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty']);
-    dashboardBizFilters = new Set(BIZ_OPTIONS);
-    dashboardYearFilters.clear();
-    dashboardKpiFilter = null;
-    dashboardCategoryFilter = null;
-    syncDashboardButtonFiltersToTable();
-    document.querySelectorAll('.f-biz').forEach(cb=>cb.checked=true);
-  }
-  syncStatusSidebarFromDashboard();
-};
-
-function dashboardRowsV32(){
-  const f=getFilterState();
-  let rows=data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && ownerFilterPass(d,f.owners) && d.year>=f.yMin && d.year<=f.yMax);
-  const activeCats=selectedDashboardCategoryValues();
-  const activeStatuses=selectedDashboardStatusValues();
-  const activeYears=selectedDashboardYears();
-  const activeBiz=selectedDashboardBusinessValues();
-  const watchActive=dashboardKpiFilters.has('watch');
-  const anySelection=activeCats.length||activeStatuses.length||activeYears.length||activeBiz.length||watchActive;
-  if(!anySelection) return [];
-  if(activeCats.length) rows=rows.filter(d=>activeCats.includes(d.cat));
-  if(activeStatuses.length) rows=rows.filter(d=>activeStatuses.includes(statusForCompany(d).label));
-  else rows=rows.filter(d=>!isWonCompany(d));
-  if(activeYears.length) rows=rows.filter(d=>activeYears.includes(Number(d.year)));
-  if(activeBiz.length) rows=rows.filter(d=>activeBiz.includes(normalizeBiz(d.bizType)));
-  if(watchActive) rows=rows.filter(d=>isWatch(d));
-  return rows;
+  dashboardKpiFilters=new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-empty']);
+  dashboardCategoryFilters=new Set(['cac','sbf','priv','pub','eco']);
+  tableFilters={name:{op:'contains',value:''},notes:{op:'contains',value:''},year:null,product:null,cat:null,owner:null,status:null,watch:null};
+  document.querySelectorAll('.f-cat,.f-prod,.f-owner').forEach(cb=>cb.checked=true);
+  document.querySelectorAll('.f-status').forEach(cb=>cb.checked=cb.value!=='Gagné');
+  const search=document.getElementById('search'); if(search) search.value='';
+  const tableSearch=document.getElementById('companyTableSearch'); if(tableSearch) tableSearch.value='';
+  refreshMainTabs(); renderOwners(); syncDashboardButtonFiltersToTable(); updateAll();
+  if(document.getElementById('tabDashboard')?.classList.contains('active')) setTimeout(resizeChart,40);
 }
-
-filteredData = function(){ return dashboardRowsV32(); };
-baseFilteredDataForTable = function(){ return dashboardRowsV32(); };
-
-const _isFilterActiveV32 = isFilterActive;
-isFilterActive = function(col){
-  if(col==='bizType') return Array.isArray(tableFilters.bizType) && tableFilters.bizType.length!==BIZ_OPTIONS.length;
-  return _isFilterActiveV32(col);
-};
-
-const _uniqueSortedValuesV32 = uniqueSortedValues;
-uniqueSortedValues = function(field){
-  if(field==='bizType') return BIZ_OPTIONS.slice();
-  return _uniqueSortedValuesV32(field);
-};
-
-const _tableValueForColumnV32 = tableValueForColumn;
-tableValueForColumn = function(d,col){
-  if(col==='bizType') return normalizeBiz(d.bizType);
-  return _tableValueForColumnV32(d,col);
-};
-
-const _bindTableFilterEventsV32 = bindTableFilterEvents;
-bindTableFilterEvents = function(){
-  _bindTableFilterEventsV32();
-  document.querySelectorAll('[data-reset="bizType"]').forEach(btn=>{
-    btn.onclick=()=>{tableFilters.bizType=null;dashboardBizFilters=new Set(BIZ_OPTIONS);window.__lastOpenFilter='bizType';renderCompanyTable();updateAll();};
-  });
-};
-
-const _renderCompanyTableV32 = renderCompanyTable;
-renderCompanyTable = function(){
-  _renderCompanyTableV32();
-  const table=document.querySelector('#companyTableWrap table');
-  if(!table) return;
-  const header=[...table.tHead.rows[0].cells].find(cell=>cell.textContent.trim()==='Business type');
-  if(header){
-    header.classList.add('business-type-head');
-    header.innerHTML=`<div class="th-inner"><span>Business Type</span><button type="button" class="filter-trigger ${isFilterActive('bizType')?'active':''}" data-filter-trigger="bizType">▾</button>${checkboxFilterMenu('bizType','Business Type',{sort:true,asc:'A → Z',desc:'Z → A'})}</div>`;
-  }
-  if(Array.isArray(tableFilters.bizType)){
-    table.querySelectorAll('tbody tr[data-id]').forEach(tr=>{
-      const d=data.find(x=>Number(x.id)===Number(tr.dataset.id));
-      if(!d || !tableFilters.bizType.includes(normalizeBiz(d.bizType))) tr.remove();
-    });
-  }
-  // Evénements déjà liés par le rendu de base : éviter le double clic ouverture/fermeture.
-
-  if(window.__lastOpenFilter){const menu=document.getElementById('filter-'+window.__lastOpenFilter);if(menu)menu.classList.add('open');}
-};
-
-function normalizeFilterSectionsV32(){
-  const filters=document.getElementById('filters');
-  if(!filters) return;
-  const sections=[...filters.children].filter(el=>el.classList&&el.classList.contains('section'));
-  let firstYear=null;
-  sections.forEach(sec=>{
-    const title=(sec.querySelector('.section-head')?.textContent||'').replace(/[▶▼]/g,'').trim().toLowerCase();
-    if(title.startsWith('catégorie')) sec.id='categoryFilterSection';
-    else if(title.startsWith('produit')) sec.id='productFilterSection';
-    else if(title.startsWith('business type')) sec.id='bizFilterSection';
-    else if(title.startsWith('statut')) sec.id='statusFilterSection';
-    else if(title.startsWith('année')){
-      if(firstYear && sec!==firstYear){sec.remove();return;}
-      firstYear=sec;sec.id='yearFilterSection';
-    }
-  });
+function installTwoDashboardNavigation(){
+  refreshMainTabs();
+  document.getElementById('mainNewBizBtn').onclick=()=>switchBusinessScope('New Biz');
+  document.getElementById('mainExistingBtn').onclick=()=>switchBusinessScope('Existing');
+  installBulkUi();
 }
-
-updateFilterCounters = function(){
-  normalizeFilterSectionsV32();
-  const configs=[
-    ['categoryFilterSection','🏷 Catégorie',document.querySelectorAll('.f-cat:checked').length],
-    ['productFilterSection','📚 Produit',document.querySelectorAll('.f-prod:checked').length],
-    ['bizFilterSection','💼 Business type',document.querySelectorAll('.f-biz:checked').length],
-    ['statusFilterSection','● Statut',document.querySelectorAll('.f-status:checked').length],
-    ['yearFilterSection','📅 Année',`${document.getElementById('yearMin')?.value||''} → ${document.getElementById('yearMax')?.value||''}`],
-    ['ownerFilterSection','👤 Owner',document.querySelectorAll('.f-owner:checked').length]
-  ];
-  configs.forEach(([id,title,count])=>{
-    const sec=document.getElementById(id);const btn=id==='ownerFilterSection'?document.getElementById('ownerToggle'):sec?.querySelector('.section-head');
-    if(!btn)return;const arrow=sec?.classList.contains('open')?'▼':'▶';
-    btn.innerHTML=`${title} <span class="section-count">${count}</span><span${id==='ownerFilterSection'?' id="ownerArrow"':''}>${arrow}</span>`;
-  });
+function installBulkUi(){
+  const toolbar=document.querySelector('#tabList .list-toolbar');
+  if(toolbar&&!document.getElementById('bulkToolbar')) toolbar.insertAdjacentHTML('afterend',`<div id="bulkToolbar" class="bulk-toolbar"><span class="bulk-count"><span id="bulkCount">0</span> sélectionnée(s)</span><select id="bulkField"><option value="status">Statut</option><option value="product">Produit</option><option value="cat">Catégorie</option><option value="owner">Owner / BDR</option><option value="year">Année</option></select><select id="bulkValue"></select><button type="button" id="bulkApply" class="btn">Appliquer</button><button type="button" id="bulkVisible" class="btn secondary">Sélectionner les lignes visibles</button><button type="button" id="bulkClear" class="btn secondary">Vider</button></div>`);
+  const field=document.getElementById('bulkField');
+  if(field){field.onchange=refreshBulkValues;document.getElementById('bulkApply').onclick=applyBulkEdit;document.getElementById('bulkVisible').onclick=()=>{document.querySelectorAll('#companyTableWrap tr[data-id]').forEach(tr=>bulkSelectedIds.add(Number(tr.dataset.id)));renderCompanyTable();};document.getElementById('bulkClear').onclick=()=>{bulkSelectedIds.clear();renderCompanyTable();};refreshBulkValues();}
+}
+function refreshBulkValues(){const field=document.getElementById('bulkField'),v=document.getElementById('bulkValue');if(!field||!v)return;const opts={status:STATUS_OPTIONS,product:['Langues','Coaching'],cat:CAT_ORDER,owner:getAllOwnerOptions(),year:[...new Set(scopeRows(data).map(d=>d.year))].sort((a,b)=>b-a)}[field.value]||[];v.innerHTML=opts.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');}
+function applyBulkEdit(){const field=document.getElementById('bulkField')?.value,value=document.getElementById('bulkValue')?.value;if(!field||!bulkSelectedIds.size)return;data.forEach(d=>{if(rowScope(d)!==activeBusinessScope||!bulkSelectedIds.has(Number(d.id)))return;if(field==='year')d.year=Number(value)||d.year;else if(field==='owner'){d.owner=value;d.owner_missing=!value;}else d[field]=value;if(field==='cat')d.color=colorForCategory(d.cat);if(field==='product')d.y=computeYFromRevenue(d.revenue,d.product);});saveData();renderOwners();updateAll();bulkSelectedIds.clear();renderCompanyTable();}
+const _loadDataV35=loadData;
+loadData=function(){_loadDataV35();data=data.map(d=>({...d,businessScope:rowScope(d)}));};
+const _initAppV35=initApp;
+initApp=function(){installTwoDashboardNavigation();_initAppV35();refreshMainTabs();};
+const _filteredDataV35=filteredData;
+filteredData=function(){return scopeRows(_filteredDataV35());};
+const _baseFilteredDataV35=baseFilteredDataForTable;
+baseFilteredDataForTable=function(){return scopeRows(_baseFilteredDataV35());};
+const _getWatchBaseRowsV35=getWatchBaseRows;
+getWatchBaseRows=function(){return scopeRows(_getWatchBaseRowsV35());};
+const _renderOwnersV35=renderOwners;
+renderOwners=function(){const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value));const owners=[...new Set(scopeRows(data).flatMap(ownerNames))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'}));const box=document.getElementById('ownerFilters');if(!box)return;box.innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join('');document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change',updateAll));updateFilterCounters();};
+getAllOwnerOptions=function(extra=[]){const set=new Set(scopeRows(data).flatMap(ownerNames).filter(o=>o&&o!=='Owner / BDR manquant'));extra.forEach(o=>{if(o&&o!=='Owner / BDR manquant')set.add(o);});return [...set].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'}));};
+const _uniqueSortedValuesV35=uniqueSortedValues;
+uniqueSortedValues=function(field){
+  if(field==='owner'){const vals=scopeRows(data).flatMap(ownerNames).filter(Boolean).map(String);return [...new Set(vals)].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'}));}
+  const vals=scopeRows(data).map(d=>field==='status'?statusForCompany(d).label:field==='watch'?(isWatch(d)?'OUI':'NON'):d[field]).filter(v=>v!==null&&v!==undefined&&String(v).trim()!=='').map(String);
+  return [...new Set(vals)].sort((a,b)=>field==='year'?Number(a)-Number(b):a.localeCompare(b,'fr',{sensitivity:'base'}));
 };
-
-const _installBizUiV32 = installBizUi;
-installBizUi = function(){
-  _installBizUiV32();
-  dashboardBizFilters=new Set(BIZ_OPTIONS);
-  document.querySelectorAll('.f-biz').forEach(cb=>cb.checked=true);
-  normalizeFilterSectionsV32();
-  syncDashboardButtonFiltersToTable();
-  updateFilterCounters();
+const _renderCompanyTableV35=renderCompanyTable;
+renderCompanyTable=function(){
+  _renderCompanyTableV35(); const table=document.querySelector('#companyTableWrap table'); if(!table)return;
+  const hr=table.tHead?.rows[0];
+  if(hr&&!hr.querySelector('.bulk-head')){const th=document.createElement('th');th.className='bulk-head';th.innerHTML='<input type="checkbox" class="bulk-select" id="bulkMaster" title="Sélectionner toutes les lignes visibles">';hr.insertBefore(th,hr.firstChild);document.getElementById('bulkMaster').onchange=e=>{table.querySelectorAll('tbody tr[data-id]').forEach(tr=>{const id=Number(tr.dataset.id);e.target.checked?bulkSelectedIds.add(id):bulkSelectedIds.delete(id);});renderCompanyTable();};}
+  table.querySelectorAll('tbody tr[data-id]').forEach(tr=>{const id=Number(tr.dataset.id);const td=document.createElement('td');td.innerHTML=`<input type="checkbox" class="bulk-select" ${bulkSelectedIds.has(id)?'checked':''}>`;td.querySelector('input').onclick=e=>e.stopPropagation();td.querySelector('input').onchange=e=>{e.target.checked?bulkSelectedIds.add(id):bulkSelectedIds.delete(id);const c=document.getElementById('bulkCount');if(c)c.textContent=bulkSelectedIds.size;};tr.insertBefore(td,tr.firstChild);});
+  const count=document.getElementById('bulkCount');if(count)count.textContent=bulkSelectedIds.size;
 };
+const _addCompanyFromFormV35=addCompanyFromForm;
+addCompanyFromForm=function(e){_addCompanyFromFormV35(e);const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d){d.businessScope=activeBusinessScope;saveData();updateAll();}};
+const _exportConstDataV35=exportConstData;
+exportConstData=function(){const rows=scopeRows(data);const out='const data = '+JSON.stringify(rows,null,2)+';\n';downloadTextFile('const_data_AO_'+(activeBusinessScope==='Existing'?'Existing':'New_Biz')+'.js',out,'application/javascript;charset=utf-8');document.getElementById('dataToolsStatus').textContent='Export const_data '+activeBusinessScope+' généré.';};
+exportCsv=function(){const rows=[CSV_HEADERS.join(';')].concat(scopeRows(data).map(d=>CSV_HEADERS.map(h=>csvEscape(h==='watch'?isWatch(d):(h==='watch_override'?(d.watchOverride===null||d.watchOverride===undefined?'':d.watchOverride):d[h]))).join(';')));downloadTextFile('ao_dashboard_'+(activeBusinessScope==='Existing'?'existing':'new_biz')+'.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8');document.getElementById('dataToolsStatus').textContent='Export CSV '+activeBusinessScope+' généré.';};
+const _importCsvV35=importCsv;
+importCsv=function(e){const before=new Set(data.map(d=>d.id));const file=e.target.files&&e.target.files[0];if(!file)return;file.text().then(text=>{const clean=String(text||'').replace(/^\ufeff/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim();if(!clean)return;const lines=clean.split('\n').filter(Boolean);const delim=lines[0].split(';').length>=lines[0].split(',').length?';':',';const headers=parseCsvLine(lines[0],delim).map(h=>h.trim());const rows=lines.slice(1).map(line=>{const cells=parseCsvLine(line,delim),o={businessScope:activeBusinessScope};headers.forEach((h,i)=>o[h]=cells[i]??'');o.businessScope=activeBusinessScope;return normalizePoint(o);});rows.forEach(row=>{const idx=data.findIndex(d=>rowScope(d)===activeBusinessScope&&(Number(d.id)===Number(row.id)||(d.name.toLowerCase()===row.name.toLowerCase()&&Number(d.year)===Number(row.year)&&d.product===row.product)));if(idx>=0)data[idx]={...data[idx],...row,id:data[idx].id,businessScope:activeBusinessScope};else data.push({...row,id:nextDataId(),businessScope:activeBusinessScope});});renderOwners();updateAll();document.getElementById('dataToolsStatus').textContent='Import CSV '+activeBusinessScope+' terminé : '+rows.length+' ligne(s).';e.target.value='';});};
+const _switchTabV35=switchTab;
+switchTab=function(tab){_switchTabV35(tab);document.getElementById('tabDashboardBtn').classList.toggle('active',tab!=='list');document.getElementById('tabListBtn').classList.toggle('active',tab==='list');if(tab!=='list')setTimeout(resizeChart,40);};
 </script>
-
-
-<script>
-/* V33 - affichage restaure, filtres onglet 2 corriges, champs Statut et Business Type separes */
-const _updateCockpitMetricsV321=updateCockpitMetrics;
-updateCockpitMetrics=function(){
-  _updateCockpitMetricsV321();
-  document.querySelectorAll('#portfolioSummary [data-biz]').forEach(btn=>{
-    btn.onclick=()=>{
-      const key=btn.dataset.biz;
-      if(dashboardBizFilters.has(key)) dashboardBizFilters.delete(key); else dashboardBizFilters.add(key);
-      document.querySelectorAll('.f-biz').forEach(cb=>cb.checked=dashboardBizFilters.has(cb.value));
-      syncDashboardButtonFiltersToTable();
-      updateAll();
-    };
-  });
-};
-const _installBizUiV321=installBizUi;
-installBizUi=function(){
-  _installBizUiV321();
-  document.querySelectorAll('.f-biz').forEach(cb=>{
-    cb.onchange=()=>{
-      dashboardBizFilters=new Set([...document.querySelectorAll('.f-biz:checked')].map(x=>x.value));
-      syncDashboardButtonFiltersToTable();
-      updateAll();
-    };
-  });
-};
-</script>
-
-<script>
-/* V34 - synchronisation bidirectionnelle stricte des filtres entre Dashboard et Liste */
-(function(){
-  const STATUS_KEY_BY_LABEL={
-    'En cours':'status-en-cours','AO à confirmer':'status-ao-confirm','Docs à venir':'status-docs',
-    'Perdu':'status-perdu','Gagné':'status-gagne','Sans statut':'status-empty'
-  };
-  const CATEGORY_KEY_BY_VALUE={
-    'CAC 40':'cac','SBF 120':'sbf','Entreprise privée hors CAC 40/SBF 120':'priv',
-    'Public / Semi-Public':'pub','Écoles':'eco'
-  };
-  let syncingFilters=false;
-
-  function checkedValues(selector){
-    return [...document.querySelectorAll(selector+':checked')].map(cb=>cb.value);
-  }
-  function setChecks(selector,values){
-    const selected=new Set(values);
-    document.querySelectorAll(selector).forEach(cb=>{cb.checked=selected.has(cb.value);});
-  }
-  function allValues(selector){
-    return [...document.querySelectorAll(selector)].map(cb=>cb.value);
-  }
-  function yearsInsideSidebarRange(){
-    const min=Number(document.getElementById('yearMin')?.value);
-    const max=Number(document.getElementById('yearMax')?.value);
-    return [...new Set(data.map(d=>Number(d.year)).filter(Number.isFinite))]
-      .filter(y=>(!Number.isFinite(min)||y>=min)&&(!Number.isFinite(max)||y<=max))
-      .map(String);
-  }
-  function syncDashboardControlsToStateV34(){
-    const watchActive=dashboardKpiFilters.has('watch');
-    dashboardCategoryFilters=new Set(checkedValues('.f-cat').map(v=>CATEGORY_KEY_BY_VALUE[v]).filter(Boolean));
-    dashboardKpiFilters=new Set(checkedValues('.f-status').map(v=>STATUS_KEY_BY_LABEL[v]).filter(Boolean));
-    if(watchActive) dashboardKpiFilters.add('watch');
-    dashboardBizFilters=new Set(checkedValues('.f-biz').map(normalizeBiz));
-
-    tableFilters.cat=checkedValues('.f-cat');
-    tableFilters.product=checkedValues('.f-prod');
-    tableFilters.status=checkedValues('.f-status');
-    tableFilters.bizType=checkedValues('.f-biz').map(normalizeBiz);
-    tableFilters.owner=checkedValues('.f-owner');
-    tableFilters.year=dashboardYearFilters.size ? selectedDashboardYears().map(String) : yearsInsideSidebarRange();
-    tableFilters.watch=watchActive?['OUI']:null;
-  }
-  function refreshDashboardFromSharedFiltersV34(){
-    renderList();
-    updateCockpitMetrics();
-    updateFilterCounters();
-    updateChart();
-    renderStatusTimeline();
-  }
-
-  const previousSyncTableToDashboard=syncTableFiltersToDashboard;
-  syncTableFiltersToDashboard=function(){
-    if(syncingFilters) return;
-    syncingFilters=true;
-    try{
-      previousSyncTableToDashboard();
-
-      const cats=Array.isArray(tableFilters.cat)?tableFilters.cat:allValues('.f-cat');
-      const products=Array.isArray(tableFilters.product)?tableFilters.product:allValues('.f-prod');
-      const statuses=Array.isArray(tableFilters.status)?tableFilters.status:allValues('.f-status');
-      const biz=Array.isArray(tableFilters.bizType)?tableFilters.bizType.map(normalizeBiz):BIZ_OPTIONS.slice();
-      const owners=Array.isArray(tableFilters.owner)?tableFilters.owner:allValues('.f-owner');
-
-      setChecks('.f-cat',cats);
-      setChecks('.f-prod',products);
-      setChecks('.f-status',statuses);
-      setChecks('.f-biz',biz);
-      setChecks('.f-owner',owners);
-
-      dashboardCategoryFilters=new Set(cats.map(v=>CATEGORY_KEY_BY_VALUE[v]).filter(Boolean));
-      const watchActive=Array.isArray(tableFilters.watch)&&tableFilters.watch.includes('OUI');
-      dashboardKpiFilters=new Set(statuses.map(v=>STATUS_KEY_BY_LABEL[v]).filter(Boolean));
-      if(watchActive) dashboardKpiFilters.add('watch');
-      dashboardBizFilters=new Set(biz);
-
-      if(Array.isArray(tableFilters.year)){
-        dashboardYearFilters=new Set(tableFilters.year.map(Number).filter(Number.isFinite));
-        if(dashboardYearFilters.size){
-          const selected=[...dashboardYearFilters];
-          const min=document.getElementById('yearMin'),max=document.getElementById('yearMax');
-          if(min) min.value=Math.min(...selected);
-          if(max) max.value=Math.max(...selected);
-        }
-      }else{
-        dashboardYearFilters.clear();
-      }
-    }finally{
-      syncingFilters=false;
-    }
-    queueMicrotask(refreshDashboardFromSharedFiltersV34);
-  };
-
-  updateAll=function(){
-    normalizeAllData();
-    if(!syncingFilters) syncDashboardControlsToStateV34();
-    renderList();
-    renderCompanyTable();
-    renderEditors();
-    updateCockpitMetrics();
-    updateFilterCounters();
-    updateChart();
-    renderStatusTimeline();
-    saveData();
-  };
-
-  const previousDashboardRows=dashboardRowsV32;
-  dashboardRowsV32=function(){
-    let rows=previousDashboardRows();
-    rows=rows
-      .filter(d=>textFilterPass(d.name,tableFilters.name))
-      .filter(d=>textFilterPass(d.notes||'',tableFilters.notes))
-      .filter(d=>checkboxFilterPass(tableValueForColumn(d,'product'),'product'))
-      .filter(d=>ownerTableFilterPass(d))
-      .filter(d=>checkboxFilterPass(tableValueForColumn(d,'watch'),'watch'));
-    return rows;
-  };
-  filteredData=function(){return dashboardRowsV32();};
-  baseFilteredDataForTable=function(){return dashboardRowsV32();};
-
-  const previousToggleCategory=toggleDashboardCategoryFilter;
-  toggleDashboardCategoryFilter=function(key){
-    previousToggleCategory(key);
-    const selected=new Set(selectedDashboardCategoryValues());
-    document.querySelectorAll('.f-cat').forEach(cb=>{cb.checked=selected.has(cb.value);});
-  };
-
-  const previousClearAll=clearDashboardButtonFilters;
-  clearDashboardButtonFilters=function(){
-    previousClearAll();
-    document.querySelectorAll('.f-cat,.f-status,.f-biz').forEach(cb=>{cb.checked=false;});
-  };
-
-  const previousToggleAll=toggleDashboardAoAll;
-  toggleDashboardAoAll=function(){
-    previousToggleAll();
-    const cats=new Set(selectedDashboardCategoryValues());
-    document.querySelectorAll('.f-cat').forEach(cb=>{cb.checked=cats.has(cb.value);});
-    syncStatusSidebarFromDashboard();
-    document.querySelectorAll('.f-biz').forEach(cb=>{cb.checked=dashboardBizFilters.has(cb.value);});
-    syncDashboardButtonFiltersToTable();
-  };
-
-  switchTab=function(tab){
-    const list=tab==='list';
-    document.getElementById('tabDashboard').classList.toggle('active',!list);
-    document.getElementById('tabList').classList.toggle('active',list);
-    document.getElementById('tabDashboardBtn').classList.toggle('active',!list);
-    document.getElementById('tabListBtn').classList.toggle('active',list);
-    if(list){
-      closeFloatingCompanyPopup();
-      renderCompanyTable();
-      renderEditors();
-    }else{
-      refreshDashboardFromSharedFiltersV34();
-      if(selectedCompanyId!=null) renderDashboardFloatingPopup();
-    }
-  };
-})();
-</script>
-
 </body>
 </html>
