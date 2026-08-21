@@ -560,6 +560,7 @@
               <div class="field-label">Produit</div><select id="newCompanyProduct"><option>Langues</option><option>Coaching</option></select>
               <div class="field-label">Catégorie</div><select id="newCompanyCat"><option>CAC 40</option><option>SBF 120</option><option>Entreprise privée hors CAC 40/SBF 120</option><option>Public / Semi-Public</option><option>Écoles</option></select>
               <div class="field-label">Owner / BDR</div><div id="newCompanyOwnerSelector"></div>
+              <div class="field-label">Business Type <span style="font-weight:600;color:#777">(facultatif)</span></div><select id="newCompanyBusinessScope"><option value="">Selon l’onglet actuel</option><option value="New Biz">New Biz</option><option value="Existing">Existing</option></select>
               <div class="field-label">Statut</div><select id="newCompanyStatusManual"><option>En cours</option><option>Perdu</option><option>Gagné</option><option>AO à confirmer</option><option>Docs à venir</option><option>Sans statut</option></select>
               <div class="field-label">Notes</div><textarea id="newCompanyNotes" placeholder="Notes libres sur l’entreprise…"></textarea>
               <button class="btn" type="submit">Ajouter au dashboard</button>
@@ -4027,7 +4028,7 @@ function saveEditor(prefix,id){
   d.y=computeYFromRevenue(d.revenue,d.product);
   renderOwners(); updateAll(); selectCompany(d.id);
 }
-function addCompanyFromForm(e){ e.preventDefault(); const d=normalizePoint({id:nextDataId(),name:document.getElementById('newCompanyName').value,year:document.getElementById('newCompanyYear').value,revenue:document.getElementById('newCompanyRevenue').value,product:document.getElementById('newCompanyProduct').value,cat:document.getElementById('newCompanyCat').value,owner:selectedOwnerValues('newCompanyOwnerChoice', null),status:document.getElementById('newCompanyStatusManual').value,notes:document.getElementById('newCompanyNotes').value,businessScope:activeBusinessScope}); if(!d.name)return; data.push(d); e.target.reset(); document.getElementById('newCompanyYear').value=new Date().getFullYear(); document.getElementById('newCompanyStatusManual').value='Sans statut'; renderNewCompanyOwnerSelector(); document.getElementById('newCompanyStatus').textContent='Entreprise ajoutée : '+d.name; renderOwners(); updateAll(); selectCompany(d.id); }
+function addCompanyFromForm(e){ e.preventDefault(); const d=normalizePoint({id:nextDataId(),name:document.getElementById('newCompanyName').value,year:document.getElementById('newCompanyYear').value,revenue:document.getElementById('newCompanyRevenue').value,product:document.getElementById('newCompanyProduct').value,cat:document.getElementById('newCompanyCat').value,owner:selectedOwnerValues('newCompanyOwnerChoice', null),status:document.getElementById('newCompanyStatusManual').value,notes:document.getElementById('newCompanyNotes').value,businessScope:(document.getElementById('newCompanyBusinessScope')?.value||activeBusinessScope)}); if(!d.name)return; data.push(d); e.target.reset(); document.getElementById('newCompanyYear').value=new Date().getFullYear(); document.getElementById('newCompanyStatusManual').value='Sans statut'; renderNewCompanyOwnerSelector(); document.getElementById('newCompanyStatus').textContent='Entreprise ajoutée : '+d.name; renderOwners(); updateAll(); selectCompany(d.id); }
 function downloadTextFile(filename,text,mime='text/plain;charset=utf-8'){ const blob=new Blob([text],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
 
 
@@ -4360,8 +4361,6 @@ renderCompanyTable=function(){
   table.querySelectorAll('tbody tr[data-id]').forEach(tr=>{const id=Number(tr.dataset.id);const td=document.createElement('td');td.innerHTML=`<input type="checkbox" class="bulk-select" ${bulkSelectedIds.has(id)?'checked':''}>`;td.querySelector('input').onclick=e=>e.stopPropagation();td.querySelector('input').onchange=e=>{e.target.checked?bulkSelectedIds.add(id):bulkSelectedIds.delete(id);const c=document.getElementById('bulkCount');if(c)c.textContent=bulkSelectedIds.size;};tr.insertBefore(td,tr.firstChild);});
   const count=document.getElementById('bulkCount');if(count)count.textContent=bulkSelectedIds.size;
 };
-const _addCompanyFromFormV35=addCompanyFromForm;
-addCompanyFromForm=function(e){_addCompanyFromFormV35(e);const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d){d.businessScope=activeBusinessScope;saveData();updateAll();}};
 const _exportConstDataV35=exportConstData;
 exportConstData=function(){const rows=scopeRows(data);const out='const data = '+JSON.stringify(rows,null,2)+';\n';downloadTextFile('const_data_AO_'+(activeBusinessScope==='Existing'?'Existing':'New_Biz')+'.js',out,'application/javascript;charset=utf-8');document.getElementById('dataToolsStatus').textContent='Export const_data '+activeBusinessScope+' généré.';};
 exportCsv=function(){const rows=[CSV_HEADERS.join(';')].concat(scopeRows(data).map(d=>CSV_HEADERS.map(h=>csvEscape(h==='watch'?isWatch(d):(h==='watch_override'?(d.watchOverride===null||d.watchOverride===undefined?'':d.watchOverride):d[h]))).join(';')));downloadTextFile('ao_dashboard_'+(activeBusinessScope==='Existing'?'existing':'new_biz')+'.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8');document.getElementById('dataToolsStatus').textContent='Export CSV '+activeBusinessScope+' généré.';};
@@ -4369,6 +4368,42 @@ const _importCsvV35=importCsv;
 importCsv=function(e){const before=new Set(data.map(d=>d.id));const file=e.target.files&&e.target.files[0];if(!file)return;file.text().then(text=>{const clean=String(text||'').replace(/^\ufeff/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim();if(!clean)return;const lines=clean.split('\n').filter(Boolean);const delim=lines[0].split(';').length>=lines[0].split(',').length?';':',';const headers=parseCsvLine(lines[0],delim).map(h=>h.trim());const rows=lines.slice(1).map(line=>{const cells=parseCsvLine(line,delim),o={businessScope:activeBusinessScope};headers.forEach((h,i)=>o[h]=cells[i]??'');o.businessScope=activeBusinessScope;return normalizePoint(o);});rows.forEach(row=>{const idx=data.findIndex(d=>rowScope(d)===activeBusinessScope&&(Number(d.id)===Number(row.id)||(d.name.toLowerCase()===row.name.toLowerCase()&&Number(d.year)===Number(row.year)&&d.product===row.product)));if(idx>=0)data[idx]={...data[idx],...row,id:data[idx].id,businessScope:activeBusinessScope};else data.push({...row,id:nextDataId(),businessScope:activeBusinessScope});});renderOwners();updateAll();document.getElementById('dataToolsStatus').textContent='Import CSV '+activeBusinessScope+' terminé : '+rows.length+' ligne(s).';e.target.value='';});};
 const _switchTabV35=switchTab;
 switchTab=function(tab){_switchTabV35(tab);document.getElementById('tabDashboardBtn').classList.toggle('active',tab!=='list');document.getElementById('tabListBtn').classList.toggle('active',tab==='list');if(tab!=='list')setTimeout(resizeChart,40);};
+</script>
+
+<script>
+/* V36 - Business Type facultatif dans tous les formulaires de creation et modification */
+function businessTypeSelectHtml(id, selected='', optional=false){
+  const chosen=rowScope({businessScope:selected||activeBusinessScope});
+  const blank=optional?`<option value="">Selon l’onglet actuel (${escapeHtml(activeBusinessScope)})</option>`:'';
+  return `<select id="${id}">${blank}<option value="New Biz" ${chosen==='New Biz'&&!optional?'selected':''}>New Biz</option><option value="Existing" ${chosen==='Existing'&&!optional?'selected':''}>Existing</option></select>`;
+}
+function injectBusinessTypeField(box,prefix,d){
+  if(!box||box.querySelector(`#${prefix}EditBusinessScope`)) return;
+  const status=box.querySelector(`#${prefix}EditStatus`);
+  if(!status) return;
+  const label=status.previousElementSibling;
+  const anchor=label&&label.classList.contains('field-label')?label:status;
+  anchor.insertAdjacentHTML('beforebegin',`<div class="field-label">Business Type <span style="font-weight:600;color:#777">(facultatif)</span></div>${businessTypeSelectHtml(prefix+'EditBusinessScope',rowScope(d),false)}`);
+}
+function captureBusinessType(prefix,id){
+  const d=data.find(x=>Number(x.id)===Number(id));
+  const el=document.getElementById(prefix+'EditBusinessScope');
+  if(d&&el) d.businessScope=el.value||activeBusinessScope;
+}
+const _renderEditorV36=renderEditor;
+renderEditor=function(containerId,prefix){_renderEditorV36(containerId,prefix);const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d)injectBusinessTypeField(document.getElementById(containerId),prefix,d);};
+const _renderDashboardFloatingPopupV36=renderDashboardFloatingPopup;
+renderDashboardFloatingPopup=function(){_renderDashboardFloatingPopupV36();const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d)injectBusinessTypeField(document.getElementById('floatingCompanyPopup'),'float',d);};
+const _renderWatchCompanyPanelV36=renderWatchCompanyPanel;
+renderWatchCompanyPanel=function(){_renderWatchCompanyPanelV36();const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d)injectBusinessTypeField(document.getElementById('watchSideEditor'),'watch',d);};
+const _saveEditorV36=saveEditor;
+saveEditor=function(prefix,id){captureBusinessType(prefix,id);_saveEditorV36(prefix,id);};
+const _saveFloatingEditorV36=saveFloatingEditor;
+saveFloatingEditor=function(id){captureBusinessType('float',id);_saveFloatingEditorV36(id);};
+const _saveWatchEditorV36=saveWatchEditor;
+saveWatchEditor=function(id){captureBusinessType('watch',id);_saveWatchEditorV36(id);};
+const _switchBusinessScopeV36=switchBusinessScope;
+switchBusinessScope=function(scope){_switchBusinessScopeV36(scope);const field=document.getElementById('newCompanyBusinessScope');if(field)field.value='';};
 </script>
 </body>
 </html>
