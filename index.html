@@ -4470,5 +4470,71 @@ function renderSummaryTimeline(rows){const holder=document.getElementById('summa
 function renderSummary(){initSummaryFilters();const rows=summaryFilteredRows(),nb=rows.filter(d=>rowScope(d)==='New Biz'),ex=rows.filter(d=>rowScope(d)==='Existing'),m=cockpitMetrics(rows),unique=uniqueCompanies(rows),n=currentYearNumber();document.getElementById('summaryHeroStats').innerHTML=`${rows.length} AO<br>${unique} entreprises uniques`;document.getElementById('summaryKpis').innerHTML=`<div class="summary-kpi"><div class="v">${rows.length}</div><div class="l">AO consolidés</div></div><div class="summary-kpi black"><div class="v">${unique}</div><div class="l">Entreprises sans doublon</div></div><div class="summary-kpi orange"><div class="v">${summaryCompanyCount(rows,'En cours')}</div><div class="l">Entreprises En cours, ${n}-${n+1}</div></div><div class="summary-kpi pink"><div class="v">${summaryCompanyCount(rows,'Docs à venir')}</div><div class="l">Entreprises Docs à venir, ${n}-${n+1}</div></div><div class="summary-kpi yellow"><div class="v">${summaryCompanyCount(rows,'AO à confirmer')}</div><div class="l">Entreprises À confirmer, ${n}-${n+1}</div></div><div class="summary-kpi"><div class="v">${summaryPriorityCompanyCount(rows)}</div><div class="l">Entreprises prioritaires consolidées, ${n}-${n+1}</div></div><div class="summary-kpi blue"><div class="v">${summaryProductCount(rows,'Langues')}</div><div class="l">AO Langues consolidés</div></div><div class="summary-kpi purple"><div class="v">${summaryProductCount(rows,'Coaching')}</div><div class="l">AO Coaching consolidés</div></div>`;document.getElementById('summaryNewBiz').innerHTML=renderScopeKpis(nb);document.getElementById('summaryExisting').innerHTML=renderScopeKpis(ex);document.getElementById('summaryCombined').innerHTML=renderScopeKpis(rows);document.getElementById('summaryCompaniesNew').innerHTML=companyTable(nb,'new');document.getElementById('summaryCompaniesExisting').innerHTML=companyTable(ex,'existing');document.getElementById('summaryCompaniesAll').innerHTML=companyTable(rows,'all');renderSummaryTimeline(rows);bindSummaryTableFilters();}
 document.addEventListener('click',()=>document.querySelectorAll('.summary-filter-menu.open').forEach(m=>m.classList.remove('open')));
 </script>
+
+<style>
+/* V39 - Fenetres de filtre stables et KPI Pipe N/N+1 */
+.filter-menu,.summary-filter-menu{min-width:250px!important;min-height:190px!important;max-height:min(72vh,520px)!important;overflow:auto!important}
+.fm-checks,.summary-filter-menu .checks{min-height:112px!important;max-height:230px!important;overflow:auto!important;display:block!important}
+.fm-bulk,.summary-filter-menu .bulk{min-height:30px!important;display:flex!important;gap:5px!important;visibility:visible!important}
+.filter-menu.open,.summary-filter-menu.open{display:block!important}
+.summary-kpi-grid{grid-template-columns:repeat(5,minmax(145px,1fr))!important}
+.summary-kpi.pipe{border-top-color:#FF7900!important;background:linear-gradient(135deg,#FFF3E0,#FFF9C4 52%,#FFE3F4)!important}
+@media(max-width:1200px){.summary-kpi-grid{grid-template-columns:repeat(3,minmax(145px,1fr))!important}}
+</style>
+<script>
+/* V39 - le menu actif survit a chaque rerendu, meme avec zero choix selectionne */
+let summaryOpenFilterV39=null;
+function reopenSummaryFilterV39(){
+  if(!summaryOpenFilterV39)return;
+  const menu=document.querySelector(`[data-sum-menu="${summaryOpenFilterV39}"]`);
+  if(menu)menu.classList.add('open');
+}
+function bindSummaryTableFilters(){
+  document.querySelectorAll('[data-sum-open]').forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    const key=b.dataset.sumOpen,target=b.parentElement.querySelector('.summary-filter-menu');
+    const opening=!target.classList.contains('open');
+    document.querySelectorAll('.summary-filter-menu.open').forEach(m=>{if(m!==target)m.classList.remove('open')});
+    target.classList.toggle('open',opening);
+    summaryOpenFilterV39=opening?key:null;
+  });
+  document.querySelectorAll('.summary-filter-menu').forEach(m=>m.onclick=e=>e.stopPropagation());
+  document.querySelectorAll('[data-sum-sort]').forEach(b=>b.onclick=e=>{e.stopPropagation();const[k,c,d]=b.dataset.sumSort.split('|');summaryOpenFilterV39=`${k}|${c}`;summaryTableState[k].sort={col:c,dir:d};renderSummary();});
+  function apply(k,c,mode){
+    const menu=document.querySelector(`[data-sum-menu="${k}|${c}"]`);if(!menu)return;
+    if(mode==='all')menu.querySelectorAll('input').forEach(x=>x.checked=true);
+    if(mode==='none')menu.querySelectorAll('input').forEach(x=>x.checked=false);
+    summaryTableState[k].filters[c]=[...menu.querySelectorAll('input:checked')].map(x=>x.value);
+    summaryOpenFilterV39=`${k}|${c}`;
+    renderSummary();
+  }
+  document.querySelectorAll('[data-sum-all]').forEach(b=>b.onclick=e=>{e.stopPropagation();const[k,c]=b.dataset.sumAll.split('|');apply(k,c,'all')});
+  document.querySelectorAll('[data-sum-none]').forEach(b=>b.onclick=e=>{e.stopPropagation();const[k,c]=b.dataset.sumNone.split('|');apply(k,c,'none')});
+  document.querySelectorAll('[data-sum-check]').forEach(b=>b.onchange=e=>{e.stopPropagation();const[k,c]=b.dataset.sumCheck.split('|');apply(k,c,'keep')});
+  reopenSummaryFilterV39();
+}
+function renderSummary(){
+  initSummaryFilters();
+  const rows=summaryFilteredRows(),nb=rows.filter(d=>rowScope(d)==='New Biz'),ex=rows.filter(d=>rowScope(d)==='Existing'),unique=uniqueCompanies(rows),n=currentYearNumber();
+  const pipe=summaryPriorityCompanyCount(rows),langues=summaryProductCount(rows,'Langues'),coaching=summaryProductCount(rows,'Coaching');
+  document.getElementById('summaryHeroStats').innerHTML=`${rows.length} AO<br>${unique} entreprises uniques`;
+  document.getElementById('summaryKpis').innerHTML=`<div class="summary-kpi"><div class="v">${rows.length}</div><div class="l">AO consolidés</div></div><div class="summary-kpi black"><div class="v">${unique}</div><div class="l">Entreprises sans doublon</div></div><div class="summary-kpi pipe"><div class="v">${pipe}</div><div class="l">Pipe N/N+1, entreprises uniques En cours + Docs à venir + À confirmer (${n}-${n+1})</div></div><div class="summary-kpi blue"><div class="v">${langues}</div><div class="l">AO Langues consolidés</div></div><div class="summary-kpi purple"><div class="v">${coaching}</div><div class="l">AO Coaching consolidés</div></div>`;
+  document.getElementById('summaryNewBiz').innerHTML=renderScopeKpis(nb);
+  document.getElementById('summaryExisting').innerHTML=renderScopeKpis(ex);
+  document.getElementById('summaryCombined').innerHTML=renderScopeKpis(rows);
+  document.getElementById('summaryCompaniesNew').innerHTML=companyTable(nb,'new');
+  document.getElementById('summaryCompaniesExisting').innerHTML=companyTable(ex,'existing');
+  document.getElementById('summaryCompaniesAll').innerHTML=companyTable(rows,'all');
+  renderSummaryTimeline(rows);bindSummaryTableFilters();reopenSummaryFilterV39();
+}
+/* La liste principale garde deja son identifiant de menu ouvert. On force aussi une taille stable apres chaque rendu. */
+const _renderCompanyTableV39=renderCompanyTable;
+renderCompanyTable=function(){_renderCompanyTableV39();if(window.__lastOpenFilter){const m=document.getElementById('filter-'+window.__lastOpenFilter);if(m)m.classList.add('open');}};
+/* Meme comportement pour la liste A surveiller. */
+let watchOpenFilterV39=null;
+const _bindWatchFilterEventsV39=bindWatchFilterEvents;
+bindWatchFilterEvents=function(){_bindWatchFilterEventsV39();document.querySelectorAll('[data-watch-filter-trigger]').forEach(b=>b.addEventListener('click',()=>{watchOpenFilterV39=b.dataset.watchFilterTrigger}));if(watchOpenFilterV39){const m=document.getElementById('watch-filter-'+watchOpenFilterV39);if(m)m.classList.add('open');}};
+document.addEventListener('click',e=>{if(!e.target.closest('.summary-filter-menu')&&!e.target.closest('[data-sum-open]'))summaryOpenFilterV39=null;});
+</script>
 </body>
 </html>
