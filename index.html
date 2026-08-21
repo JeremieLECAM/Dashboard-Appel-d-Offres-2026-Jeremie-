@@ -4763,8 +4763,57 @@ bindOwnerMultiSelectors=function(scope=document){
       const picker=button.closest('[data-owner-picker]');
       const search=picker?.querySelector('.owner-picker-search');
       registerPersistentOwnerV42(search?.value||'');
+      if(picker?.dataset.ownerPicker!=='newCompanyOwnerChoice'){
+        setTimeout(()=>renderNewCompanyOwnerSelector(),0);
+      }
     },true);
   });
+};
+</script>
+
+<script>
+/* V43 - Synchronisation du formulaire de creation et apparition immediate des bulles */
+function checkOwnerFiltersV43(ownerValue){
+  const wanted=new Set(splitOwners(ownerValue).map(normText));
+  if(!wanted.size)return;
+  document.querySelectorAll('.f-owner').forEach(input=>{
+    if(wanted.has(normText(input.value))) input.checked=true;
+  });
+}
+
+const renderOwnersBeforeV43=renderOwners;
+renderOwners=function(){
+  renderOwnersBeforeV43();
+  renderNewCompanyOwnerSelector();
+};
+
+const addCompanyFromFormBeforeV43=addCompanyFromForm;
+addCompanyFromForm=function(event){
+  const previousIds=new Set(data.map(row=>Number(row.id)));
+  addCompanyFromFormBeforeV43(event);
+  const created=data.find(row=>!previousIds.has(Number(row.id)));
+  if(!created)return;
+
+  splitOwners(created.owner).forEach(owner=>registerPersistentOwnerV42(owner));
+  renderOwners();
+  checkOwnerFiltersV43(created.owner);
+  renderNewCompanyOwnerSelector();
+  updateAll();
+
+  const refresh=()=>{
+    normalizeAllData();
+    updateChart();
+    updateCockpitMetrics();
+    renderStatusTimeline();
+  };
+  if(typeof requestAnimationFrame==='function') requestAnimationFrame(refresh);
+  else setTimeout(refresh,0);
+};
+
+const switchBusinessScopeBeforeV43=switchBusinessScope;
+switchBusinessScope=function(scope){
+  switchBusinessScopeBeforeV43(scope);
+  renderNewCompanyOwnerSelector();
 };
 </script>
 </body>
