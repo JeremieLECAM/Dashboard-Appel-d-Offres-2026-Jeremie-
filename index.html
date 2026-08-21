@@ -536,6 +536,7 @@
   <div class="topbar main-tabs">
     <button type="button" id="mainNewBizBtn" class="tab-btn active">AO New Biz</button>
     <button type="button" id="mainExistingBtn" class="tab-btn">AO Existing</button>
+    <button type="button" id="mainSummaryBtn" class="tab-btn">Résumé</button>
     <button type="button" id="watchTopBadge" class="topbar-watch-badge">⭐ A surveiller <strong id="watchTopCount">0</strong></button>
   </div>
   <div class="subbar">
@@ -560,7 +561,6 @@
               <div class="field-label">Produit</div><select id="newCompanyProduct"><option>Langues</option><option>Coaching</option></select>
               <div class="field-label">Catégorie</div><select id="newCompanyCat"><option>CAC 40</option><option>SBF 120</option><option>Entreprise privée hors CAC 40/SBF 120</option><option>Public / Semi-Public</option><option>Écoles</option></select>
               <div class="field-label">Owner / BDR</div><div id="newCompanyOwnerSelector"></div>
-              <div class="field-label">Business Type <span style="font-weight:600;color:#777">(facultatif)</span></div><select id="newCompanyBusinessScope"><option value="">Selon l’onglet actuel</option><option value="New Biz">New Biz</option><option value="Existing">Existing</option></select>
               <div class="field-label">Statut</div><select id="newCompanyStatusManual"><option>En cours</option><option>Perdu</option><option>Gagné</option><option>AO à confirmer</option><option>Docs à venir</option><option>Sans statut</option></select>
               <div class="field-label">Notes</div><textarea id="newCompanyNotes" placeholder="Notes libres sur l’entreprise…"></textarea>
               <button class="btn" type="submit">Ajouter au dashboard</button>
@@ -651,6 +651,24 @@
     </div>
   </div>
 
+  <div id="tabSummary" class="tab-content summary-page">
+    <div class="summary-shell">
+      <div class="summary-hero"><div><h1>Résumé des Appels d’offres</h1><p>Vue consolidée New Biz, Existing et portefeuille global</p></div><div id="summaryHeroStats" class="summary-hero-stats"></div></div>
+      <div id="summaryFilters" class="summary-filterbar">
+        <div><label>Périmètre</label><select id="summaryScope"><option value="All">New Biz + Existing</option><option value="New Biz">New Biz</option><option value="Existing">Existing</option></select></div>
+        <div><label>Produit</label><select id="summaryProduct"><option value="All">Tous</option><option>Langues</option><option>Coaching</option></select></div>
+        <div><label>Statut</label><select id="summaryStatus"><option value="All">Tous</option><option>En cours</option><option>AO à confirmer</option><option>Docs à venir</option><option>Perdu</option><option>Gagné</option><option>Sans statut</option></select></div>
+        <div><label>Année min.</label><select id="summaryYearMin"></select></div><div><label>Année max.</label><select id="summaryYearMax"></select></div>
+        <div><label>Entreprise</label><input id="summarySearch" type="text" placeholder="Rechercher…"></div>
+        <button id="summaryReset" type="button">Réinitialiser</button>
+      </div>
+      <div id="summaryKpis" class="summary-kpi-grid"></div>
+      <section class="summary-card"><div class="summary-card-head"><div><h2>Timeline commune</h2><p>Répartition annuelle des AO New Biz et Existing</p></div><div class="summary-legend"><span><i class="nb"></i>New Biz</span><span><i class="ex"></i>Existing</span></div></div><div id="summaryTimeline"></div></section>
+      <div class="summary-two-cols"><section class="summary-card"><h2>KPIs New Biz</h2><div id="summaryNewBiz"></div></section><section class="summary-card"><h2>KPIs Existing</h2><div id="summaryExisting"></div></section></div>
+      <section class="summary-card"><h2>KPIs consolidés</h2><div id="summaryCombined"></div></section>
+      <div class="summary-three-cols"><section class="summary-card"><h2>AO par entreprise, New Biz</h2><div id="summaryCompaniesNew"></div></section><section class="summary-card"><h2>AO par entreprise, Existing</h2><div id="summaryCompaniesExisting"></div></section><section class="summary-card"><h2>AO par entreprise, consolidé</h2><div id="summaryCompaniesAll"></div></section></div>
+    </div>
+  </div>
 <script>
 const SEED_DATA = [
   {
@@ -4028,7 +4046,7 @@ function saveEditor(prefix,id){
   d.y=computeYFromRevenue(d.revenue,d.product);
   renderOwners(); updateAll(); selectCompany(d.id);
 }
-function addCompanyFromForm(e){ e.preventDefault(); const d=normalizePoint({id:nextDataId(),name:document.getElementById('newCompanyName').value,year:document.getElementById('newCompanyYear').value,revenue:document.getElementById('newCompanyRevenue').value,product:document.getElementById('newCompanyProduct').value,cat:document.getElementById('newCompanyCat').value,owner:selectedOwnerValues('newCompanyOwnerChoice', null),status:document.getElementById('newCompanyStatusManual').value,notes:document.getElementById('newCompanyNotes').value,businessScope:(document.getElementById('newCompanyBusinessScope')?.value||activeBusinessScope)}); if(!d.name)return; data.push(d); e.target.reset(); document.getElementById('newCompanyYear').value=new Date().getFullYear(); document.getElementById('newCompanyStatusManual').value='Sans statut'; renderNewCompanyOwnerSelector(); document.getElementById('newCompanyStatus').textContent='Entreprise ajoutée : '+d.name; renderOwners(); updateAll(); selectCompany(d.id); }
+function addCompanyFromForm(e){ e.preventDefault(); const d=normalizePoint({id:nextDataId(),name:document.getElementById('newCompanyName').value,year:document.getElementById('newCompanyYear').value,revenue:document.getElementById('newCompanyRevenue').value,product:document.getElementById('newCompanyProduct').value,cat:document.getElementById('newCompanyCat').value,owner:selectedOwnerValues('newCompanyOwnerChoice', null),status:document.getElementById('newCompanyStatusManual').value,notes:document.getElementById('newCompanyNotes').value,businessScope:activeBusinessScope}); if(!d.name)return; data.push(d); e.target.reset(); document.getElementById('newCompanyYear').value=new Date().getFullYear(); document.getElementById('newCompanyStatusManual').value='Sans statut'; renderNewCompanyOwnerSelector(); document.getElementById('newCompanyStatus').textContent='Entreprise ajoutée : '+d.name; renderOwners(); updateAll(); selectCompany(d.id); }
 function downloadTextFile(filename,text,mime='text/plain;charset=utf-8'){ const blob=new Blob([text],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
 
 
@@ -4361,6 +4379,8 @@ renderCompanyTable=function(){
   table.querySelectorAll('tbody tr[data-id]').forEach(tr=>{const id=Number(tr.dataset.id);const td=document.createElement('td');td.innerHTML=`<input type="checkbox" class="bulk-select" ${bulkSelectedIds.has(id)?'checked':''}>`;td.querySelector('input').onclick=e=>e.stopPropagation();td.querySelector('input').onchange=e=>{e.target.checked?bulkSelectedIds.add(id):bulkSelectedIds.delete(id);const c=document.getElementById('bulkCount');if(c)c.textContent=bulkSelectedIds.size;};tr.insertBefore(td,tr.firstChild);});
   const count=document.getElementById('bulkCount');if(count)count.textContent=bulkSelectedIds.size;
 };
+const _addCompanyFromFormV35=addCompanyFromForm;
+addCompanyFromForm=function(e){_addCompanyFromFormV35(e);const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d){d.businessScope=activeBusinessScope;saveData();updateAll();}};
 const _exportConstDataV35=exportConstData;
 exportConstData=function(){const rows=scopeRows(data);const out='const data = '+JSON.stringify(rows,null,2)+';\n';downloadTextFile('const_data_AO_'+(activeBusinessScope==='Existing'?'Existing':'New_Biz')+'.js',out,'application/javascript;charset=utf-8');document.getElementById('dataToolsStatus').textContent='Export const_data '+activeBusinessScope+' généré.';};
 exportCsv=function(){const rows=[CSV_HEADERS.join(';')].concat(scopeRows(data).map(d=>CSV_HEADERS.map(h=>csvEscape(h==='watch'?isWatch(d):(h==='watch_override'?(d.watchOverride===null||d.watchOverride===undefined?'':d.watchOverride):d[h]))).join(';')));downloadTextFile('ao_dashboard_'+(activeBusinessScope==='Existing'?'existing':'new_biz')+'.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8');document.getElementById('dataToolsStatus').textContent='Export CSV '+activeBusinessScope+' généré.';};
@@ -4370,40 +4390,44 @@ const _switchTabV35=switchTab;
 switchTab=function(tab){_switchTabV35(tab);document.getElementById('tabDashboardBtn').classList.toggle('active',tab!=='list');document.getElementById('tabListBtn').classList.toggle('active',tab==='list');if(tab!=='list')setTimeout(resizeChart,40);};
 </script>
 
+<style>
+/* V37 - Résumé consolidé */
+#watchBtn1.watch-filter-active{background:#000!important;color:#fff!important;border-color:#FF7900!important;box-shadow:0 0 0 3px rgba(255,121,0,.25)!important}
+.summary-page{overflow-y:auto!important;background:#f4f4f4!important}
+.summary-shell{padding:16px;max-width:1800px;margin:auto}.summary-hero{background:linear-gradient(135deg,#050505,#282828);border-bottom:4px solid var(--orange);border-radius:18px;padding:20px 22px;color:#fff;display:flex;justify-content:space-between;gap:16px;align-items:center;box-shadow:var(--shadow)}
+.summary-hero h1{margin:0;font-size:24px}.summary-hero p{margin:5px 0 0;color:#ddd;font-size:12px}.summary-hero-stats{font-weight:950;color:var(--orange);font-size:14px;text-align:right}
+.summary-filterbar{position:sticky;top:0;z-index:30;margin:12px 0;display:grid;grid-template-columns:1.2fr 1fr 1fr .7fr .7fr 1.3fr auto;gap:8px;align-items:end;padding:11px;background:#fff;border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow)}
+.summary-filterbar label{font-size:9px;font-weight:950;margin-bottom:4px}.summary-filterbar input,.summary-filterbar select{height:34px}.summary-filterbar button{height:34px;border:1px solid #000;border-radius:9px;background:#fff;font-weight:900;cursor:pointer}
+.summary-kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:12px 0}.summary-kpi{background:#fff;border:1px solid #e8e8e8;border-radius:15px;padding:13px;box-shadow:0 5px 15px rgba(0,0,0,.06);border-top:4px solid var(--orange)}.summary-kpi.black{border-top-color:#000}.summary-kpi.green{border-top-color:#39FF14}.summary-kpi.pink{border-top-color:#FF1493}.summary-kpi .v{font-size:25px;font-weight:950}.summary-kpi .l{font-size:10px;color:#555;font-weight:850;margin-top:4px}
+.summary-card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px;margin:12px 0;box-shadow:var(--shadow);overflow:visible}.summary-card h2{font-size:15px;margin:0 0 10px}.summary-card-head{display:flex;justify-content:space-between;gap:12px}.summary-card-head p{font-size:10px;color:#666;margin:3px 0}.summary-legend{display:flex;gap:12px;font-size:10px;font-weight:900}.summary-legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px}.summary-legend .nb{background:#FF7900}.summary-legend .ex{background:#111}
+.summary-two-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}.summary-three-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.summary-mini-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.summary-mini{border:1px solid #eee;border-radius:11px;padding:9px;background:#fafafa}.summary-mini b{font-size:18px}.summary-mini span{display:block;font-size:9px;color:#666;margin-top:3px}
+.sum-timeline-row{display:grid;grid-template-columns:62px 1fr 54px;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #eee}.sum-timeline-year{font-weight:950}.sum-timeline-track{height:28px;background:#efefef;border-radius:999px;display:flex;overflow:hidden}.sum-timeline-new,.sum-timeline-existing{display:flex;align-items:center;justify-content:center;min-width:2px;font-size:10px;font-weight:950}.sum-timeline-new{background:#FF7900;color:#000}.sum-timeline-existing{background:#111;color:#fff}.sum-timeline-total{text-align:right;font-weight:950}
+.summary-table{width:100%;border-collapse:collapse;font-size:10px}.summary-table th{position:sticky;top:54px;background:#000;color:#fff;border-bottom:3px solid var(--orange);padding:7px;text-align:left}.summary-table td{border-bottom:1px solid #eee;padding:7px}.summary-table tbody tr:hover{background:#fff6ee}.summary-table-wrap{max-height:430px;overflow:auto;border:1px solid #eee;border-radius:11px}.summary-count{font-size:10px;color:#666;font-weight:850;margin:-4px 0 8px}
+@media(max-width:1200px){.summary-kpi-grid{grid-template-columns:repeat(3,1fr)}.summary-three-cols{grid-template-columns:1fr}.summary-filterbar{grid-template-columns:repeat(3,1fr)}.summary-two-cols{grid-template-columns:1fr}}
+</style>
 <script>
-/* V36 - Business Type facultatif dans tous les formulaires de creation et modification */
-function businessTypeSelectHtml(id, selected='', optional=false){
-  const chosen=rowScope({businessScope:selected||activeBusinessScope});
-  const blank=optional?`<option value="">Selon l’onglet actuel (${escapeHtml(activeBusinessScope)})</option>`:'';
-  return `<select id="${id}">${blank}<option value="New Biz" ${chosen==='New Biz'&&!optional?'selected':''}>New Biz</option><option value="Existing" ${chosen==='Existing'&&!optional?'selected':''}>Existing</option></select>`;
+/* V37 - filtre A surveiller et onglet Résumé */
+let summaryMode=false;
+function showSummary(){
+  summaryMode=true; closeFloatingCompanyPopup(); closeWatchModal();
+  document.getElementById('tabDashboard').classList.remove('active');document.getElementById('tabList').classList.remove('active');document.getElementById('tabSummary').classList.add('active');
+  document.getElementById('subbar')?.classList.add('summary-hidden');document.querySelector('.subbar').style.display='none';
+  document.getElementById('mainNewBizBtn').classList.remove('active');document.getElementById('mainExistingBtn').classList.remove('active');document.getElementById('mainSummaryBtn').classList.add('active');renderSummary();
 }
-function injectBusinessTypeField(box,prefix,d){
-  if(!box||box.querySelector(`#${prefix}EditBusinessScope`)) return;
-  const status=box.querySelector(`#${prefix}EditStatus`);
-  if(!status) return;
-  const label=status.previousElementSibling;
-  const anchor=label&&label.classList.contains('field-label')?label:status;
-  anchor.insertAdjacentHTML('beforebegin',`<div class="field-label">Business Type <span style="font-weight:600;color:#777">(facultatif)</span></div>${businessTypeSelectHtml(prefix+'EditBusinessScope',rowScope(d),false)}`);
-}
-function captureBusinessType(prefix,id){
-  const d=data.find(x=>Number(x.id)===Number(id));
-  const el=document.getElementById(prefix+'EditBusinessScope');
-  if(d&&el) d.businessScope=el.value||activeBusinessScope;
-}
-const _renderEditorV36=renderEditor;
-renderEditor=function(containerId,prefix){_renderEditorV36(containerId,prefix);const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d)injectBusinessTypeField(document.getElementById(containerId),prefix,d);};
-const _renderDashboardFloatingPopupV36=renderDashboardFloatingPopup;
-renderDashboardFloatingPopup=function(){_renderDashboardFloatingPopupV36();const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d)injectBusinessTypeField(document.getElementById('floatingCompanyPopup'),'float',d);};
-const _renderWatchCompanyPanelV36=renderWatchCompanyPanel;
-renderWatchCompanyPanel=function(){_renderWatchCompanyPanelV36();const d=data.find(x=>Number(x.id)===Number(selectedCompanyId));if(d)injectBusinessTypeField(document.getElementById('watchSideEditor'),'watch',d);};
-const _saveEditorV36=saveEditor;
-saveEditor=function(prefix,id){captureBusinessType(prefix,id);_saveEditorV36(prefix,id);};
-const _saveFloatingEditorV36=saveFloatingEditor;
-saveFloatingEditor=function(id){captureBusinessType('float',id);_saveFloatingEditorV36(id);};
-const _saveWatchEditorV36=saveWatchEditor;
-saveWatchEditor=function(id){captureBusinessType('watch',id);_saveWatchEditorV36(id);};
-const _switchBusinessScopeV36=switchBusinessScope;
-switchBusinessScope=function(scope){_switchBusinessScopeV36(scope);const field=document.getElementById('newCompanyBusinessScope');if(field)field.value='';};
+function leaveSummary(){summaryMode=false;document.getElementById('tabSummary').classList.remove('active');document.querySelector('.subbar').style.display='flex';document.getElementById('mainSummaryBtn').classList.remove('active');}
+function toggleWatchChart(){if(dashboardKpiFilters.has('watch'))dashboardKpiFilters.delete('watch');else dashboardKpiFilters.add('watch');syncDashboardButtonFiltersToTable();document.getElementById('watchBtn1').classList.toggle('watch-filter-active',dashboardKpiFilters.has('watch'));updateAll();}
+function summaryFilteredRows(){let rows=data.slice();const scope=document.getElementById('summaryScope')?.value||'All',prod=document.getElementById('summaryProduct')?.value||'All',status=document.getElementById('summaryStatus')?.value||'All',q=normText(document.getElementById('summarySearch')?.value||''),min=Number(document.getElementById('summaryYearMin')?.value),max=Number(document.getElementById('summaryYearMax')?.value);if(scope!=='All')rows=rows.filter(d=>rowScope(d)===scope);if(prod!=='All')rows=rows.filter(d=>d.product===prod);if(status!=='All')rows=rows.filter(d=>statusForCompany(d).label===status);if(q)rows=rows.filter(d=>normText(d.name).includes(q));if(Number.isFinite(min))rows=rows.filter(d=>Number(d.year)>=min);if(Number.isFinite(max))rows=rows.filter(d=>Number(d.year)<=max);return rows;}
+function uniqueCompanies(rows){return new Set(rows.map(d=>normText(d.name)).filter(Boolean)).size;}
+function renderScopeKpis(rows){const m=cockpitMetrics(rows),u=uniqueCompanies(rows);return `<div class="summary-mini-kpis"><div class="summary-mini"><b>${rows.length}</b><span>AO recensés</span></div><div class="summary-mini"><b>${u}</b><span>Entreprises uniques</span></div><div class="summary-mini"><b>${m.watch}</b><span>À surveiller</span></div><div class="summary-mini"><b>${Math.round(rows.reduce((a,d)=>a+Number(d.revenue||0),0)).toLocaleString('fr-FR')} €</b><span>Estimated € cumulé</span></div></div>`;}
+function companyAggregation(rows){const map=new Map();rows.forEach(d=>{const k=normText(d.name);if(!map.has(k))map.set(k,{name:d.name,count:0,years:new Set(),products:new Set(),scope:new Set(),revenue:0});const x=map.get(k);x.count++;x.years.add(d.year);x.products.add(d.product);x.scope.add(rowScope(d));x.revenue+=Number(d.revenue||0);});return [...map.values()].sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'fr'));}
+function companyTable(rows){const a=companyAggregation(rows);return `<div class="summary-count">${a.length} entreprises sans doublon</div><div class="summary-table-wrap"><table class="summary-table"><thead><tr><th>Entreprise</th><th>AO</th><th>Années</th><th>Produits</th><th>Estimated €</th></tr></thead><tbody>${a.map(x=>`<tr><td><b>${escapeHtml(x.name)}</b></td><td>${x.count}</td><td>${[...x.years].sort((a,b)=>b-a).join(', ')}</td><td>${[...x.products].join(' + ')}</td><td>${Math.round(x.revenue).toLocaleString('fr-FR')} €</td></tr>`).join('')}</tbody></table></div>`;}
+function initSummaryFilters(){const ys=[...new Set(data.map(d=>Number(d.year)).filter(Number.isFinite))].sort((a,b)=>a-b),min=document.getElementById('summaryYearMin'),max=document.getElementById('summaryYearMax');if(min&&!min.options.length){min.innerHTML=ys.map(y=>`<option>${y}</option>`).join('');max.innerHTML=ys.map(y=>`<option>${y}</option>`).join('');min.value=ys[0];max.value=ys[ys.length-1];}['summaryScope','summaryProduct','summaryStatus','summaryYearMin','summaryYearMax'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.dataset.bound){e.dataset.bound='1';e.onchange=renderSummary;}});const q=document.getElementById('summarySearch');if(q&&!q.dataset.bound){q.dataset.bound='1';q.oninput=renderSummary;}const reset=document.getElementById('summaryReset');if(reset&&!reset.dataset.bound){reset.dataset.bound='1';reset.onclick=()=>{document.getElementById('summaryScope').value='All';document.getElementById('summaryProduct').value='All';document.getElementById('summaryStatus').value='All';document.getElementById('summarySearch').value='';min.value=ys[0];max.value=ys[ys.length-1];renderSummary();};}}
+function renderSummary(){initSummaryFilters();const rows=summaryFilteredRows(),nb=rows.filter(d=>rowScope(d)==='New Biz'),ex=rows.filter(d=>rowScope(d)==='Existing'),m=cockpitMetrics(rows),unique=uniqueCompanies(rows);document.getElementById('summaryHeroStats').innerHTML=`${rows.length} AO<br>${unique} entreprises uniques`;document.getElementById('summaryKpis').innerHTML=`<div class="summary-kpi"><div class="v">${rows.length}</div><div class="l">AO consolidés</div></div><div class="summary-kpi black"><div class="v">${unique}</div><div class="l">Entreprises sans doublon</div></div><div class="summary-kpi"><div class="v">${nb.length}</div><div class="l">AO New Biz</div></div><div class="summary-kpi black"><div class="v">${ex.length}</div><div class="l">AO Existing</div></div><div class="summary-kpi pink"><div class="v">${m.watch}</div><div class="l">AO à surveiller</div></div><div class="summary-kpi green"><div class="v">${m.statusCounts['Gagné']}</div><div class="l">AO gagnés</div></div>`;document.getElementById('summaryNewBiz').innerHTML=renderScopeKpis(nb);document.getElementById('summaryExisting').innerHTML=renderScopeKpis(ex);document.getElementById('summaryCombined').innerHTML=renderScopeKpis(rows);document.getElementById('summaryCompaniesNew').innerHTML=companyTable(nb);document.getElementById('summaryCompaniesExisting').innerHTML=companyTable(ex);document.getElementById('summaryCompaniesAll').innerHTML=companyTable(rows);renderSummaryTimeline(rows);}
+function renderSummaryTimeline(rows){const years=[...new Set(rows.map(d=>Number(d.year)).filter(Number.isFinite))].sort((a,b)=>b-a),max=Math.max(1,...years.map(y=>rows.filter(d=>Number(d.year)===y).length));document.getElementById('summaryTimeline').innerHTML=years.map(y=>{const yr=rows.filter(d=>Number(d.year)===y),n=yr.filter(d=>rowScope(d)==='New Biz').length,e=yr.filter(d=>rowScope(d)==='Existing').length,total=yr.length,w=100*total/max;return `<div class="sum-timeline-row"><div class="sum-timeline-year">${y}</div><div class="sum-timeline-track" style="width:${Math.max(5,w)}%"><div class="sum-timeline-new" style="width:${total?100*n/total:0}%">${n||''}</div><div class="sum-timeline-existing" style="width:${total?100*e/total:0}%">${e||''}</div></div><div class="sum-timeline-total">${total} AO</div></div>`;}).join('')||'<div class="timeline-empty">Aucun AO avec ces filtres.</div>';}
+const _installTwoDashboardNavigationV37=installTwoDashboardNavigation;installTwoDashboardNavigation=function(){_installTwoDashboardNavigationV37();document.getElementById('mainSummaryBtn').onclick=showSummary;};
+const _switchBusinessScopeV37=switchBusinessScope;switchBusinessScope=function(scope){leaveSummary();_switchBusinessScopeV37(scope);};
+const _updateAllV37=updateAll;updateAll=function(){_updateAllV37();document.getElementById('watchBtn1')?.classList.toggle('watch-filter-active',dashboardKpiFilters.has('watch'));if(summaryMode)renderSummary();};
+document.addEventListener('DOMContentLoaded',()=>{const w=document.getElementById('watchBtn1');if(w){w.replaceWith(w.cloneNode(true));document.getElementById('watchBtn1').onclick=toggleWatchChart;}});
 </script>
 </body>
 </html>
