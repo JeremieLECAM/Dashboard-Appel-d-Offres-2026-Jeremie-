@@ -86,7 +86,18 @@
     .chart-panel{height:100%;display:flex;flex-direction:column;overflow:hidden;position:relative;}
     #chartWrap{flex:1;min-height:0;position:relative;}
     #chart{width:100%;height:100%;}
-    #fsBtn{position:absolute;top:10px;right:10px;z-index:20;border:1px solid var(--black);background:var(--white);color:var(--black);border-radius:12px;padding:8px 10px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.10);}
+    #fsBtn{
+  position:static;
+  border:1px solid var(--black);
+  background:var(--white);
+  color:var(--black);
+  border-radius:12px;
+  padding:8px 14px;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 6px 16px rgba(0,0,0,.10);
+}
     #bottomBar{border-top:1px solid var(--line);padding:8px 10px;display:flex;justify-content:center;background:var(--white);}
     #labelBtn{border:1px solid var(--black);background:var(--black);color:var(--white);border-radius:12px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;}
     #chart .modebar{right:120px!important;top:6px!important;}
@@ -596,9 +607,15 @@
       <main id="chartPanel" class="chart-panel">
         <div class="chart-main">
           <div id="portfolioSummary" class="summary-strip"></div>
-          <div id="chartWrap"><button id="fsBtn" type="button">⛶ Plein écran</button><div id="chart"></div></div>
-          <div id="bottomBar"><button id="labelBtn" type="button">👁️ Afficher les noms</button><button id="watchBtn1" type="button">A surveiller</button></div>
-        </div>
+<div id="chartWrap">
+  <div id="chart"></div>
+</div>
+
+<div id="bottomBar">
+  <button id="watchBtn1" type="button">A surveiller</button>
+  <button id="labelBtn" type="button">👁️ Afficher les noms</button>
+  <button id="fsBtn" type="button">⛶ Plein écran</button>
+</div>
         <section id="statusTimelinePanel" class="status-timeline-panel">
           <div class="timeline-head">
             <div>
