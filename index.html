@@ -4816,5 +4816,40 @@ switchBusinessScope=function(scope){
   renderNewCompanyOwnerSelector();
 };
 </script>
+
+<!-- V43 FIX -->
+<style id="v43-filter-fix">
+.summary-table .summary-filter-menu,
+.company-table .filter-menu,
+.watch-table .filter-menu{
+  min-height:320px !important;
+  height:auto !important;
+}
+.summary-table .summary-filter-menu .checks,
+.company-table .filter-menu .fm-checks,
+.watch-table .filter-menu .fm-checks{
+  min-height:200px !important;
+  height:200px !important;
+}
+</style>
+<script>
+(function(){
+ function forceDashboardRefresh(){
+   try{
+     if(typeof updateAll==='function') updateAll();
+     if(typeof renderCompanyTable==='function') renderCompanyTable();
+     if(typeof renderSummary==='function') renderSummary();
+   }catch(e){}
+ }
+ document.addEventListener('click',function(ev){
+   const b=ev.target.closest('[data-tab],#tabDashboardBtn,#tabListBtn,#tabSummaryBtn');
+   if(!b) return;
+   setTimeout(forceDashboardRefresh,0);
+   setTimeout(forceDashboardRefresh,80);
+   setTimeout(forceDashboardRefresh,250);
+ });
+})();
+</script>
+
 </body>
 </html>
