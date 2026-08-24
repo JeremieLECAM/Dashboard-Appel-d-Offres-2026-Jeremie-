@@ -4882,5 +4882,76 @@ window.addEventListener('click',function(e){
  },true);
 })();
 </script>
+
+<!-- V45 - Filtres du resume toujours accessibles + sortie fiable du resume -->
+<style id="v45-summary-stability">
+/* Le conteneur ne se replie plus sur la seule ligne d'en-tete lorsque le filtre ne renvoie aucune entreprise. */
+.summary-three-cols .summary-table-wrap{
+  box-sizing:border-box!important;
+  min-height:370px!important;
+  height:370px!important;
+  max-height:430px!important;
+  overflow:auto!important;
+}
+.summary-three-cols .summary-table{
+  min-height:100%!important;
+}
+.summary-three-cols .summary-filter-menu{
+  min-height:320px!important;
+  max-height:350px!important;
+}
+.summary-three-cols .summary-filter-menu .checks{
+  min-height:205px!important;
+  height:205px!important;
+  overflow-y:auto!important;
+}
+</style>
+<script>
+(function(){
+  function showDashboardAfterSummaryV45(){
+    const summary=document.getElementById('tabSummary');
+    const dashboard=document.getElementById('tabDashboard');
+    const list=document.getElementById('tabList');
+    if(summary) summary.classList.remove('active');
+    if(dashboard) dashboard.classList.add('active');
+    if(list) list.classList.remove('active');
+    document.querySelector('.subbar')?.style.setProperty('display','flex');
+    document.getElementById('tabDashboardBtn')?.classList.add('active');
+    document.getElementById('tabListBtn')?.classList.remove('active');
+    document.getElementById('mainSummaryBtn')?.classList.remove('active');
+    summaryMode=false;
+  }
+
+  const previousSwitchBusinessScopeV45=window.switchBusinessScope;
+  window.switchBusinessScope=function(scope){
+    const wasSummary=summaryMode || document.getElementById('tabSummary')?.classList.contains('active');
+    if(wasSummary) showDashboardAfterSummaryV45();
+    const result=previousSwitchBusinessScopeV45.apply(this,arguments);
+    if(wasSummary){
+      showDashboardAfterSummaryV45();
+      if(typeof refreshMainTabs==='function') refreshMainTabs();
+      requestAnimationFrame(()=>{
+        try{ if(typeof updateAll==='function') updateAll(); }catch(e){}
+        requestAnimationFrame(()=>{ try{ if(typeof resizeChart==='function') resizeChart(); }catch(e){} });
+      });
+    }
+    return result;
+  };
+
+  /* Lors d'un rerendu, conserver aussi la position haute du menu pour que les cases restent immediatement visibles. */
+  const previousReopenSummaryFilterV45=window.reopenSummaryFilterV39;
+  window.reopenSummaryFilterV39=function(){
+    if(previousReopenSummaryFilterV45) previousReopenSummaryFilterV45();
+    if(!summaryOpenFilterV39) return;
+    const menu=document.querySelector(`[data-sum-menu="${summaryOpenFilterV39}"]`);
+    if(menu){
+      menu.classList.add('open');
+      menu.scrollTop=0;
+      const checks=menu.querySelector('.checks');
+      if(checks) checks.scrollTop=0;
+    }
+  };
+})();
+</script>
 </body>
 </html>
