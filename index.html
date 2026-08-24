@@ -5147,7 +5147,7 @@ window.addEventListener('click',function(e){
     const rows=filteredData(),n=currentYearNumber(),k=document.getElementById('cockpitKpis');if(!k)return;
     const priorityWonLostN=uniqueWhereV47(rows,d=>Number(d.year)===n&&(PRIORITY_V47.includes(statusForCompany(d).label)||['Gagné','Perdu'].includes(statusForCompany(d).label)));
     const priorityNext=uniqueWhereV47(rows,d=>Number(d.year)===n+1&&PRIORITY_V47.includes(statusForCompany(d).label));
-    k.innerHTML=`<div class="kpi-card accent"><div class="kpi-value">${rows.length}</div><div class="kpi-label">Nombre total d’entreprises </div></div><div class="kpi-card"><div class="kpi-value">${uniqueV47(rows)}</div><div class="kpi-label">Entreprises différentes</div></div><div class="kpi-card"><div class="kpi-value">${priorityWonLostN}</div><div class="kpi-label">Nbr max. AO en ${n}</div></div><div class="kpi-card"><div class="kpi-value">${priorityNext}</div><div class="kpi-label">SPipe à venir en ${n+1}</div></div>`;
+    k.innerHTML=`<div class="kpi-card accent"><div class="kpi-value">${rows.length}</div><div class="kpi-label">Nombre total d’entreprises </div></div><div class="kpi-card"><div class="kpi-value">${uniqueV47(rows)}</div><div class="kpi-label">Entreprises différentes</div></div><div class="kpi-card"><div class="kpi-value">${priorityWonLostN}</div><div class="kpi-label">Nbr max. AO en ${n}</div></div><div class="kpi-card"><div class="kpi-value">${priorityNext}</div><div class="kpi-label">Pipe à venir en ${n+1}</div></div>`;
   };
 
   const oldRenderSummaryV47=window.renderSummary;
