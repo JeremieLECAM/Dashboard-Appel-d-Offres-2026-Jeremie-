@@ -4851,5 +4851,36 @@ switchBusinessScope=function(scope){
 })();
 </script>
 
+
+<!-- V44 REAL FIX -->
+<script>
+(function(){
+const oldSwitchTab=window.switchTab;
+window.switchTab=function(tab){
+ if(typeof leaveSummary==='function'){try{leaveSummary();}catch(e){}}
+ const r=oldSwitchTab?oldSwitchTab.apply(this,arguments):null;
+ setTimeout(()=>{try{if(typeof updateAll==='function')updateAll();}catch(e){}},0);
+ setTimeout(()=>{try{if(typeof updateAll==='function')updateAll();}catch(e){}},150);
+ return r;
+};
+
+window.addEventListener('click',function(e){
+ const btn=e.target.closest('[data-sum-none]');
+ if(!btn) return;
+ setTimeout(()=>{
+  const parts=btn.getAttribute('data-sum-none').split('|');
+  const key=parts[0],col=parts[1];
+  const menu=document.querySelector('[data-sum-menu="'+key+'|'+col+'"]');
+  if(menu){
+    menu.classList.add('open');
+    menu.style.display='block';
+    menu.style.minHeight='320px';
+    const checks=menu.querySelector('.checks');
+    if(checks){checks.style.display='block';checks.style.minHeight='220px';}
+  }
+ },50);
+ },true);
+})();
+</script>
 </body>
 </html>
