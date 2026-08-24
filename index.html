@@ -5159,6 +5159,10 @@ window.addEventListener('click',function(e){
 <style id="v48-summary-annual-kpis-style">
   .summary-kpi-grid{grid-template-columns:repeat(7,minmax(145px,1fr))!important}
   .summary-kpi.result-year{border-top-color:#111!important;background:#f4f4f4!important}
+  .summary-kpi .result-split{display:flex;align-items:center;justify-content:center;gap:9px;font-size:20px;line-height:1.1}
+  .summary-kpi .result-split span{display:flex;flex-direction:column;align-items:center}
+  .summary-kpi .result-split small{margin-top:3px;font-size:9px;font-weight:850;text-transform:uppercase;color:#666}
+  .summary-kpi .result-split .versus{font-size:11px;color:#888;font-weight:900}
   .summary-kpi.pipe-next{border-top-color:#FF1493!important;background:#FFF0F8!important}
   @media(max-width:1500px){.summary-kpi-grid{grid-template-columns:repeat(4,minmax(145px,1fr))!important}}
   @media(max-width:900px){.summary-kpi-grid{grid-template-columns:repeat(2,minmax(145px,1fr))!important}}
@@ -5178,7 +5182,8 @@ window.addEventListener('click',function(e){
     const n=currentYearNumber();
     const statusOf=row=>statusForCompany(row).label;
     const pipeN=rows.filter(row=>Number(row.year)===n&&PRIORITY_V48.includes(statusOf(row))).length;
-    const resultN=rows.filter(row=>Number(row.year)===n&&['Gagné','Perdu'].includes(statusOf(row))).length;
+    const wonN=rows.filter(row=>Number(row.year)===n&&statusOf(row)==='Gagné').length;
+    const lostN=rows.filter(row=>Number(row.year)===n&&statusOf(row)==='Perdu').length;
     const pipeNext=rows.filter(row=>Number(row.year)===n+1&&PRIORITY_V48.includes(statusOf(row))).length;
     const unique=uniqueCompanies(rows);
     const langues=summaryProductCount(rows,'Langues');
@@ -5188,7 +5193,7 @@ window.addEventListener('click',function(e){
       <div class="summary-kpi"><div class="v">${rows.length}</div><div class="l">AO consolidés</div></div>
       <div class="summary-kpi black"><div class="v">${unique}</div><div class="l">Entreprises sans doublon</div></div>
       <div class="summary-kpi pipe"><div class="v">${pipeN}</div><div class="l">Pipe ${n}<br>En cours + Docs à venir + À confirmer</div></div>
-      <div class="summary-kpi result-year"><div class="v">${resultN}</div><div class="l">Résultat ${n}<br>Gagné + Perdu</div></div>
+      <div class="summary-kpi result-year"><div class="v result-split"><span>${wonN}<small>Gagné</small></span><i class="versus">VS</i><span>${lostN}<small>Perdu</small></span></div><div class="l">Résultat ${n}</div></div>
       <div class="summary-kpi pipe-next"><div class="v">${pipeNext}</div><div class="l">Pipe ${n+1}<br>À confirmer + En cours + Docs à venir</div></div>
       <div class="summary-kpi blue"><div class="v">${langues}</div><div class="l">AO Langues consolidés</div></div>
       <div class="summary-kpi purple"><div class="v">${coaching}</div><div class="l">AO Coaching consolidés</div></div>`;
