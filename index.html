@@ -5040,5 +5040,120 @@ window.addEventListener('click',function(e){
   };
 })();
 </script>
+<!-- V47 - Types d'entreprise, KPIs regroupes et compteurs de listes -->
+<style id="v47-kpi-list-style">
+  .summary-filterbar{grid-template-columns:1.15fr 1fr 1.25fr 1fr .7fr .7fr 1.25fr auto!important}
+  .v47-kpi-sections{display:grid;gap:9px}
+  .v47-kpi-section{border:1px solid #e7e7e7;border-radius:12px;padding:9px;background:#fff}
+  .v47-kpi-section h3{margin:0 0 7px;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#555}
+  .v47-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:7px}
+  .v47-kpi-item{border-radius:9px;background:#f7f7f7;padding:8px;border-left:3px solid var(--orange)}
+  .v47-kpi-item b{display:block;font-size:18px;line-height:1.05}.v47-kpi-item span{display:block;margin-top:3px;font-size:9px;color:#666;font-weight:800}
+  .v47-list-stats{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 8px;padding:8px 10px;border:1px solid #ddd;border-radius:11px;background:#fff;font-size:10px;font-weight:850}
+  .v47-list-stats strong{font-size:13px;color:#000}.v47-list-stats .partial{color:#d45f00}
+  #list .v47-list-stats{position:sticky;top:0;z-index:2}
+  #cockpitKpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  @media(max-width:1200px){.summary-filterbar{grid-template-columns:repeat(4,1fr)!important}}
+</style>
+<script>
+(function(){
+  const PRIORITY_V47=['En cours','Docs à venir','AO à confirmer'];
+  const companyTypeLabelV47=cat=>shortCatLabel(cat)||cat||'Non renseigné';
+  const uniqueV47=rows=>new Set(rows.map(d=>normText(d.name)).filter(Boolean)).size;
+  const uniqueWhereV47=(rows,predicate)=>uniqueV47(rows.filter(predicate));
+  const statsHtmlV47=(rows,selected=0)=>{
+    const selection=selected>0&&selected<rows.length?`<span class="partial"><strong>${selected}</strong> ligne(s) sélectionnée(s)</span>`:'';
+    return `<div class="v47-list-stats"><span><strong>${rows.length}</strong> entreprise(s) / ligne(s) affichée(s)</span><span><strong>${uniqueV47(rows)}</strong> entreprise(s) différente(s)</span>${selection}</div>`;
+  };
+
+  function ensureCompanyTypeFilterV47(){
+    const bar=document.getElementById('summaryFilters');
+    if(!bar||document.getElementById('summaryCompanyType'))return;
+    const product=document.getElementById('summaryProduct')?.parentElement;
+    product?.insertAdjacentHTML('afterend',`<div><label>Type d’entreprise</label><select id="summaryCompanyType"><option value="All">Tous</option>${CAT_ORDER.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(companyTypeLabelV47(v))}</option>`).join('')}</select></div>`);
+    document.getElementById('summaryCompanyType').onchange=renderSummary;
+  }
+
+  const oldSummaryFilteredRowsV47=window.summaryFilteredRows;
+  window.summaryFilteredRows=function(){
+    let rows=oldSummaryFilteredRowsV47();
+    const type=document.getElementById('summaryCompanyType')?.value||'All';
+    return type==='All'?rows:rows.filter(d=>d.cat===type);
+  };
+
+  const oldInitSummaryFiltersV47=window.initSummaryFilters;
+  window.initSummaryFilters=function(){
+    ensureCompanyTypeFilterV47();
+    oldInitSummaryFiltersV47();
+    const reset=document.getElementById('summaryReset');
+    if(reset&&!reset.dataset.v47){
+      reset.dataset.v47='1';
+      reset.addEventListener('click',()=>{const type=document.getElementById('summaryCompanyType');if(type)type.value='All';renderSummary();});
+    }
+  };
+
+  window.renderScopeKpis=function(rows){
+    const products=[...new Set(data.map(d=>d.product).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));
+    const types=CAT_ORDER;
+    const statusItems=PRIORITY_V47.map(st=>`<div class="v47-kpi-item"><b>${uniqueWhereV47(rows,d=>statusForCompany(d).label===st)}</b><span>${escapeHtml(st)}</span></div>`).join('');
+    return `<div class="v47-kpi-sections">
+      <section class="v47-kpi-section"><h3>1. Volume d’entreprises (AO)</h3><div class="v47-kpi-row"><div class="v47-kpi-item"><b>${rows.length}</b><span>Nombre total d’entreprises / AO</span></div><div class="v47-kpi-item"><b>${uniqueV47(rows)}</b><span>Entreprises différentes</span></div></div></section>
+      <section class="v47-kpi-section"><h3>2. Nombre d’entreprises par produit</h3><div class="v47-kpi-row">${products.map(p=>`<div class="v47-kpi-item"><b>${uniqueWhereV47(rows,d=>d.product===p)}</b><span>${escapeHtml(p)}</span></div>`).join('')}</div></section>
+      <section class="v47-kpi-section"><h3>3. Nombre de lignes par type d’entreprise</h3><div class="v47-kpi-row">${types.map(cat=>`<div class="v47-kpi-item"><b>${rows.filter(d=>d.cat===cat).length}</b><span>${escapeHtml(companyTypeLabelV47(cat))}</span></div>`).join('')||'<span>Aucune donnée</span>'}</div></section>
+      <section class="v47-kpi-section"><h3>4. Statuts prioritaires</h3><div class="v47-kpi-row">${statusItems}<div class="v47-kpi-item"><b>${uniqueWhereV47(rows,d=>PRIORITY_V47.includes(statusForCompany(d).label))}</b><span>Total prioritaire</span></div></div></section>
+    </div>`;
+  };
+
+  window.companyTable=function(rows,key='all'){
+    const all=companyAggregation(rows),state=summaryTableState[key],cols=['name','count','years','products','revenue'],values={};
+    cols.forEach(c=>values[c]=[...new Set(all.map(x=>String(summaryField(x,c))))].sort((a,b)=>c==='count'||c==='revenue'?Number(a)-Number(b):a.localeCompare(b,'fr',{numeric:true,sensitivity:'base'})));
+    let shown=all.filter(x=>cols.every(c=>summaryAllowed(state,c,summaryField(x,c))));
+    shown.sort((x,y)=>{const c=state.sort.col,dir=state.sort.dir==='desc'?-1:1,vx=summaryField(x,c),vy=summaryField(y,c);return(c==='count'||c==='revenue'?(Number(vx)-Number(vy)):String(vx).localeCompare(String(vy),'fr',{numeric:true,sensitivity:'base'}))*dir;});
+    const displayedRows=shown.flatMap(x=>rows.filter(d=>normText(d.name)===normText(x.name)));
+    return `${statsHtmlV47(displayedRows)}<div class="summary-table-wrap"><table class="summary-table"><thead><tr><th>${summaryMenu(key,'name','Entreprise',values.name)}</th><th>${summaryMenu(key,'count','AO',values.count)}</th><th>${summaryMenu(key,'years','Années',values.years)}</th><th>${summaryMenu(key,'products','Produits',values.products)}</th><th>${summaryMenu(key,'revenue','Estimated €',values.revenue)}</th></tr></thead><tbody>${shown.map(x=>`<tr><td><b>${escapeHtml(x.name)}</b></td><td>${x.count}</td><td>${summaryField(x,'years')}</td><td>${escapeHtml(summaryField(x,'products'))}</td><td>${Math.round(x.revenue).toLocaleString('fr-FR')} €</td></tr>`).join('')}</tbody></table></div>`;
+  };
+
+  const oldRenderCompanyTableV47=window.renderCompanyTable;
+  window.renderCompanyTable=function(){
+    oldRenderCompanyTableV47();
+    const wrap=document.getElementById('companyTableWrap'),table=wrap?.querySelector('table');if(!wrap||!table)return;
+    wrap.querySelector(':scope > .v47-list-stats')?.remove();
+    const ids=[...table.querySelectorAll('tbody tr[data-id]')].map(tr=>Number(tr.dataset.id));
+    const rows=ids.map(id=>data.find(d=>Number(d.id)===id)).filter(Boolean);
+    const selected=ids.filter(id=>bulkSelectedIds.has(id)).length;
+    table.insertAdjacentHTML('beforebegin',statsHtmlV47(rows,selected));
+  };
+
+  const oldRenderListV47=window.renderList;
+  window.renderList=function(){
+    oldRenderListV47();
+    const box=document.getElementById('list');if(!box)return;
+    const rows=[...box.querySelectorAll('.item[data-id]')].map(el=>data.find(d=>Number(d.id)===Number(el.dataset.id))).filter(Boolean);
+    box.insertAdjacentHTML('afterbegin',statsHtmlV47(rows));
+  };
+
+  const oldRenderWatchTableV47=window.renderWatchTable;
+  window.renderWatchTable=function(){
+    oldRenderWatchTableV47();
+    const content=document.getElementById('watchContent'),table=content?.querySelector('table');if(!content)return;
+    content.querySelector('.v47-list-stats')?.remove();
+    const rows=table?[...table.querySelectorAll('tbody tr[data-id]')].map(tr=>data.find(d=>Number(d.id)===Number(tr.dataset.id))).filter(Boolean):[];
+    content.querySelector('.mini-note')?.insertAdjacentHTML('afterend',statsHtmlV47(rows));
+  };
+
+  const oldUpdateCockpitMetricsV47=window.updateCockpitMetrics;
+  window.updateCockpitMetrics=function(){
+    oldUpdateCockpitMetricsV47();
+    const rows=filteredData(),n=currentYearNumber(),k=document.getElementById('cockpitKpis');if(!k)return;
+    const priorityWonLostN=uniqueWhereV47(rows,d=>Number(d.year)===n&&(PRIORITY_V47.includes(statusForCompany(d).label)||['Gagné','Perdu'].includes(statusForCompany(d).label)));
+    const priorityNext=uniqueWhereV47(rows,d=>Number(d.year)===n+1&&PRIORITY_V47.includes(statusForCompany(d).label));
+    k.innerHTML=`<div class="kpi-card accent"><div class="kpi-value">${rows.length}</div><div class="kpi-label">Nombre total d’entreprises / AO</div></div><div class="kpi-card"><div class="kpi-value">${uniqueV47(rows)}</div><div class="kpi-label">Entreprises différentes</div></div><div class="kpi-card"><div class="kpi-value">${priorityWonLostN}</div><div class="kpi-label">Prioritaires + gagnées + perdues en ${n}</div></div><div class="kpi-card"><div class="kpi-value">${priorityNext}</div><div class="kpi-label">Statuts prioritaires en ${n+1}</div></div>`;
+  };
+
+  const oldRenderSummaryV47=window.renderSummary;
+  window.renderSummary=function(){ensureCompanyTypeFilterV47();oldRenderSummaryV47();};
+  document.addEventListener('DOMContentLoaded',ensureCompanyTypeFilterV47);
+})();
+</script>
 </body>
 </html>
