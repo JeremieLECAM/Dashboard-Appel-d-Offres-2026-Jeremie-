@@ -554,6 +554,7 @@
           <div class="section-body">
             <form id="newCompanyForm">
               <div class="field-label">Entreprise</div><input id="newCompanyName" type="text" required placeholder="Ex: Air Liquide" />
+              <div class="field-label">Périmètre commercial</div><div id="newCompanyScopeField" class="business-scope-tags"><label><input type="radio" name="newCompanyScope" value="New Biz" checked><span>New Biz</span></label><label><input type="radio" name="newCompanyScope" value="Existing"><span>Existing</span></label></div>
               <div class="row2">
                 <div><div class="field-label">Année</div><input id="newCompanyYear" type="number" min="2012" max="2035" required /></div>
                 <div><div class="field-label">Estimated €</div><input id="newCompanyRevenue" type="number" min="0" step="1" value="0" /></div>
@@ -5198,6 +5199,135 @@ window.addEventListener('click',function(e){
       <div class="summary-kpi blue"><div class="v">${langues}</div><div class="l">AO Langues consolidés</div></div>
       <div class="summary-kpi purple"><div class="v">${coaching}</div><div class="l">AO Coaching consolidés</div></div>`;
   };
+})();
+</script>
+<!-- V49 - Migration New Biz / Existing et suppression limitee aux onglets Liste -->
+<style id="v49-scope-delete-style">
+  .business-scope-tags{display:flex;gap:8px;margin:2px 0 10px}
+  .business-scope-tags label{cursor:pointer}
+  .business-scope-tags input{position:absolute;opacity:0;pointer-events:none}
+  .business-scope-tags span{display:inline-flex;align-items:center;justify-content:center;min-width:92px;padding:7px 12px;border:1px solid #bbb;border-radius:999px;background:#fff;color:#333;font-size:11px;font-weight:900;transition:.15s ease}
+  .business-scope-tags input:checked+span{border-color:#000;background:#000;color:#fff;box-shadow:0 0 0 2px #ff7900}
+  .list-delete-company{border:1px solid #d52828;background:#fff;color:#b31313;border-radius:7px;padding:5px 7px;font-size:10px;font-weight:900;cursor:pointer;white-space:nowrap}
+  .list-delete-company:hover{background:#b31313;color:#fff}
+  .list-delete-head{text-align:center!important;min-width:86px}
+</style>
+<script>
+(function(){
+  const scopeTagsV49=(name,value)=>`<div class="business-scope-tags" data-business-scope-tags><label><input type="radio" name="${name}" value="New Biz" ${value==='Existing'?'':'checked'}><span>New Biz</span></label><label><input type="radio" name="${name}" value="Existing" ${value==='Existing'?'checked':''}><span>Existing</span></label></div>`;
+  const selectedScopeV49=(name,fallback='New Biz')=>{
+    const checked=document.querySelector(`input[name="${name}"]:checked`)?.value;
+    if(checked==='Existing'||checked==='New Biz')return checked;
+    return fallback==='Existing'?'Existing':'New Biz';
+  };
+
+  function syncNewCompanyScopeV49(){
+    const value=activeBusinessScope==='Existing'?'Existing':'New Biz';
+    const input=document.querySelector(`input[name="newCompanyScope"][value="${value}"]`);
+    if(input)input.checked=true;
+  }
+
+  const previousSwitchBusinessScopeV49=window.switchBusinessScope;
+  window.switchBusinessScope=function(scope){
+    const result=previousSwitchBusinessScopeV49.apply(this,arguments);
+    syncNewCompanyScopeV49();
+    return result;
+  };
+
+  const previousAddCompanyFromFormV49=window.addCompanyFromForm;
+  window.addCompanyFromForm=function(event){
+    const targetScope=selectedScopeV49('newCompanyScope',activeBusinessScope);
+    activeBusinessScope=targetScope;
+    const result=previousAddCompanyFromFormV49.apply(this,arguments);
+    const selected=document.querySelector(`input[name="newCompanyScope"][value="${targetScope}"]`);
+    if(selected)selected.checked=true;
+    window.switchBusinessScope(targetScope);
+    return result;
+  };
+
+  function addEditorScopeFieldV49(prefix,scope){
+    const name=`${prefix}EditBusinessScopeChoice`;
+    if(document.querySelector(`input[name="${name}"]`))return;
+    const nameInput=document.getElementById(`${prefix}EditName`);
+    if(!nameInput)return;
+    nameInput.insertAdjacentHTML('afterend',`<div class="field-label">Périmètre commercial</div>${scopeTagsV49(name,scope)}`);
+  }
+
+  const previousRenderEditorV49=window.renderEditor;
+  window.renderEditor=function(containerId,prefix){
+    const result=previousRenderEditorV49.apply(this,arguments);
+    const company=data.find(row=>Number(row.id)===Number(selectedCompanyId));
+    if(company)addEditorScopeFieldV49(prefix,rowScope(company));
+    return result;
+  };
+
+  const previousRenderDashboardFloatingPopupV49=window.renderDashboardFloatingPopup;
+  window.renderDashboardFloatingPopup=function(){
+    const result=previousRenderDashboardFloatingPopupV49.apply(this,arguments);
+    const company=data.find(row=>Number(row.id)===Number(selectedCompanyId));
+    if(company)addEditorScopeFieldV49('float',rowScope(company));
+    return result;
+  };
+
+  const previousSaveEditorV49=window.saveEditor;
+  window.saveEditor=function(prefix,id){
+    const company=data.find(row=>Number(row.id)===Number(id));
+    const oldScope=company?rowScope(company):activeBusinessScope;
+    const targetScope=selectedScopeV49(`${prefix}EditBusinessScopeChoice`,oldScope);
+    if(company)company.businessScope=targetScope;
+    const result=previousSaveEditorV49.apply(this,arguments);
+    if(targetScope!==activeBusinessScope)window.switchBusinessScope(targetScope);
+    return result;
+  };
+
+  const previousSaveFloatingEditorV49=window.saveFloatingEditor;
+  window.saveFloatingEditor=function(id){
+    const company=data.find(row=>Number(row.id)===Number(id));
+    const oldScope=company?rowScope(company):activeBusinessScope;
+    const targetScope=selectedScopeV49('floatEditBusinessScopeChoice',oldScope);
+    if(company)company.businessScope=targetScope;
+    const result=previousSaveFloatingEditorV49.apply(this,arguments);
+    if(targetScope!==activeBusinessScope)window.switchBusinessScope(targetScope);
+    return result;
+  };
+
+  function deleteCompanyFromListV49(id){
+    const company=data.find(row=>Number(row.id)===Number(id));
+    if(!company)return;
+    if(!window.confirm(`Supprimer définitivement « ${company.name} » de la liste ${rowScope(company)} ?`))return;
+    data=data.filter(row=>Number(row.id)!==Number(id));
+    if(typeof bulkSelectedIds!=='undefined')bulkSelectedIds.delete(Number(id));
+    if(Number(selectedCompanyId)===Number(id))selectedCompanyId=null;
+    saveData();
+    renderOwners();
+    updateAll();
+    renderEditors();
+  }
+
+  function addListDeleteControlsV49(){
+    const listTab=document.getElementById('tabList');
+    const table=document.querySelector('#companyTableWrap table');
+    if(!listTab?.classList.contains('active')||!table)return;
+    const head=table.querySelector('thead tr');
+    if(head&&!head.querySelector('.list-delete-head'))head.insertAdjacentHTML('beforeend','<th class="list-delete-head">Supprimer</th>');
+    table.querySelectorAll('tbody tr[data-id]').forEach(row=>{
+      if(row.querySelector('.list-delete-cell'))return;
+      const cell=document.createElement('td');
+      cell.className='list-delete-cell';
+      cell.innerHTML=`<button type="button" class="list-delete-company" data-delete-company-id="${row.dataset.id}" title="Supprimer cette entreprise">Supprimer</button>`;
+      cell.querySelector('button').onclick=event=>{event.stopPropagation();deleteCompanyFromListV49(row.dataset.id);};
+      row.appendChild(cell);
+    });
+  }
+
+  const previousRenderCompanyTableV49=window.renderCompanyTable;
+  window.renderCompanyTable=function(){
+    const result=previousRenderCompanyTableV49.apply(this,arguments);
+    addListDeleteControlsV49();
+    return result;
+  };
+
+  document.addEventListener('DOMContentLoaded',syncNewCompanyScopeV49);
 })();
 </script>
 </body>
