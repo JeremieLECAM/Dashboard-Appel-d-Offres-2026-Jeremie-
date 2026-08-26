@@ -5100,7 +5100,7 @@ window.addEventListener('click',function(e){
     return `<div class="v47-kpi-sections">
       <section class="v47-kpi-section"><h3>1. Volume d’entreprises (AO)</h3><div class="v47-kpi-row"><div class="v47-kpi-item"><b>${rows.length}</b><span>Nombre total d’entreprises / AO</span></div><div class="v47-kpi-item"><b>${uniqueV47(rows)}</b><span>Entreprises différentes</span></div></div></section>
       <section class="v47-kpi-section"><h3>2. Nombre d’entreprises par produit</h3><div class="v47-kpi-row">${products.map(p=>`<div class="v47-kpi-item"><b>${uniqueWhereV47(rows,d=>d.product===p)}</b><span>${escapeHtml(p)}</span></div>`).join('')}</div></section>
-      <section class="v47-kpi-section"><h3>3. Nombre de lignes par type d’entreprise</h3><div class="v47-kpi-row">${types.map(cat=>`<div class="v47-kpi-item"><b>${rows.filter(d=>d.cat===cat).length}</b><span>${escapeHtml(companyTypeLabelV47(cat))}</span></div>`).join('')||'<span>Aucune donnée</span>'}</div></section>
+      <section class="v47-kpi-section"><h3>3. Types d’entreprises</h3><div class="v47-kpi-row">${types.map(cat=>`<div class="v47-kpi-item"><b>${rows.filter(d=>d.cat===cat).length}</b><span>${escapeHtml(companyTypeLabelV47(cat))}</span></div>`).join('')||'<span>Aucune donnée</span>'}</div></section>
       <section class="v47-kpi-section"><h3>4. Statuts prioritaires</h3><div class="v47-kpi-row">${statusItems}<div class="v47-kpi-item"><b>${uniqueWhereV47(rows,d=>PRIORITY_V47.includes(statusForCompany(d).label))}</b><span>Total prioritaire</span></div></div></section>
     </div>`;
   };
