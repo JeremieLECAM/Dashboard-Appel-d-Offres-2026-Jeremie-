@@ -5403,5 +5403,59 @@ window.addEventListener('click',function(e){
 })();
 </script>
 
+<!-- V51 - Restauration complete des informations dans les 3 blocs KPI -->
+<style id="v51-summary-kpi-complete-style">
+  .v51-kpi-dashboard{display:grid;gap:12px}
+  .v51-kpi-section{border:1px solid #dedede;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 5px 14px rgba(0,0,0,.05)}
+  .v51-kpi-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:linear-gradient(90deg,#f5f5f5,#fff);border-bottom:1px solid #e6e6e6}
+  .v51-kpi-head h3{margin:0;font-size:10px;text-transform:uppercase;letter-spacing:.055em;color:#222}
+  .v51-kpi-head span{font-size:9px;color:#777;font-weight:800;text-align:right}
+  .v51-kpi-content{padding:10px}
+  .v51-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px}
+  .v51-kpi-tile{position:relative;min-height:70px;border:1px solid #e7e7e7;border-radius:11px;padding:9px 10px;background:#fafafa;overflow:hidden}
+  .v51-kpi-tile:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#FF7900}
+  .v51-kpi-tile b{display:block;font-size:20px;line-height:1.05;color:#111}
+  .v51-kpi-tile small{display:block;margin-top:5px;font-size:9px;line-height:1.25;color:#666;font-weight:850}
+  .v51-kpi-tile.neutral:before{background:#111}.v51-kpi-tile.langues:before{background:#1E88E5}.v51-kpi-tile.coaching:before{background:#8E24AA}
+  .v51-kpi-tile.progress{background:#FFF8EF}.v51-kpi-tile.progress:before{background:#FF9800}
+  .v51-kpi-tile.docs{background:#FFF0F8}.v51-kpi-tile.docs:before{background:#FF1493}
+  .v51-kpi-tile.confirm{background:#FFFCE8}.v51-kpi-tile.confirm:before{background:#FFD400}
+  .v51-kpi-tile.total-priority{background:linear-gradient(135deg,#FFF8EF,#FFFCE8 55%,#FFF0F8)}
+  .v51-type-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
+  .v51-win-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .v51-win-card{border:1px solid #dcdcdc;border-radius:13px;padding:11px;background:linear-gradient(135deg,#f3fff1,#fff 60%,#f5f5f5)}
+  .v51-win-title{font-size:10px;font-weight:950;color:#333}.v51-win-value{font-size:29px;font-weight:950;line-height:1;color:#087a00;margin-top:6px}
+  .v51-win-detail{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+  .v51-result{border-radius:999px;padding:4px 8px;font-size:9px;font-weight:950}.v51-result.won{background:#efffed;border:1px solid #39C928;color:#087a00}.v51-result.lost{background:#111;border:1px solid #111;color:#fff}
+  @media(max-width:900px){.v51-win-grid{grid-template-columns:1fr}.v51-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+<script>
+(function(){
+  const priorityV51=['En cours','Docs à venir','AO à confirmer'];
+  function uniqueV51(rows){return new Set(rows.map(d=>normText(d.name)).filter(Boolean)).size;}
+  function uniqueStatusV51(rows,status){return uniqueV51(rows.filter(d=>statusForCompany(d).label===status));}
+  function resultV51(rows){const won=uniqueStatusV51(rows,'Gagné'),lost=uniqueStatusV51(rows,'Perdu'),decided=won+lost;return{won,lost,rate:decided?100*won/decided:null};}
+  function rateV51(value){return value===null?'—':value.toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1})+' %';}
+  function tileV51(value,label,cls=''){return `<div class="v51-kpi-tile ${cls}"><b>${value}</b><small>${label}</small></div>`;}
+  function resultCardV51(title,stats){return `<div class="v51-win-card"><div class="v51-win-title">${escapeHtml(title)}</div><div class="v51-win-value">${rateV51(stats.rate)}</div><div class="v51-win-detail"><span class="v51-result won">Gagné : ${stats.won}</span><span class="v51-result lost">Perdu : ${stats.lost}</span></div></div>`;}
+  window.renderScopeKpis=function(rows){
+    const n=currentYearNumber(),rowsN=rows.filter(d=>Number(d.year)===n),rowsNN1=rows.filter(d=>Number(d.year)===n||Number(d.year)===n+1);
+    const products=[...new Set(data.map(d=>d.product).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));
+    const types=CAT_ORDER;
+    const current=resultV51(rowsN),all=resultV51(rows);
+    const statusTiles=priorityV51.map(st=>tileV51(uniqueStatusV51(rowsNN1,st),`Entreprises ${escapeHtml(st)}, ${n}-${n+1}`,st==='En cours'?'progress':st==='Docs à venir'?'docs':'confirm')).join('');
+    const typeTiles=types.map(cat=>`<div class="v51-kpi-tile"><span class="v51-type-dot" style="background:${colorForCategory(cat)}"></span><b>${rows.filter(d=>d.cat===cat).length}</b><small>${escapeHtml(shortCatLabel(cat))}</small></div>`).join('');
+    const productTiles=products.map(p=>tileV51(uniqueV51(rows.filter(d=>d.product===p)),escapeHtml(p),p==='Coaching'?'coaching':'langues')).join('');
+    return `<div class="v51-kpi-dashboard">
+      <section class="v51-kpi-section"><div class="v51-kpi-head"><h3>1. Volume d’entreprises (AO)</h3><span>Volumétrie du périmètre filtré</span></div><div class="v51-kpi-content"><div class="v51-kpi-grid">${tileV51(rows.length,'Nombre total d’entreprises / AO')}${tileV51(uniqueV51(rows),'Entreprises différentes','neutral')}</div></div></section>
+      <section class="v51-kpi-section"><div class="v51-kpi-head"><h3>2. Nombre d’entreprises par produit</h3><span>Entreprises uniques</span></div><div class="v51-kpi-content"><div class="v51-kpi-grid">${productTiles}</div></div></section>
+      <section class="v51-kpi-section"><div class="v51-kpi-head"><h3>3. Types d’entreprises</h3><span>Nombre d’AO par catégorie</span></div><div class="v51-kpi-content"><div class="v51-kpi-grid">${typeTiles}</div></div></section>
+      <section class="v51-kpi-section"><div class="v51-kpi-head"><h3>4. Statuts prioritaires</h3><span>Détail conservé sur ${n}-${n+1}</span></div><div class="v51-kpi-content"><div class="v51-kpi-grid">${statusTiles}${tileV51(uniqueV51(rowsNN1.filter(d=>priorityV51.includes(statusForCompany(d).label))),`Entreprises prioritaires consolidées, ${n}-${n+1}`,'total-priority')}${tileV51(rows.length,'AO produits consolidés','neutral')}</div></div></section>
+      <section class="v51-kpi-section"><div class="v51-kpi-head"><h3>5. Win rate</h3><span>Gagné ÷ (Gagné + Perdu), entreprises uniques</span></div><div class="v51-kpi-content"><div class="v51-win-grid">${resultCardV51('Année actuelle '+n,current)}${resultCardV51('Toutes les années',all)}</div></div></section>
+    </div>`;
+  };
+})();
+</script>
+
 </body>
 </html>
