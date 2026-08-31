@@ -5330,5 +5330,78 @@ window.addEventListener('click',function(e){
   document.addEventListener('DOMContentLoaded',syncNewCompanyScopeV49);
 })();
 </script>
+
+<!-- V50 - Win rate N / historique, compteurs Gagne-Perdu et UI KPI clarifiee -->
+<style id="v50-win-rate-summary-style">
+  .v50-kpi-dashboard{display:grid;gap:12px}
+  .v50-kpi-group{border:1px solid #dedede;border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 5px 14px rgba(0,0,0,.05)}
+  .v50-kpi-group-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:#f6f6f6;border-bottom:1px solid #e5e5e5}
+  .v50-kpi-group-head h3{margin:0;font-size:11px;text-transform:uppercase;letter-spacing:.055em;color:#222}
+  .v50-kpi-group-head span{font-size:9px;color:#666;font-weight:850;text-align:right}
+  .v50-kpi-body{padding:10px}
+  .v50-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px}
+  .v50-kpi-tile{min-height:72px;border:1px solid #e8e8e8;border-radius:11px;padding:9px;background:#fafafa;display:flex;flex-direction:column;justify-content:center}
+  .v50-kpi-tile .value{font-size:20px;font-weight:950;line-height:1.05;color:#111}
+  .v50-kpi-tile .label{font-size:9px;line-height:1.25;color:#666;font-weight:850;margin-top:5px}
+  .v50-kpi-tile.orange{border-left:4px solid #FF7900;background:#fff8f1}
+  .v50-kpi-tile.blue{border-left:4px solid #1E88E5;background:#f3f8ff}
+  .v50-kpi-tile.purple{border-left:4px solid #8E24AA;background:#fbf4ff}
+  .v50-kpi-tile.green{border-left:4px solid #39C928;background:#f3fff1}
+  .v50-kpi-tile.black{border-left:4px solid #111;background:#f5f5f5}
+  .v50-winrate-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .v50-winrate-card{border:1px solid #dcdcdc;border-radius:13px;padding:10px;background:linear-gradient(135deg,#f7fff5,#fff 55%,#f7f7f7)}
+  .v50-winrate-title{font-size:10px;font-weight:950;color:#333;margin-bottom:7px}
+  .v50-winrate-value{font-size:28px;font-weight:950;line-height:1;color:#087a00}
+  .v50-winrate-detail{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+  .v50-result-chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 8px;font-size:9px;font-weight:950;border:1px solid #ddd;background:#fff}
+  .v50-result-chip.won{border-color:#39C928;background:#efffed;color:#087a00}
+  .v50-result-chip.lost{border-color:#111;background:#111;color:#fff}
+  .summary-table th.v50-won-head{background:#0d7905}.summary-table th.v50-lost-head{background:#222}
+  .summary-table td.v50-won-cell{font-weight:950;color:#087a00;background:#f5fff3}
+  .summary-table td.v50-lost-cell{font-weight:950;color:#111;background:#f4f4f4}
+  @media(max-width:900px){.v50-winrate-grid{grid-template-columns:1fr}.v50-kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+<script>
+(function(){
+  function resultCompanyCountsV50(rows){
+    const won=uniqueCompanies(rows.filter(d=>statusForCompany(d).label==='Gagné'));
+    const lost=uniqueCompanies(rows.filter(d=>statusForCompany(d).label==='Perdu'));
+    const decided=won+lost;
+    return {won,lost,decided,rate:decided?100*won/decided:null};
+  }
+  function formatRateV50(value){return value===null?'—':value.toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1})+' %';}
+  function winRateCardV50(title,stats){return `<div class="v50-winrate-card"><div class="v50-winrate-title">${escapeHtml(title)}</div><div class="v50-winrate-value">${formatRateV50(stats.rate)}</div><div class="v50-winrate-detail"><span class="v50-result-chip won">Gagné : ${stats.won}</span><span class="v50-result-chip lost">Perdu : ${stats.lost}</span></div></div>`;}
+  window.renderScopeKpis=function(rows){
+    const n=currentYearNumber();
+    const rowsN=rows.filter(d=>Number(d.year)===n);
+    const current=resultCompanyCountsV50(rowsN),all=resultCompanyCountsV50(rows);
+    const products=[...new Set(data.map(d=>d.product).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));
+    const priority=['En cours','Docs à venir','AO à confirmer'];
+    return `<div class="v50-kpi-dashboard">
+      <section class="v50-kpi-group"><div class="v50-kpi-group-head"><h3>Vue d’ensemble</h3><span>Volumétrie du périmètre filtré</span></div><div class="v50-kpi-body"><div class="v50-kpi-row"><div class="v50-kpi-tile orange"><div class="value">${rows.length}</div><div class="label">Nombre total d’entreprises / AO</div></div><div class="v50-kpi-tile black"><div class="value">${uniqueCompanies(rows)}</div><div class="label">Entreprises différentes</div></div><div class="v50-kpi-tile orange"><div class="value">${uniqueCompanies(rows.filter(d=>priority.includes(statusForCompany(d).label)))}</div><div class="label">Entreprises prioritaires</div></div></div></div></section>
+      <section class="v50-kpi-group"><div class="v50-kpi-group-head"><h3>Win rate</h3><span>Gagné ÷ (Gagné + Perdu), en entreprises uniques</span></div><div class="v50-kpi-body"><div class="v50-winrate-grid">${winRateCardV50('Année actuelle '+n,current)}${winRateCardV50('Toutes les années',all)}</div></div></section>
+      <section class="v50-kpi-group"><div class="v50-kpi-group-head"><h3>Produits</h3><span>Entreprises uniques par produit</span></div><div class="v50-kpi-body"><div class="v50-kpi-row">${products.map((p,i)=>`<div class="v50-kpi-tile ${i%2?'purple':'blue'}"><div class="value">${uniqueCompanies(rows.filter(d=>d.product===p))}</div><div class="label">${escapeHtml(p)}</div></div>`).join('')}</div></div></section>
+    </div>`;
+  };
+  window.companyAggregation=function(rows){
+    const map=new Map();
+    rows.forEach(d=>{const k=normText(d.name);if(!map.has(k))map.set(k,{name:d.name,count:0,won:0,lost:0,years:new Set(),products:new Set(),scope:new Set(),revenue:0});const x=map.get(k);x.count++;x.years.add(d.year);x.products.add(d.product);x.scope.add(rowScope(d));x.revenue+=Number(d.revenue||0);const st=statusForCompany(d).label;if(st==='Gagné')x.won++;if(st==='Perdu')x.lost++;});
+    return [...map.values()].sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'fr'));
+  };
+  const priorSummaryFieldV50=window.summaryField;
+  window.summaryField=function(x,col){if(col==='won')return x.won||0;if(col==='lost')return x.lost||0;return priorSummaryFieldV50(x,col);};
+  window.companyTable=function(rows,key='all'){
+    const all=companyAggregation(rows),state=summaryTableState[key],cols=['name','count','won','lost','years','products','revenue'],values={};
+    cols.forEach(c=>values[c]=[...new Set(all.map(x=>String(summaryField(x,c))))].sort((a,b)=>['count','won','lost','revenue'].includes(c)?Number(a)-Number(b):a.localeCompare(b,'fr',{numeric:true,sensitivity:'base'})));
+    let shown=all.filter(x=>cols.every(c=>summaryAllowed(state,c,summaryField(x,c))));
+    shown.sort((x,y)=>{const c=state.sort.col,dir=state.sort.dir==='desc'?-1:1,vx=summaryField(x,c),vy=summaryField(y,c);return(['count','won','lost','revenue'].includes(c)?Number(vx)-Number(vy):String(vx).localeCompare(String(vy),'fr',{numeric:true,sensitivity:'base'}))*dir;});
+    const displayedRows=shown.flatMap(x=>rows.filter(d=>normText(d.name)===normText(x.name)));
+    return `${typeof statsHtmlV47==='function'?statsHtmlV47(displayedRows):`<div class="summary-count">${shown.length} entreprises affichées sur ${all.length}</div>`}<div class="summary-table-wrap"><table class="summary-table"><thead><tr><th>${summaryMenu(key,'name','Entreprise',values.name)}</th><th>${summaryMenu(key,'count','AO',values.count)}</th><th class="v50-won-head">${summaryMenu(key,'won','Gagné',values.won)}</th><th class="v50-lost-head">${summaryMenu(key,'lost','Perdu',values.lost)}</th><th>${summaryMenu(key,'years','Années',values.years)}</th><th>${summaryMenu(key,'products','Produits',values.products)}</th><th>${summaryMenu(key,'revenue','Estimated €',values.revenue)}</th></tr></thead><tbody>${shown.map(x=>`<tr><td><b>${escapeHtml(x.name)}</b></td><td>${x.count}</td><td class="v50-won-cell">${x.won}</td><td class="v50-lost-cell">${x.lost}</td><td>${summaryField(x,'years')}</td><td>${escapeHtml(summaryField(x,'products'))}</td><td>${Math.round(x.revenue).toLocaleString('fr-FR')} €</td></tr>`).join('')}</tbody></table></div>`;
+  };
+  const previousRenderSummaryV50=window.renderSummary;
+  window.renderSummary=function(){previousRenderSummaryV50();document.getElementById('summaryNewBiz').innerHTML=renderScopeKpis(summaryFilteredRows().filter(d=>rowScope(d)==='New Biz'));document.getElementById('summaryExisting').innerHTML=renderScopeKpis(summaryFilteredRows().filter(d=>rowScope(d)==='Existing'));document.getElementById('summaryCombined').innerHTML=renderScopeKpis(summaryFilteredRows());document.getElementById('summaryCompaniesNew').innerHTML=companyTable(summaryFilteredRows().filter(d=>rowScope(d)==='New Biz'),'new');document.getElementById('summaryCompaniesExisting').innerHTML=companyTable(summaryFilteredRows().filter(d=>rowScope(d)==='Existing'),'existing');document.getElementById('summaryCompaniesAll').innerHTML=companyTable(summaryFilteredRows(),'all');bindSummaryTableFilters();reopenSummaryFilterV39?.();};
+})();
+</script>
+
 </body>
 </html>
