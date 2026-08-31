@@ -5466,5 +5466,106 @@ window.addEventListener('click',function(e){
 .summary-three-cols .summary-table tbody tr:first-child td{padding-top:14px!important;}
 </style>
 
+
+<!-- V54 - Filtres multi-selection en haut de l'onglet Resume -->
+<style id="v54-summary-multiselect-style">
+  .summary-multi{position:relative;min-width:0}
+  .summary-multi-button{width:100%;height:34px;border:1px solid #d8d8d8!important;border-radius:9px!important;background:#fff!important;color:#000!important;padding:6px 9px!important;font-size:10px!important;font-weight:800!important;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;white-space:nowrap;overflow:hidden}
+  .summary-multi-button .summary-multi-label{overflow:hidden;text-overflow:ellipsis}
+  .summary-multi-button.active{border-color:#FF7900!important;box-shadow:0 0 0 2px rgba(255,121,0,.13)}
+  .summary-multi-menu{display:none;position:absolute;left:0;top:38px;z-index:250;box-sizing:border-box;min-width:245px;max-width:min(360px,80vw);max-height:350px;overflow:auto;padding:9px;border:1px solid #cfcfcf;border-radius:11px;background:#fff;box-shadow:0 14px 32px rgba(0,0,0,.20)}
+  .summary-multi.open .summary-multi-menu{display:block}
+  .summary-multi-actions{position:sticky;top:-9px;z-index:2;display:flex;gap:5px;padding:4px 0 8px;background:#fff}
+  .summary-multi-actions button{flex:1;height:auto!important;min-height:28px;border:1px solid #000!important;border-radius:7px!important;background:#fff!important;padding:4px 6px!important;font-size:9px!important;font-weight:850!important;cursor:pointer}
+  .summary-multi-options{display:grid;gap:3px}
+  .summary-multi-options label{display:flex;align-items:center;gap:7px;margin:0;padding:5px 6px;border-radius:7px;font-size:10px;font-weight:750;cursor:pointer}
+  .summary-multi-options label:hover{background:#fff5eb}
+  .summary-multi-options input{width:15px!important;height:15px!important;accent-color:#FF7900;flex:0 0 auto}
+  .summary-filterbar select.v54-hidden-select{display:none!important}
+</style>
+<script>
+(function(){
+  const CONFIG={
+    summaryScope:{all:'New Biz + Existing',values:[['New Biz','New Biz'],['Existing','Existing']]},
+    summaryProduct:{all:'Tous les produits',values:[['Langues','Langues'],['Coaching','Coaching']]},
+    summaryCompanyType:{all:'Tous les types',dynamic:'cat'},
+    summaryStatus:{all:'Tous les statuts',dynamic:'status'}
+  };
+  const state={};
+  function optionsFor(id){
+    const cfg=CONFIG[id];
+    if(cfg.values)return cfg.values.slice();
+    if(cfg.dynamic==='cat')return CAT_ORDER.map(v=>[v,shortCatLabel(v)||v]);
+    if(cfg.dynamic==='status')return STATUS_OPTIONS.map(v=>[v,v]);
+    return [];
+  }
+  function ensureState(id){
+    const values=optionsFor(id).map(x=>x[0]);
+    if(!state[id])state[id]=new Set(values);
+    return state[id];
+  }
+  function labelFor(id){
+    const cfg=CONFIG[id],opts=optionsFor(id),selected=ensureState(id);
+    if(selected.size===opts.length)return cfg.all;
+    if(selected.size===0)return 'Aucun choix';
+    const labels=opts.filter(([v])=>selected.has(v)).map(([,l])=>l);
+    return labels.length<=2?labels.join(' + '):labels.length+' choix';
+  }
+  function updateControl(id){
+    const wrap=document.querySelector(`[data-summary-multi="${id}"]`);if(!wrap)return;
+    const selected=ensureState(id),opts=optionsFor(id);
+    wrap.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=selected.has(cb.value));
+    const button=wrap.querySelector('.summary-multi-button');
+    button.querySelector('.summary-multi-label').textContent=labelFor(id);
+    button.classList.toggle('active',selected.size!==opts.length);
+  }
+  function fire(){if(typeof renderSummary==='function')renderSummary();}
+  function build(id){
+    const select=document.getElementById(id);if(!select||document.querySelector(`[data-summary-multi="${id}"]`))return;
+    const opts=optionsFor(id);ensureState(id);
+    select.classList.add('v54-hidden-select');
+    const wrap=document.createElement('div');wrap.className='summary-multi';wrap.dataset.summaryMulti=id;
+    wrap.innerHTML=`<button type="button" class="summary-multi-button" aria-haspopup="true" aria-expanded="false"><span class="summary-multi-label"></span><span>▾</span></button><div class="summary-multi-menu"><div class="summary-multi-actions"><button type="button" data-v54-all>Tout sélectionner</button><button type="button" data-v54-none>Tout désélectionner</button></div><div class="summary-multi-options">${opts.map(([v,l])=>`<label><input type="checkbox" value="${escapeHtml(v)}"> <span>${escapeHtml(l)}</span></label>`).join('')}</div></div>`;
+    select.insertAdjacentElement('afterend',wrap);
+    const button=wrap.querySelector('.summary-multi-button');
+    button.onclick=e=>{e.stopPropagation();const opening=!wrap.classList.contains('open');document.querySelectorAll('.summary-multi.open').forEach(x=>x.classList.remove('open'));wrap.classList.toggle('open',opening);button.setAttribute('aria-expanded',String(opening));};
+    wrap.querySelector('.summary-multi-menu').onclick=e=>e.stopPropagation();
+    wrap.querySelector('[data-v54-all]').onclick=()=>{state[id]=new Set(opts.map(x=>x[0]));updateControl(id);fire();};
+    wrap.querySelector('[data-v54-none]').onclick=()=>{state[id]=new Set();updateControl(id);fire();};
+    wrap.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.onchange=()=>{const s=ensureState(id);cb.checked?s.add(cb.value):s.delete(cb.value);updateControl(id);fire();});
+    updateControl(id);
+  }
+  function install(){Object.keys(CONFIG).forEach(build);}
+  const previousSummaryFilteredRows=window.summaryFilteredRows;
+  window.summaryFilteredRows=function(){
+    let rows=data.slice();
+    const selected=(id,value)=>ensureState(id).has(value);
+    rows=rows.filter(d=>selected('summaryScope',rowScope(d)));
+    rows=rows.filter(d=>selected('summaryProduct',d.product));
+    rows=rows.filter(d=>selected('summaryCompanyType',d.cat));
+    rows=rows.filter(d=>selected('summaryStatus',statusForCompany(d).label));
+    const q=normText(document.getElementById('summarySearch')?.value||'');
+    const min=Number(document.getElementById('summaryYearMin')?.value),max=Number(document.getElementById('summaryYearMax')?.value);
+    if(q)rows=rows.filter(d=>normText(d.name).includes(q));
+    if(Number.isFinite(min))rows=rows.filter(d=>Number(d.year)>=min);
+    if(Number.isFinite(max))rows=rows.filter(d=>Number(d.year)<=max);
+    return rows;
+  };
+  const previousInitSummaryFilters=window.initSummaryFilters;
+  window.initSummaryFilters=function(){
+    previousInitSummaryFilters();install();
+    const reset=document.getElementById('summaryReset');
+    if(reset&&!reset.dataset.v54){
+      reset.dataset.v54='1';
+      reset.addEventListener('click',()=>{Object.keys(CONFIG).forEach(id=>{state[id]=new Set(optionsFor(id).map(x=>x[0]));updateControl(id);});fire();});
+    }
+  };
+  const previousShowSummary=window.showSummary;
+  window.showSummary=function(){const r=previousShowSummary.apply(this,arguments);install();return r;};
+  document.addEventListener('click',()=>document.querySelectorAll('.summary-multi.open').forEach(x=>{x.classList.remove('open');x.querySelector('.summary-multi-button')?.setAttribute('aria-expanded','false');}));
+  document.addEventListener('DOMContentLoaded',install);
+})();
+</script>
+
 </body>
 </html>
