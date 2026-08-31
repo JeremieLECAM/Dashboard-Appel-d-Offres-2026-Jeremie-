@@ -5434,7 +5434,7 @@ window.addEventListener('click',function(e){
   const priorityV51=['En cours','Docs à venir','AO à confirmer'];
   function uniqueV51(rows){return new Set(rows.map(d=>normText(d.name)).filter(Boolean)).size;}
   function uniqueStatusV51(rows,status){return uniqueV51(rows.filter(d=>statusForCompany(d).label===status));}
-  function resultV51(rows){const won=uniqueStatusV51(rows,'Gagné'),lost=uniqueStatusV51(rows,'Perdu'),decided=won+lost;return{won,lost,rate:decided?100*won/decided:null};}
+  function resultV51(rows){const won=rows.filter(d=>statusForCompany(d).label==='Gagné').length,lost=rows.filter(d=>statusForCompany(d).label==='Perdu').length,decided=won+lost;return{won,lost,rate:decided?100*won/decided:null};}
   function rateV51(value){return value===null?'—':value.toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1})+' %';}
   function tileV51(value,label,cls=''){return `<div class="v51-kpi-tile ${cls}"><b>${value}</b><small>${label}</small></div>`;}
   function resultCardV51(title,stats){return `<div class="v51-win-card"><div class="v51-win-title">${escapeHtml(title)}</div><div class="v51-win-value">${rateV51(stats.rate)}</div><div class="v51-win-detail"><span class="v51-result won">Gagné : ${stats.won}</span><span class="v51-result lost">Perdu : ${stats.lost}</span></div></div>`;}
@@ -5451,11 +5451,12 @@ window.addEventListener('click',function(e){
       <section class="v51-kpi-section"><div class="v51-kpi-head"><h3>2. Nombre d’entreprises par produit</h3><span>Entreprises uniques</span></div><div class="v51-kpi-content"><div class="v51-kpi-grid">${productTiles}</div></div></section>
       <section class="v51-kpi-section"><div class="v51-kpi-head"><h3>3. Types d’entreprises</h3><span>Nombre d’AO par catégorie</span></div><div class="v51-kpi-content"><div class="v51-kpi-grid">${typeTiles}</div></div></section>
       <section class="v51-kpi-section"><div class="v51-kpi-head"><h3>4. Statuts prioritaires</h3><span>Détail conservé sur ${n}-${n+1}</span></div><div class="v51-kpi-content"><div class="v51-kpi-grid">${statusTiles}${tileV51(uniqueV51(rowsNN1.filter(d=>priorityV51.includes(statusForCompany(d).label))),`Entreprises prioritaires consolidées, ${n}-${n+1}`,'total-priority')}${tileV51(rows.length,'AO produits consolidés','neutral')}</div></div></section>
-      <section class="v51-kpi-section"><div class="v51-kpi-head"><h3>5. Win rate</h3><span>Gagné ÷ (Gagné + Perdu), entreprises uniques</span></div><div class="v51-kpi-content"><div class="v51-win-grid">${resultCardV51('Année actuelle '+n,current)}${resultCardV51('Toutes les années',all)}</div></div></section>
+      <section class="v51-kpi-section"><div class="v51-kpi-head"><h3>5. Win rate</h3><span>Gagné ÷ (Gagné + Perdu), nombre total d’entreprises / AO</span></div><div class="v51-kpi-content"><div class="v51-win-grid">${resultCardV51('Année actuelle '+n,current)}${resultCardV51('Toutes les années',all)}</div></div></section>
     </div>`;
   };
 })();
 </script>
 
+<!-- V52 - Win rate calcule sur le nombre total de lignes / entreprises, doublons inclus -->
 </body>
 </html>
