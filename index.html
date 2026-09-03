@@ -5567,5 +5567,85 @@ window.addEventListener('click',function(e){
 })();
 </script>
 
+
+<!-- V55 - Bouton Reset pour les filtres du bloc de gauche des Dashboards -->
+<style id="v55-dashboard-filter-reset-style">
+  #filtersTitle{gap:8px}
+  #filtersTitle > span:first-child{flex:1}
+  #dashboardFiltersResetBtn{
+    flex:0 0 auto;
+    border:1px solid #000;
+    border-radius:8px;
+    background:#fff;
+    color:#000;
+    padding:4px 8px;
+    font-size:9px;
+    font-weight:950;
+    line-height:1.2;
+    cursor:pointer;
+    text-transform:none;
+    letter-spacing:0;
+    transition:background .15s ease,color .15s ease,border-color .15s ease;
+  }
+  #dashboardFiltersResetBtn:hover{
+    background:#000;
+    color:#fff;
+    border-color:#FF7900;
+  }
+</style>
+<script>
+(function(){
+  function resetDashboardLeftFiltersV55(){
+    if(typeof closeFilterMenus==='function')closeFilterMenus();
+    dashboardKpiFilters=new Set(['status-en-cours','status-ao-confirm','status-docs','status-perdu','status-gagne','status-empty','watch']);
+    dashboardCategoryFilters=new Set(['cac','sbf','priv','pub','eco']);
+    dashboardYearFilters=new Set();
+    dashboardKpiFilter=null;
+    dashboardCategoryFilter=null;
+
+    document.querySelectorAll('.f-cat,.f-prod,.f-status,.f-owner').forEach(input=>{input.checked=true;});
+    const search=document.getElementById('search');
+    if(search)search.value='';
+
+    const scopeYears=scopeRows(data).map(row=>Number(row.year)).filter(Number.isFinite);
+    if(scopeYears.length){
+      const yearMin=document.getElementById('yearMin');
+      const yearMax=document.getElementById('yearMax');
+      if(yearMin)yearMin.value=Math.min(...scopeYears);
+      if(yearMax)yearMax.value=Math.max(...scopeYears);
+    }
+
+    if(typeof syncDashboardButtonFiltersToTable==='function')syncDashboardButtonFiltersToTable();
+    if(typeof syncStatusSidebarFromDashboard==='function')syncStatusSidebarFromDashboard();
+    if(typeof updateAll==='function')updateAll();
+
+    if(typeof businessScopeFilterStatesV40!=='undefined' && typeof captureBusinessScopeFiltersV40==='function'){
+      businessScopeFilterStatesV40[activeBusinessScope]=captureBusinessScopeFiltersV40();
+    }
+  }
+
+  function installDashboardFiltersResetV55(){
+    const title=document.getElementById('filtersTitle');
+    if(!title || document.getElementById('dashboardFiltersResetBtn'))return;
+    const icon=title.querySelector('span:last-child');
+    const button=document.createElement('button');
+    button.type='button';
+    button.id='dashboardFiltersResetBtn';
+    button.textContent='Reset';
+    button.title='Réinitialiser les filtres du Dashboard';
+    button.addEventListener('click',resetDashboardLeftFiltersV55);
+    title.insertBefore(button,icon || null);
+  }
+
+  document.addEventListener('DOMContentLoaded',installDashboardFiltersResetV55);
+  const previousArrangeCockpitV55=window.arrangeCockpit;
+  window.arrangeCockpit=function(){
+    const result=previousArrangeCockpitV55.apply(this,arguments);
+    installDashboardFiltersResetV55();
+    return result;
+  };
+})();
+</script>
+
 </body>
 </html>
