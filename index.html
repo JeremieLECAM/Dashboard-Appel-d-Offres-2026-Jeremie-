@@ -5647,5 +5647,91 @@ window.addEventListener('click',function(e){
 })();
 </script>
 
+
+<!-- V56 - Edition et suppression en masse des lignes selectionnees -->
+<style id="v56-bulk-edit-delete-style">
+  #bulkDelete{border-color:#b31313!important;color:#b31313!important;background:#fff!important}
+  #bulkDelete:hover{background:#b31313!important;color:#fff!important}
+  #bulkValue.bulk-free-input{min-width:160px!important}
+  .bulk-head{min-width:34px;text-align:center!important}
+</style>
+<script>
+(function(){
+  function selectedBulkRowsV56(){
+    return data.filter(d=>rowScope(d)===activeBusinessScope && bulkSelectedIds.has(Number(d.id)));
+  }
+  function replaceBulkValueControlV56(){
+    const field=document.getElementById('bulkField');
+    let control=document.getElementById('bulkValue');
+    if(!field||!control)return;
+    const current=field.value;
+    const options={
+      status:STATUS_OPTIONS,
+      product:['Langues','Coaching'],
+      cat:CAT_ORDER,
+      owner:getAllOwnerOptions(),
+      year:[...new Set(scopeRows(data).map(d=>d.year))].sort((a,b)=>b-a),
+      businessScope:['New Biz','Existing']
+    }[current]||[];
+    const next=document.createElement('select');
+    next.id='bulkValue';
+    options.forEach(value=>{
+      const option=document.createElement('option');
+      option.value=String(value); option.textContent=String(value); next.appendChild(option);
+    });
+    control.replaceWith(next);
+  }
+  function ensureBulkUiV56(){
+    const field=document.getElementById('bulkField');
+    const toolbar=document.getElementById('bulkToolbar');
+    if(!field||!toolbar)return;
+    if(!field.querySelector('option[value="businessScope"]')){
+      const opt=document.createElement('option'); opt.value='businessScope'; opt.textContent='Périmètre commercial'; field.appendChild(opt);
+    }
+    if(!document.getElementById('bulkDelete')){
+      const btn=document.createElement('button'); btn.type='button'; btn.id='bulkDelete'; btn.className='btn secondary'; btn.textContent='Supprimer la sélection';
+      toolbar.appendChild(btn);
+    }
+    field.onchange=replaceBulkValueControlV56;
+    const apply=document.getElementById('bulkApply'); if(apply)apply.onclick=applyBulkEditV56;
+    const del=document.getElementById('bulkDelete'); if(del)del.onclick=deleteBulkRowsV56;
+    replaceBulkValueControlV56();
+  }
+  function applyBulkEditV56(){
+    const field=document.getElementById('bulkField')?.value;
+    const value=document.getElementById('bulkValue')?.value;
+    const rows=selectedBulkRowsV56();
+    if(!field||!rows.length)return;
+    rows.forEach(d=>{
+      if(field==='year') d.year=Number(value)||d.year;
+      else if(field==='owner'){ d.owner=value||null; d.owner_missing=!d.owner; }
+      else if(field==='businessScope') d.businessScope=value==='Existing'?'Existing':'New Biz';
+      else d[field]=value;
+      if(field==='cat') d.color=colorForCategory(d.cat);
+      if(field==='product'||field==='year') d.y=computeYFromRevenue(d.revenue,d.product);
+    });
+    bulkSelectedIds.clear();
+    saveData(); renderOwners(); updateAll(); renderCompanyTable(); ensureBulkUiV56();
+  }
+  function deleteBulkRowsV56(){
+    const rows=selectedBulkRowsV56();
+    if(!rows.length)return;
+    const label=rows.length===1?`Supprimer définitivement « ${rows[0].name} » ?`:`Supprimer définitivement les ${rows.length} lignes sélectionnées ?`;
+    if(!window.confirm(label))return;
+    const ids=new Set(rows.map(d=>Number(d.id)));
+    data=data.filter(d=>!ids.has(Number(d.id)));
+    if(selectedCompanyId!=null&&ids.has(Number(selectedCompanyId))) selectedCompanyId=null;
+    bulkSelectedIds.clear();
+    data=data.map((d,index)=>({...d,id:index+1}));
+    saveData(); closeFloatingCompanyPopup(); renderOwners(); updateAll(); renderEditors(); renderCompanyTable(); ensureBulkUiV56();
+  }
+  const previousInstallBulkUiV56=window.installBulkUi;
+  window.installBulkUi=function(){ const result=previousInstallBulkUiV56.apply(this,arguments); ensureBulkUiV56(); return result; };
+  const previousRenderCompanyTableV56=window.renderCompanyTable;
+  window.renderCompanyTable=function(){ const result=previousRenderCompanyTableV56.apply(this,arguments); ensureBulkUiV56(); return result; };
+  document.addEventListener('DOMContentLoaded',ensureBulkUiV56);
+})();
+</script>
+
 </body>
 </html>
