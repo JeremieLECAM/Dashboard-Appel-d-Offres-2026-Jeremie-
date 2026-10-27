@@ -5811,5 +5811,90 @@ window.addEventListener('click',function(e){
 }
 </style>
 
+
+<!-- V59 - Hauteur viewport + jalons dynamiques selon les bulles visibles -->
+<style id="v59-responsive-chart-height">
+/* Le tableau New Biz / Existing tient dans la hauteur visible : les annees restent accessibles sans scroll. */
+#tabDashboard .chart-main{
+  flex:0 0 100%!important;
+  height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+#tabDashboard #chartWrap{
+  flex:1 1 auto!important;
+  height:auto!important;
+  min-height:0!important;
+}
+#tabDashboard #chart{
+  height:100%!important;
+  min-height:0!important;
+}
+</style>
+<script>
+(function(){
+  const previousUpdateChartV59=window.updateChart;
+
+  function allRevenueBandsV59(){
+    return [
+      ...(window.Y_BANDS_LANGUES||[]),
+      ...(window.Y_BANDS_COACHING||[]),
+      ...(window.Y_BANDS_MENTORAT||[])
+    ];
+  }
+  function isRevenueBandAnnotationV59(annotation){
+    const text=String(annotation&&annotation.text||'');
+    return /^(Langues|Coaching|Mentorat)\b/.test(text);
+  }
+  function isSectionSeparatorV59(shape){
+    if(!shape||shape.type!=='line'||shape.yref!=='y')return false;
+    const y0=Number(shape.y0),y1=Number(shape.y1);
+    return y0===y1&&(y0===0||y0===-6);
+  }
+
+  window.updateChart=function(){
+    previousUpdateChartV59();
+    if(!window.Plotly||!plotlyReady)return;
+    const gd=document.getElementById('chart');
+    if(!gd||!gd.layout)return;
+
+    /* filteredData() est deja limite au dashboard actif : New Biz ou Existing. */
+    const visibleRows=filteredData();
+    const occupiedLevels=new Set(visibleRows.map(row=>Number(row.y)).filter(Number.isFinite));
+    const activeBands=allRevenueBandsV59().filter(band=>occupiedLevels.has(Number(band.y)));
+
+    /* On conserve Aujourd'hui, les noms au survol/selection et toutes les autres annotations. */
+    const annotations=(gd.layout.annotations||[])
+      .filter(annotation=>!isRevenueBandAnnotationV59(annotation))
+      .concat(activeBands.map(band=>({
+        xref:'paper',yref:'y',x:-0.035,y:band.y,text:band.label,
+        showarrow:false,xanchor:'center',yanchor:'middle',
+        font:{size:9,color:'#000',family:'Segoe UI,Arial'},
+        bgcolor:'rgba(255,255,255,0)',borderwidth:0
+      })));
+
+    /* Les anciennes bandes verticales, le repere Aujourd'hui et les selections restent inchanges.
+       On n'ajoute une ligne horizontale de revenu que lorsqu'une bulle occupe ce jalon. */
+    const retainedShapes=(gd.layout.shapes||[]).filter(shape=>{
+      if(isSectionSeparatorV59(shape))return true;
+      if(shape.type==='line'&&shape.yref==='y'&&Number(shape.y0)===Number(shape.y1))return false;
+      return true;
+    });
+    const revenueLines=activeBands.map(band=>({
+      type:'line',xref:'paper',yref:'y',x0:0,x1:1,y0:band.y,y1:band.y,
+      line:{color:'rgba(0,0,0,.11)',width:1},layer:'below'
+    }));
+
+    Plotly.relayout(gd,{
+      'yaxis.gridcolor':'rgba(0,0,0,0)',
+      'annotations':annotations,
+      'shapes':[...retainedShapes,...revenueLines]
+    });
+    /* Recalcule la taille apres les overrides CSS, sans modifier les interactions Plotly. */
+    try{Plotly.Plots.resize(gd);}catch(e){}
+  };
+})();
+</script>
+
 </body>
 </html>
