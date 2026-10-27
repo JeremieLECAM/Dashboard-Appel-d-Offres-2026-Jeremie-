@@ -5735,5 +5735,55 @@ window.addEventListener('click',function(e){
 })();
 </script>
 
+
+<!-- V57 - 3e section verticale Mentorat sous Coaching -->
+<script>
+(function(){
+  /* Même jalonnement de revenu que Coaching, placé sous la zone Coaching. */
+  window.Y_BANDS_MENTORAT = [
+    {max:10000,y:-11,label:'Mentorat ≤ 10k€'},
+    {max:30000,y:-10,label:'Mentorat 10–30k€'},
+    {max:50000,y:-9,label:'Mentorat 30–50k€'},
+    {max:100000,y:-8,label:'Mentorat 50–100k€'},
+    {max:1000000,y:-7,label:'Mentorat > 100k€'}
+  ];
+
+  const previousComputeYV57=window.computeYFromRevenue;
+  window.computeYFromRevenue=function(revenue,product){
+    const v=Number.isFinite(Number(revenue))?Number(revenue):0;
+    const key=String(product||'').trim().toLowerCase();
+    if(key==='mentorat') return (Y_BANDS_MENTORAT.find(b=>v<=b.max)||Y_BANDS_MENTORAT[Y_BANDS_MENTORAT.length-1]).y;
+    return previousComputeYV57(revenue,product);
+  };
+
+  const previousUpdateChartV57=window.updateChart;
+  window.updateChart=function(){
+    /* Le rendu historique crée Langues + Coaching. On le laisse faire, puis on étend
+       uniquement l'axe Y, les jalons Mentorat et la ligne de séparation Coaching/Mentorat. */
+    previousUpdateChartV57();
+    if(!window.Plotly||!plotlyReady)return;
+    const gd=document.getElementById('chart');
+    if(!gd||!gd.layout)return;
+    const f=getFilterState();
+    const today=currentDecimalYear();
+    const existingShapes=(gd.layout.shapes||[]).map(x=>({...x}));
+    const existingAnnotations=(gd.layout.annotations||[]).map(x=>({...x}));
+    const mentorAnnotations=Y_BANDS_MENTORAT.map(t=>({xref:'paper',yref:'y',x:-0.035,y:t.y,text:t.label,showarrow:false,xanchor:'center',yanchor:'middle',font:{size:9,color:'#000',family:'Segoe UI,Arial'},bgcolor:'rgba(255,255,255,0)',borderwidth:0}));
+    const separator={type:'line',xref:'paper',yref:'y',x0:0,x1:1,y0:-6,y1:-6,line:{color:'#999',width:2},layer:'above'};
+    /* La ligne zéro existante reste la séparation Langues / Coaching. */
+    const mentorAlready=existingAnnotations.some(a=>String(a.text||'').startsWith('Mentorat'));
+    const separatorAlready=existingShapes.some(sh=>sh.yref==='y'&&Number(sh.y0)===-6&&Number(sh.y1)===-6);
+    Plotly.relayout(gd,{
+      'yaxis.range':[-11.95,5.95],
+      'yaxis.zeroline':true,
+      'yaxis.zerolinecolor':'#999',
+      'yaxis.zerolinewidth':2,
+      'shapes':separatorAlready?existingShapes:[...existingShapes,separator],
+      'annotations':mentorAlready?existingAnnotations:[...existingAnnotations,...mentorAnnotations]
+    });
+  };
+})();
+</script>
+
 </body>
 </html>
