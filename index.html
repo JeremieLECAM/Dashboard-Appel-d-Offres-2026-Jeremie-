@@ -5811,5 +5811,95 @@ window.addEventListener('click',function(e){
 }
 </style>
 
+
+<!-- V59 - Axe des annees en haut et sous Mentorat + lignes Mentorat dynamiques -->
+<script>
+(function(){
+  const mentorRevenueBandsV59 = [
+    {max:10000,label:'Mentorat ≤ 10k€'},
+    {max:30000,label:'Mentorat 10–30k€'},
+    {max:50000,label:'Mentorat 30–50k€'},
+    {max:100000,label:'Mentorat 50–100k€'},
+    {max:1000000,label:'Mentorat > 100k€'}
+  ];
+  function mentorBandIndexV59(revenue){
+    const value=Number.isFinite(Number(revenue))?Number(revenue):0;
+    const index=mentorRevenueBandsV59.findIndex(b=>value<=b.max);
+    return index<0?mentorRevenueBandsV59.length-1:index;
+  }
+  function mentorRowsForLayoutV59(){
+    const rows=(typeof scopeRows==='function'&&typeof data!=='undefined')?scopeRows(data):(typeof data!=='undefined'?data:[]);
+    return rows.filter(row=>String(row.product||'').trim().toLowerCase()==='mentorat');
+  }
+  function activeMentorBandIndexesV59(){
+    const indexes=[...new Set(mentorRowsForLayoutV59().map(row=>mentorBandIndexV59(row.revenue)))].sort((a,b)=>a-b);
+    return indexes.length?indexes:[0];
+  }
+  function mentorBandYV59(index){
+    const active=activeMentorBandIndexesV59();
+    const rank=active.indexOf(index);
+    return -7-(rank<0?0:rank);
+  }
+  const computeYBeforeV59=window.computeYFromRevenue;
+  window.computeYFromRevenue=function(revenue,product){
+    if(String(product||'').trim().toLowerCase()==='mentorat'){
+      return mentorBandYV59(mentorBandIndexV59(revenue));
+    }
+    return computeYBeforeV59(revenue,product);
+  };
+  const updateChartBeforeV59=window.updateChart;
+  window.updateChart=function(){
+    updateChartBeforeV59();
+    if(!window.Plotly||!plotlyReady)return;
+    const gd=document.getElementById('chart');
+    if(!gd||!gd.layout)return;
+    const activeIndexes=activeMentorBandIndexesV59();
+    const mentorTicks=activeIndexes.map((bandIndex,rank)=>({
+      y:-7-rank,
+      label:mentorRevenueBandsV59[bandIndex].label
+    }));
+    const bottomYearY=Math.min(...mentorTicks.map(t=>t.y))-0.78;
+    const topYearY=6.62;
+    const annotations=(gd.layout.annotations||[])
+      .map(item=>({...item}))
+      .filter(item=>!String(item.text||'').startsWith('Mentorat'));
+    const mentorAnnotations=mentorTicks.map(t=>({
+      xref:'paper',yref:'y',x:-0.035,y:t.y,text:t.label,showarrow:false,
+      xanchor:'center',yanchor:'middle',font:{size:9,color:'#000',family:'Segoe UI,Arial'},
+      bgcolor:'rgba(255,255,255,0)',borderwidth:0
+    }));
+    const yearTraceIndex=(gd.data||[]).findIndex(trace=>
+      Array.isArray(trace.customdata)&&trace.customdata.some(item=>Array.isArray(item)&&item[0]==='year-filter')
+    );
+    const operations=[];
+    if(yearTraceIndex>=0){
+      const source=gd.data[yearTraceIndex];
+      operations.push(Plotly.restyle(gd,{
+        y:[source.x.map(()=>bottomYearY)],
+        textposition:'middle center'
+      },[yearTraceIndex]));
+      const topTrace={...source,
+        y:source.x.map(()=>topYearY),
+        marker:{...(source.marker||{})},
+        textfont:{...(source.textfont||{})},
+        customdata:(source.customdata||[]).map(item=>Array.isArray(item)?item.slice():item),
+        showlegend:false,
+        hoverinfo:'none',
+        cliponaxis:false
+      };
+      operations.push(Plotly.addTraces(gd,topTrace));
+    }
+    Promise.all(operations).then(()=>Plotly.relayout(gd,{
+      'yaxis.range':[bottomYearY-0.48,topYearY+0.42],
+      'annotations':[...annotations,...mentorAnnotations]
+    }));
+  };
+})();
+</script>
+<style id="v59-mentorat-dynamic-style">
+/* Un peu d'air pour les deux rangees d'annees, sans recréer de lignes Mentorat inutiles. */
+#tabDashboard #chartWrap{padding-top:2px!important;padding-bottom:2px!important;}
+</style>
+
 </body>
 </html>
