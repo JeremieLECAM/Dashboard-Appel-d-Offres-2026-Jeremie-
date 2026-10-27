@@ -559,7 +559,7 @@
                 <div><div class="field-label">Année</div><input id="newCompanyYear" type="number" min="2012" max="2035" required /></div>
                 <div><div class="field-label">Estimated €</div><input id="newCompanyRevenue" type="number" min="0" step="1" value="0" /></div>
               </div>
-              <div class="field-label">Produit</div><select id="newCompanyProduct"><option>Langues</option><option>Coaching</option></select>
+              <div class="field-label">Produit</div><select id="newCompanyProduct"><option>Langues</option><option>Coaching</option><option>Mentorat</option><option>Interculturel</option></select>
               <div class="field-label">Catégorie</div><select id="newCompanyCat"><option>CAC 40</option><option>SBF 120</option><option>Entreprise privée hors CAC 40/SBF 120</option><option>Public / Semi-Public</option><option>Écoles</option></select>
               <div class="field-label">Owner / BDR</div><div id="newCompanyOwnerSelector"></div>
               <div class="field-label">Statut</div><select id="newCompanyStatusManual"><option>En cours</option><option>Perdu</option><option>Gagné</option><option>AO à confirmer</option><option>Docs à venir</option><option>Sans statut</option></select>
@@ -592,6 +592,8 @@
           <div class="section"><button type="button" class="section-head">Produit <span>▶</span></button><div class="section-body">
             <label><input type="checkbox" class="f-prod" value="Langues" checked> Langues</label>
             <label><input type="checkbox" class="f-prod" value="Coaching" checked> Coaching</label>
+            <label><input type="checkbox" class="f-prod" value="Mentorat" checked> Mentorat</label>
+            <label><input type="checkbox" class="f-prod" value="Interculturel" checked> Interculturel</label>
           </div></div>
           <div class="section"><button type="button" class="section-head">Statut <span>▶</span></button><div class="section-body">
             <label class="status-filter-choice status-progress"><input type="checkbox" class="f-status" value="En cours" checked> En cours</label>
@@ -657,7 +659,7 @@
       <div class="summary-hero"><div><h1>Résumé des Appels d’offres</h1><p>Vue consolidée New Biz, Existing et portefeuille global</p></div><div id="summaryHeroStats" class="summary-hero-stats"></div></div>
       <div id="summaryFilters" class="summary-filterbar">
         <div><label>Périmètre</label><select id="summaryScope"><option value="All">New Biz + Existing</option><option value="New Biz">New Biz</option><option value="Existing">Existing</option></select></div>
-        <div><label>Produit</label><select id="summaryProduct"><option value="All">Tous</option><option>Langues</option><option>Coaching</option></select></div>
+        <div><label>Produit</label><select id="summaryProduct"><option value="All">Tous</option><option>Langues</option><option>Coaching</option><option>Mentorat</option><option>Interculturel</option></select></div>
         <div><label>Statut</label><select id="summaryStatus"><option value="All">Tous</option><option>En cours</option><option>AO à confirmer</option><option>Docs à venir</option><option>Perdu</option><option>Gagné</option><option>Sans statut</option></select></div>
         <div><label>Année min.</label><select id="summaryYearMin"></select></div><div><label>Année max.</label><select id="summaryYearMax"></select></div>
         <div><label>Entreprise</label><input id="summarySearch" type="text" placeholder="Rechercher…"></div>
@@ -4020,7 +4022,7 @@ function renderEditor(containerId,prefix){
   <form id="${prefix}EditForm">
     <div class="field-label">Entreprise</div><input id="${prefix}EditName" type="text" value="${escapeHtml(d.name)}">
     <div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div>
-    <div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching'], d.product)}
+    <div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching','Mentorat','Interculturel'], d.product)}
     <div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='SBF 120'?'selected':''}>SBF 120</option><option ${d.cat==='Entreprise privée hors CAC 40/SBF 120'?'selected':''}>Entreprise privée hors CAC 40/SBF 120</option><option ${d.cat==='Public / Semi-Public'?'selected':''}>Public / Semi-Public</option><option ${d.cat==='Écoles'?'selected':''}>Écoles</option></select>
     <div class="field-label">Owner / BDR</div>${ownerMultiSelectorHtml(ownerGroup, ownerLabel(d))}
     <div class="field-label">Statut</div>${statusSelectHtml(`${prefix}EditStatus`, d.status || inferStatusFromNotes(d.notes))}
@@ -4103,7 +4105,7 @@ function renderDashboardFloatingPopup(){
   <form id="${prefix}EditForm">
     <div class="field-label">Entreprise</div><input id="${prefix}EditName" type="text" value="${escapeHtml(d.name)}">
     <div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div>
-    <div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching'], d.product)}
+    <div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching','Mentorat','Interculturel'], d.product)}
     <div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='SBF 120'?'selected':''}>SBF 120</option><option ${d.cat==='Entreprise privée hors CAC 40/SBF 120'?'selected':''}>Entreprise privée hors CAC 40/SBF 120</option><option ${d.cat==='Public / Semi-Public'?'selected':''}>Public / Semi-Public</option><option ${d.cat==='Écoles'?'selected':''}>Écoles</option></select>
     <div class="field-label">Owner / BDR</div>${ownerMultiSelectorHtml(ownerGroup, ownerLabel(d))}
     <div class="field-label">Statut</div>${statusSelectHtml(`${prefix}EditStatus`, d.status || inferStatusFromNotes(d.notes))}
@@ -4248,7 +4250,7 @@ function renderWatchCompanyPanel(){
   if(!d){ holder.classList.remove('open'); holder.innerHTML=''; return; }
   const prefix='watch'; const productGroup=`${prefix}EditProductChoice`; const ownerGroup=`${prefix}EditOwnerChoice`;
   holder.classList.add('open');
-  holder.innerHTML=`<h3>Fiche entreprise<br><span style="font-weight:600;color:#444">${escapeHtml(d.name)}</span></h3><form id="${prefix}EditForm"><div class="field-label">Entreprise</div><input id="${prefix}EditName" type="text" value="${escapeHtml(d.name)}"><div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div><div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching'], d.product)}<div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='SBF 120'?'selected':''}>SBF 120</option><option ${d.cat==='Entreprise privée hors CAC 40/SBF 120'?'selected':''}>Entreprise privée hors CAC 40/SBF 120</option><option ${d.cat==='Public / Semi-Public'?'selected':''}>Public / Semi-Public</option><option ${d.cat==='Écoles'?'selected':''}>Écoles</option></select><div class="field-label">Owner / BDR</div>${ownerMultiSelectorHtml(ownerGroup, ownerLabel(d))}<div class="field-label">Statut</div>${statusSelectHtml(`${prefix}EditStatus`, d.status || inferStatusFromNotes(d.notes))}<div class="field-label">Notes</div><textarea id="${prefix}EditNotes">${escapeHtml(d.notes||'')}</textarea><div class="editor-actions"><button type="submit" class="editor-save">Enregistrer</button><button type="button" id="${prefix}EditClose" class="editor-close">Fermer la fiche</button></div></form>`;
+  holder.innerHTML=`<h3>Fiche entreprise<br><span style="font-weight:600;color:#444">${escapeHtml(d.name)}</span></h3><form id="${prefix}EditForm"><div class="field-label">Entreprise</div><input id="${prefix}EditName" type="text" value="${escapeHtml(d.name)}"><div class="row2"><div><div class="field-label">Année</div><input id="${prefix}EditYear" type="number" value="${d.year}"></div><div><div class="field-label">Estimated €</div><input id="${prefix}EditRevenue" type="number" min="0" step="1" value="${d.revenue}"></div></div><div class="field-label">Produit</div>${singleCheckboxGroupHtml(productGroup, ['Langues','Coaching','Mentorat','Interculturel'], d.product)}<div class="field-label">Catégorie</div><select id="${prefix}EditCat"><option ${d.cat==='CAC 40'?'selected':''}>CAC 40</option><option ${d.cat==='SBF 120'?'selected':''}>SBF 120</option><option ${d.cat==='Entreprise privée hors CAC 40/SBF 120'?'selected':''}>Entreprise privée hors CAC 40/SBF 120</option><option ${d.cat==='Public / Semi-Public'?'selected':''}>Public / Semi-Public</option><option ${d.cat==='Écoles'?'selected':''}>Écoles</option></select><div class="field-label">Owner / BDR</div>${ownerMultiSelectorHtml(ownerGroup, ownerLabel(d))}<div class="field-label">Statut</div>${statusSelectHtml(`${prefix}EditStatus`, d.status || inferStatusFromNotes(d.notes))}<div class="field-label">Notes</div><textarea id="${prefix}EditNotes">${escapeHtml(d.notes||'')}</textarea><div class="editor-actions"><button type="submit" class="editor-save">Enregistrer</button><button type="button" id="${prefix}EditClose" class="editor-close">Fermer la fiche</button></div></form>`;
   bindSingleCheckboxGroups(holder); bindOwnerMultiSelectors(holder);
   document.getElementById(`${prefix}EditForm`).onsubmit=e=>{e.preventDefault(); saveWatchEditor(d.id);};
   document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderWatchCompanyPanel();renderList();syncTableFiltersToDashboard(); renderCompanyTable();};
@@ -4360,7 +4362,7 @@ function installBulkUi(){
   const field=document.getElementById('bulkField');
   if(field){field.onchange=refreshBulkValues;document.getElementById('bulkApply').onclick=applyBulkEdit;document.getElementById('bulkVisible').onclick=()=>{document.querySelectorAll('#companyTableWrap tr[data-id]').forEach(tr=>bulkSelectedIds.add(Number(tr.dataset.id)));renderCompanyTable();};document.getElementById('bulkClear').onclick=()=>{bulkSelectedIds.clear();renderCompanyTable();};refreshBulkValues();}
 }
-function refreshBulkValues(){const field=document.getElementById('bulkField'),v=document.getElementById('bulkValue');if(!field||!v)return;const opts={status:STATUS_OPTIONS,product:['Langues','Coaching'],cat:CAT_ORDER,owner:getAllOwnerOptions(),year:[...new Set(scopeRows(data).map(d=>d.year))].sort((a,b)=>b-a)}[field.value]||[];v.innerHTML=opts.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');}
+function refreshBulkValues(){const field=document.getElementById('bulkField'),v=document.getElementById('bulkValue');if(!field||!v)return;const opts={status:STATUS_OPTIONS,product:['Langues','Coaching','Mentorat','Interculturel'],cat:CAT_ORDER,owner:getAllOwnerOptions(),year:[...new Set(scopeRows(data).map(d=>d.year))].sort((a,b)=>b-a)}[field.value]||[];v.innerHTML=opts.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');}
 function applyBulkEdit(){const field=document.getElementById('bulkField')?.value,value=document.getElementById('bulkValue')?.value;if(!field||!bulkSelectedIds.size)return;data.forEach(d=>{if(rowScope(d)!==activeBusinessScope||!bulkSelectedIds.has(Number(d.id)))return;if(field==='year')d.year=Number(value)||d.year;else if(field==='owner'){d.owner=value;d.owner_missing=!value;}else d[field]=value;if(field==='cat')d.color=colorForCategory(d.cat);if(field==='product')d.y=computeYFromRevenue(d.revenue,d.product);});saveData();renderOwners();updateAll();bulkSelectedIds.clear();renderCompanyTable();}
 const _loadDataV35=loadData;
 loadData=function(){_loadDataV35();data=data.map(d=>({...d,businessScope:rowScope(d)}));};
@@ -5416,7 +5418,7 @@ window.addEventListener('click',function(e){
   .v51-kpi-tile:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#FF7900}
   .v51-kpi-tile b{display:block;font-size:20px;line-height:1.05;color:#111}
   .v51-kpi-tile small{display:block;margin-top:5px;font-size:9px;line-height:1.25;color:#666;font-weight:850}
-  .v51-kpi-tile.neutral:before{background:#111}.v51-kpi-tile.langues:before{background:#1E88E5}.v51-kpi-tile.coaching:before{background:#8E24AA}
+  .v51-kpi-tile.neutral:before{background:#111}.v51-kpi-tile.langues:before{background:#1E88E5}.v51-kpi-tile.coaching:before{background:#8E24AA}.v51-kpi-tile.mentorat:before{background:#00A6A6}.v51-kpi-tile.interculturel:before{background:#FF7900}
   .v51-kpi-tile.progress{background:#FFF8EF}.v51-kpi-tile.progress:before{background:#FF9800}
   .v51-kpi-tile.docs{background:#FFF0F8}.v51-kpi-tile.docs:before{background:#FF1493}
   .v51-kpi-tile.confirm{background:#FFFCE8}.v51-kpi-tile.confirm:before{background:#FFD400}
@@ -5445,7 +5447,7 @@ window.addEventListener('click',function(e){
     const current=resultV51(rowsN),all=resultV51(rows);
     const statusTiles=priorityV51.map(st=>tileV51(uniqueStatusV51(rowsNN1,st),`Entreprises ${escapeHtml(st)}, ${n}-${n+1}`,st==='En cours'?'progress':st==='Docs à venir'?'docs':'confirm')).join('');
     const typeTiles=types.map(cat=>`<div class="v51-kpi-tile"><span class="v51-type-dot" style="background:${colorForCategory(cat)}"></span><b>${rows.filter(d=>d.cat===cat).length}</b><small>${escapeHtml(shortCatLabel(cat))}</small></div>`).join('');
-    const productTiles=products.map(p=>tileV51(uniqueV51(rows.filter(d=>d.product===p)),escapeHtml(p),p==='Coaching'?'coaching':'langues')).join('');
+    const productTiles=products.map(p=>tileV51(uniqueV51(rows.filter(d=>d.product===p)),escapeHtml(p),p==='Coaching'?'coaching':p==='Mentorat'?'mentorat':p==='Interculturel'?'interculturel':'langues')).join('');
     return `<div class="v51-kpi-dashboard">
       <section class="v51-kpi-section"><div class="v51-kpi-head"><h3>1. Volume d’entreprises (AO)</h3><span>Volumétrie du périmètre filtré</span></div><div class="v51-kpi-content"><div class="v51-kpi-grid">${tileV51(rows.length,'Nombre total d’entreprises / AO')}${tileV51(uniqueV51(rows),'Entreprises différentes','neutral')}</div></div></section>
       <section class="v51-kpi-section"><div class="v51-kpi-head"><h3>2. Nombre d’entreprises par produit</h3><span>Entreprises uniques</span></div><div class="v51-kpi-content"><div class="v51-kpi-grid">${productTiles}</div></div></section>
@@ -5487,7 +5489,7 @@ window.addEventListener('click',function(e){
 (function(){
   const CONFIG={
     summaryScope:{all:'New Biz + Existing',values:[['New Biz','New Biz'],['Existing','Existing']]},
-    summaryProduct:{all:'Tous les produits',values:[['Langues','Langues'],['Coaching','Coaching']]},
+    summaryProduct:{all:'Tous les produits',values:[['Langues','Langues'],['Coaching','Coaching'],['Mentorat','Mentorat'],['Interculturel','Interculturel']]},
     summaryCompanyType:{all:'Tous les types',dynamic:'cat'},
     summaryStatus:{all:'Tous les statuts',dynamic:'status'}
   };
@@ -5667,7 +5669,7 @@ window.addEventListener('click',function(e){
     const current=field.value;
     const options={
       status:STATUS_OPTIONS,
-      product:['Langues','Coaching'],
+      product:['Langues','Coaching','Mentorat','Interculturel'],
       cat:CAT_ORDER,
       owner:getAllOwnerOptions(),
       year:[...new Set(scopeRows(data).map(d=>d.year))].sort((a,b)=>b-a),
