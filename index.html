@@ -6135,5 +6135,144 @@ window.addEventListener('click',function(e){
 })();
 </script>
 
+
+<!-- V64 - Remplacement definitif du graphique par des axes orthonormes classiques -->
+<style id="v64-classic-chart-style">
+#tabDashboard .chart-main{flex:0 0 auto!important;min-height:720px!important;height:720px!important;}
+#tabDashboard #chartWrap{flex:1 1 auto!important;min-height:560px!important;height:auto!important;padding:0!important;}
+#tabDashboard #chart{min-height:560px!important;height:100%!important;}
+@media(max-height:850px){#tabDashboard .chart-main{min-height:650px!important;height:650px!important;}#tabDashboard #chartWrap,#tabDashboard #chart{min-height:500px!important;}}
+</style>
+<script>
+(function(){
+  const REVENUE_BANDS_V64=[
+    {max:5000,y:1,label:'0–5k€'},
+    {max:10000,y:2,label:'5–10k€'},
+    {max:20000,y:3,label:'10–20k€'},
+    {max:30000,y:4,label:'20–30k€'},
+    {max:50000,y:5,label:'30–50k€'},
+    {max:75000,y:6,label:'50–75k€'},
+    {max:100000,y:7,label:'75–100k€'},
+    {max:150000,y:8,label:'100–150k€'},
+    {max:200000,y:9,label:'150–200k€'},
+    {max:300000,y:10,label:'200–300k€'},
+    {max:500000,y:11,label:'300–500k€'},
+    {max:Infinity,y:12,label:'> 500k€'}
+  ];
+
+  window.Y_BANDS_UNIFIED_V60=REVENUE_BANDS_V64;
+  window.computeYFromRevenue=function(revenue){
+    const value=Number.isFinite(Number(revenue))?Number(revenue):0;
+    return (REVENUE_BANDS_V64.find(b=>value<=b.max)||REVENUE_BANDS_V64[REVENUE_BANDS_V64.length-1]).y;
+  };
+
+  function markerSymbolV64(product){
+    const key=String(product||'').trim().toLowerCase();
+    if(key==='coaching')return 'square';
+    if(key==='mentorat')return 'triangle-up';
+    if(key==='interculturel')return 'diamond';
+    return 'circle';
+  }
+
+  window.updateChart=function(){
+    if(!window.Plotly||!window.plotlyReady)return;
+    const pts=filteredData();
+    const f=getFilterState();
+    const visibleYears=Array.from({length:Math.max(0,f.yMax-f.yMin+1)},(_,i)=>f.yMin+i);
+    const activeYears=selectedDashboardYears();
+
+    const offsets=[
+      {x:0,y:0},{x:-0.16,y:0.18},{x:0.16,y:0.18},{x:-0.16,y:-0.18},
+      {x:0.16,y:-0.18},{x:0,y:0.30},{x:0,y:-0.30},{x:-0.28,y:0},{x:0.28,y:0}
+    ];
+    const groups=new Map();
+    pts.forEach(p=>{
+      p.baseYear=Number(p.year);
+      p.baseY=computeYFromRevenue(p.revenue);
+      p.y=p.baseY;
+      const key=p.baseYear+'|'+p.baseY;
+      if(!groups.has(key))groups.set(key,[]);
+      groups.get(key).push(p);
+    });
+    groups.forEach(group=>{
+      group.sort((a,b)=>String(a.name).localeCompare(String(b.name),'fr',{sensitivity:'base'}));
+      group.forEach((p,i)=>{
+        const off=offsets[i%offsets.length];
+        const ring=Math.floor(i/offsets.length)+1;
+        p.plotYear=p.baseYear+off.x*ring;
+        p.plotY=p.baseY+off.y*ring;
+      });
+    });
+
+    const traces=[];
+    CAT_ORDER.forEach(cat=>{
+      const rows=pts.filter(p=>p.cat===cat);
+      if(!rows.length)return;
+      traces.push({
+        type:'scatter',mode:'markers',name:cat,showlegend:false,
+        x:rows.map(p=>p.plotYear),y:rows.map(p=>p.plotY),text:rows.map(p=>p.name),
+        customdata:rows.map(p=>[p.id,p.product,p.revenue,p.year,ownerLabel(p),p.notes&&String(p.notes).trim()?p.notes:'—',statusForCompany(p).label]),
+        hovertemplate:'<b>%{text}</b><br>Année : %{customdata[3]}<br>Produit : %{customdata[1]}<br>Estimated revenue : %{customdata[2]:,.0f} €<br>Owner / BDR : %{customdata[4]}<br>Statut : %{customdata[6]}<br>Note : %{customdata[5]}<extra></extra>',
+        marker:{
+          size:rows.map(p=>bubbleSizeByCat(p.cat)),
+          color:rows.map(p=>p.color),
+          symbol:rows.map(p=>markerSymbolV64(p.product)),
+          opacity:0.97,
+          line:{width:rows.map(p=>statusBorderWidth(p)),color:rows.map(p=>statusBorderColor(p))}
+        }
+      });
+    });
+
+    const hoverPoint=hoveredCompanyId==null?null:pts.find(p=>Number(p.id)===Number(hoveredCompanyId));
+    if(hoverPoint){
+      traces.push({type:'scatter',mode:'markers',showlegend:false,hoverinfo:'skip',x:[hoverPoint.plotYear],y:[hoverPoint.plotY],marker:{size:[bubbleSizeByCat(hoverPoint.cat)+14],color:['rgba(255,255,255,0)'],symbol:[markerSymbolV64(hoverPoint.product)],line:{color:'#FFD400',width:5}}});
+    }
+
+    const yearShapes=visibleYears.map((year,i)=>({type:'rect',xref:'x',yref:'paper',x0:year-0.5,x1:year+0.5,y0:0,y1:1,fillcolor:i%2===0?'rgba(0,0,0,0.025)':'rgba(255,121,0,0.025)',line:{width:0},layer:'below'}));
+    const activeShapes=activeYears.map(year=>({type:'rect',xref:'x',yref:'paper',x0:year-0.47,x1:year+0.47,y0:0,y1:1,fillcolor:'rgba(255,121,0,0.035)',line:{color:'#FF7900',width:2,dash:'dot'},layer:'above'}));
+    const today=currentDecimalYear();
+    const todayShape={type:'line',xref:'x',yref:'paper',x0:today,x1:today,y0:0,y1:1,line:{color:'#FF7900',width:2,dash:'dot'},layer:'above'};
+    const annotations=[{xref:'x',yref:'paper',x:today,y:1,text:'Aujourd’hui',showarrow:false,font:{color:'#FF7900',size:10},xanchor:'left',yanchor:'bottom'}];
+    if(showNames){
+      pts.forEach(p=>annotations.push({xref:'x',yref:'y',x:p.plotYear,y:p.plotY,text:escapeHtml(p.name),showarrow:false,yshift:16,font:{size:10,color:'#000'},bgcolor:'rgba(255,255,255,.86)',bordercolor:'rgba(0,0,0,.12)',borderwidth:1,borderpad:2}));
+    }
+
+    const layout={
+      uirevision:'classic-axis-v64',
+      autosize:true,
+      margin:{l:118,r:24,t:34,b:66},
+      paper_bgcolor:'#fff',plot_bgcolor:'#fff',
+      shapes:[...yearShapes,...activeShapes,todayShape],annotations,
+      xaxis:{
+        title:{text:'Années',font:{size:12,color:'#222'},standoff:12},
+        side:'bottom',anchor:'y',tickmode:'array',tickvals:visibleYears,ticktext:visibleYears.map(String),
+        showticklabels:true,ticks:'outside',ticklen:6,tickwidth:1,tickcolor:'#333',
+        tickfont:{size:11,color:'#222'},showline:true,linecolor:'#333',linewidth:1,
+        mirror:false,automargin:true,range:[f.yMin-0.45,f.yMax+0.45],
+        gridcolor:'rgba(0,0,0,.08)',fixedrange:false,zeroline:false
+      },
+      yaxis:{
+        title:{text:'Estimated Revenue',font:{size:12,color:'#222'},standoff:10},
+        side:'left',tickmode:'array',tickvals:REVENUE_BANDS_V64.map(b=>b.y),ticktext:REVENUE_BANDS_V64.map(b=>b.label),
+        showticklabels:true,ticks:'outside',ticklen:6,tickwidth:1,tickcolor:'#333',
+        tickfont:{size:10,color:'#222'},showline:true,linecolor:'#333',linewidth:1,
+        mirror:false,automargin:true,range:[0.55,12.45],
+        gridcolor:'rgba(0,0,0,.10)',fixedrange:false,zeroline:false
+      },
+      showlegend:false,font:{family:'Segoe UI,Arial',color:'#000'},hovermode:'closest'
+    };
+
+    Plotly.react('chart',traces,layout,{displaylogo:false,responsive:true,scrollZoom:true});
+    const gd=document.getElementById('chart');
+    gd.removeAllListeners&&gd.removeAllListeners('plotly_click');
+    gd.on&&gd.on('plotly_click',ev=>{
+      const point=ev&&ev.points&&ev.points[0];
+      const id=point&&Array.isArray(point.customdata)?point.customdata[0]:null;
+      if(id!=null)selectCompany(id);
+    });
+  };
+})();
+
+</script>
 </body>
 </html>
