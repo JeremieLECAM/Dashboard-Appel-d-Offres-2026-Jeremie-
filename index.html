@@ -5901,5 +5901,72 @@ window.addEventListener('click',function(e){
 #tabDashboard #chartWrap{padding-top:2px!important;padding-bottom:2px!important;}
 </style>
 
+
+<!-- V60 - Graphique unifie par revenue + formes par produit + legende simplifiee -->
+<style id="v60-unified-chart-style">
+  #productShapeLegend{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;padding:7px 10px;border-top:1px solid var(--line);background:#fff;font-size:10px;font-weight:850;color:#333}
+  .v60-shape-item{display:inline-flex;align-items:center;gap:6px}
+  .v60-shape{display:inline-block;width:13px;height:13px;background:#777;border:2px solid #222;box-sizing:border-box}
+  .v60-circle{border-radius:50%}.v60-square{border-radius:1px}.v60-triangle{width:0;height:0;background:transparent;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:13px solid #777;border-top:0}.v60-diamond{width:11px;height:11px;transform:rotate(45deg)}
+</style>
+<script>
+(function(){
+  window.Y_BANDS_UNIFIED_V60=[
+    {max:10000,y:1,label:'≤ 10k€'},
+    {max:30000,y:2,label:'10–30k€'},
+    {max:50000,y:3,label:'30–50k€'},
+    {max:100000,y:4,label:'50–100k€'},
+    {max:200000,y:5,label:'100–200k€'},
+    {max:Infinity,y:6,label:'> 200k€'}
+  ];
+  window.computeYFromRevenue=function(revenue,product){
+    const value=Number.isFinite(Number(revenue))?Number(revenue):0;
+    return (Y_BANDS_UNIFIED_V60.find(b=>value<=b.max)||Y_BANDS_UNIFIED_V60[Y_BANDS_UNIFIED_V60.length-1]).y;
+  };
+  window.productMarkerSymbolV60=function(product){
+    const key=String(product||'').trim().toLowerCase();
+    if(key==='coaching')return 'square';
+    if(key==='mentorat')return 'triangle-up';
+    if(key==='interculturel')return 'diamond';
+    return 'circle';
+  };
+  function ensureLegendV60(){
+    if(document.getElementById('productShapeLegend'))return;
+    const bottom=document.getElementById('bottomBar');
+    if(!bottom)return;
+    bottom.insertAdjacentHTML('beforebegin','<div id="productShapeLegend"><span class="v60-shape-item"><i class="v60-shape v60-circle"></i>Langues</span><span class="v60-shape-item"><i class="v60-shape v60-square"></i>Coaching</span><span class="v60-shape-item"><i class="v60-shape v60-triangle"></i>Mentorat</span><span class="v60-shape-item"><i class="v60-shape v60-diamond"></i>Interculturel</span></div>');
+  }
+  function removeExplanatoryTextV60(){
+    document.querySelectorAll('.mini-note,.timeline-subtitle,.timeline-reset-note').forEach(el=>el.remove());
+  }
+  const previousUpdateChartV60=window.updateChart;
+  window.updateChart=function(){
+    previousUpdateChartV60();
+    if(!window.Plotly||!plotlyReady)return;
+    const gd=document.getElementById('chart'); if(!gd||!gd.data)return;
+    const pointTraceIndexes=[];
+    gd.data.forEach((trace,index)=>{
+      if(Array.isArray(trace.customdata) && trace.customdata.some(cd=>Array.isArray(cd)&&typeof cd[0]==='number')) pointTraceIndexes.push(index);
+    });
+    pointTraceIndexes.forEach(index=>{
+      const trace=gd.data[index];
+      const symbols=(trace.customdata||[]).map(cd=>productMarkerSymbolV60(cd&&cd[1]));
+      Plotly.restyle(gd,{'marker.symbol':[symbols]},[index]);
+    });
+    const annotations=(gd.layout.annotations||[]).filter(a=>{
+      const t=String(a.text||'');
+      return !t.startsWith('Langues')&&!t.startsWith('Coaching')&&!t.startsWith('Mentorat');
+    });
+    const revenueAnnotations=Y_BANDS_UNIFIED_V60.map(b=>({xref:'paper',yref:'y',x:-0.035,y:b.y,text:b.label,showarrow:false,xanchor:'center',yanchor:'middle',font:{size:9,color:'#000',family:'Segoe UI,Arial'},bgcolor:'rgba(255,255,255,0)',borderwidth:0}));
+    const shapes=(gd.layout.shapes||[]).filter(sh=>!(sh.yref==='y' && Number(sh.y0)===-6 && Number(sh.y1)===-6));
+    Plotly.relayout(gd,{'yaxis.range':[0.35,6.75],'yaxis.zeroline':false,'annotations':[...annotations,...revenueAnnotations],'shapes':shapes});
+    ensureLegendV60(); removeExplanatoryTextV60();
+  };
+  const previousInitAppV60=window.initApp;
+  window.initApp=function(){const r=previousInitAppV60.apply(this,arguments);ensureLegendV60();removeExplanatoryTextV60();return r;};
+  document.addEventListener('DOMContentLoaded',()=>{ensureLegendV60();removeExplanatoryTextV60();});
+})();
+</script>
+
 </body>
 </html>
