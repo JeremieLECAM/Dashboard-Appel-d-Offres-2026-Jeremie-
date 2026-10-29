@@ -6049,5 +6049,91 @@ window.addEventListener('click',function(e){
 })();
 </script>
 
+
+<!-- V64 - Axes classiques lisibles : années en bas, Estimated Revenue à gauche -->
+<style id="v64-classic-axis-style">
+#tabDashboard #chartWrap{padding-bottom:8px!important;}
+</style>
+<script>
+(function(){
+  function applyClassicAxesV64(){
+    if(!window.Plotly || !window.plotlyReady) return;
+    const gd=document.getElementById('chart');
+    if(!gd || !gd.layout) return;
+    const f=getFilterState();
+    const yearTicks=[];
+    for(let year=f.yMin; year<=f.yMax; year++) yearTicks.push(year);
+    const bands=window.Y_BANDS_UNIFIED_V60 || [];
+    if(!bands.length) return;
+
+    // Les anciennes rangées d'années ajoutées comme traces rendaient l'axe ambigu.
+    // On les masque et on utilise uniquement l'axe X natif de Plotly, positionné en bas.
+    const yearTraceIndexes=[];
+    (gd.data || []).forEach((trace,index)=>{
+      if(Array.isArray(trace.customdata) && trace.customdata.some(item=>Array.isArray(item) && item[0]==='year-filter')){
+        yearTraceIndexes.push(index);
+      }
+    });
+    if(yearTraceIndexes.length){
+      Plotly.restyle(gd,{visible:false},yearTraceIndexes);
+    }
+
+    const annotations=(gd.layout.annotations || []).filter(annotation=>{
+      const text=String(annotation.text || '').replace(/<[^>]*>/g,'').trim();
+      return !/^(Langues|Coaching|Mentorat|Interculturel)(\b|\s|:|–|-)/i.test(text);
+    });
+
+    Plotly.relayout(gd,{
+      'margin.l':118,
+      'margin.b':64,
+      'xaxis.side':'bottom',
+      'xaxis.anchor':'y',
+      'xaxis.tickmode':'array',
+      'xaxis.tickvals':yearTicks,
+      'xaxis.ticktext':yearTicks.map(String),
+      'xaxis.showticklabels':true,
+      'xaxis.ticks':'outside',
+      'xaxis.ticklen':6,
+      'xaxis.tickwidth':1,
+      'xaxis.tickcolor':'#333',
+      'xaxis.tickfont':{size:11,color:'#222',family:'Segoe UI,Arial'},
+      'xaxis.showline':true,
+      'xaxis.linecolor':'#333',
+      'xaxis.linewidth':1,
+      'xaxis.mirror':false,
+      'xaxis.automargin':true,
+      'xaxis.range':[f.yMin-0.35,f.yMax+0.35],
+      'yaxis.side':'left',
+      'yaxis.tickmode':'array',
+      'yaxis.tickvals':bands.map(b=>b.y),
+      'yaxis.ticktext':bands.map(b=>b.label),
+      'yaxis.showticklabels':true,
+      'yaxis.ticks':'outside',
+      'yaxis.ticklen':6,
+      'yaxis.tickwidth':1,
+      'yaxis.tickcolor':'#333',
+      'yaxis.tickfont':{size:10,color:'#222',family:'Segoe UI,Arial'},
+      'yaxis.showline':true,
+      'yaxis.linecolor':'#333',
+      'yaxis.linewidth':1,
+      'yaxis.automargin':true,
+      'yaxis.range':[0.35,12.65],
+      'yaxis.zeroline':false,
+      'annotations':annotations
+    });
+  }
+
+  const updateChartBeforeV64=window.updateChart;
+  window.updateChart=function(){
+    const result=updateChartBeforeV64.apply(this,arguments);
+    Promise.resolve(result).then(applyClassicAxesV64);
+    requestAnimationFrame(applyClassicAxesV64);
+    setTimeout(applyClassicAxesV64,100);
+    setTimeout(applyClassicAxesV64,300);
+    return result;
+  };
+})();
+</script>
+
 </body>
 </html>
