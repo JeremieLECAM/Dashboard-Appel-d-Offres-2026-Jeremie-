@@ -5990,7 +5990,7 @@ window.addEventListener('click',function(e){
   const prevUpdateChartV62=window.updateChart;
   window.updateChart=function(){
     prevUpdateChartV62();
-    if(!window.Plotly||!window.plotlyReady)return;
+    if(!window.Plotly||!plotlyReady)return;
     const gd=document.getElementById('chart'); if(!gd||!gd.layout)return;
     const keepAnnotations=(gd.layout.annotations||[]).filter(a=>{
       const t=String(a.text||'').replace(/<[^>]*>/g,'').replace(/&nbsp;/gi,' ').trim();
@@ -6017,7 +6017,7 @@ window.addEventListener('click',function(e){
 (function(){
   const PRODUCT_AXIS_LABEL_V63=/^(Langues|Coaching|Mentorat|Interculturel)(\b|\s|:|–|-)/i;
   function cleanRevenueAxisV63(){
-    if(!window.Plotly||!window.plotlyReady)return;
+    if(!window.Plotly||!plotlyReady)return;
     const gd=document.getElementById('chart');
     if(!gd||!gd.layout)return;
     const annotations=(gd.layout.annotations||[]).filter(a=>{
@@ -6057,7 +6057,7 @@ window.addEventListener('click',function(e){
 <script>
 (function(){
   function applyClassicAxesV64(){
-    if(!window.Plotly || !window.plotlyReady) return;
+    if(!window.Plotly || !plotlyReady) return;
     const gd=document.getElementById('chart');
     if(!gd || !gd.layout) return;
     const f=getFilterState();
@@ -6175,7 +6175,9 @@ window.addEventListener('click',function(e){
   }
 
   window.updateChart=function(){
-    if(!window.Plotly||!window.plotlyReady)return;
+    if(!window.Plotly || !plotlyReady) return;
+    const chartElement=document.getElementById('chart');
+    if(!chartElement) return;
     const pts=filteredData();
     const f=getFilterState();
     const visibleYears=Array.from({length:Math.max(0,f.yMax-f.yMin+1)},(_,i)=>f.yMin+i);
@@ -6272,6 +6274,13 @@ window.addEventListener('click',function(e){
     });
   };
 })();
+
+window.addEventListener('load',function(){
+  setTimeout(function(){
+    if(typeof updateChart==='function') updateChart();
+    if(typeof resizeChart==='function') resizeChart();
+  },150);
+});
 
 </script>
 </body>
