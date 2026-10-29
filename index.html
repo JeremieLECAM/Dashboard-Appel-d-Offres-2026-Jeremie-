@@ -3956,7 +3956,7 @@ const hoverPoint = hoveredCompanyId == null ? null : pts.find(p=>Number(p.id)===
   const today=currentDecimalYear();
   const todayShape={type:'line',xref:'x',yref:'paper',x0:today,x1:today,y0:0,y1:1,line:{color:'#FF7900',width:2,dash:'dot'},layer:'above'};
   const todayAnnotation={xref:'x',yref:'paper',x:today,y:1.02,text:'Aujourd’hui',showarrow:false,font:{color:'#FF7900',size:11},xanchor:'left'};
-  const productBandAnnotations=ticks.map(t=>({xref:'paper',yref:'y',x:-0.035,y:t.y,text:t.label,showarrow:false,xanchor:'center',yanchor:'middle',font:{size:9,color:'#000',family:'Segoe UI,Arial'},bgcolor:'rgba(255,255,255,0)',borderwidth:0}));
+  const productBandAnnotations=[]; // Product labels removed from vertical axis
 
   // Labels intelligents : on garde le graphique lisible en n'affichant que les AO prioritaires
   // quand le bouton "Afficher les noms" est actif, plus la bulle survolée / sélectionnée.
@@ -5768,7 +5768,7 @@ window.addEventListener('click',function(e){
     const today=currentDecimalYear();
     const existingShapes=(gd.layout.shapes||[]).map(x=>({...x}));
     const existingAnnotations=(gd.layout.annotations||[]).map(x=>({...x}));
-    const mentorAnnotations=Y_BANDS_MENTORAT.map(t=>({xref:'paper',yref:'y',x:-0.035,y:t.y,text:t.label,showarrow:false,xanchor:'center',yanchor:'middle',font:{size:9,color:'#000',family:'Segoe UI,Arial'},bgcolor:'rgba(255,255,255,0)',borderwidth:0}));
+    const mentorAnnotations=[]; // Mentorat labels removed from vertical axis
     const separator={type:'line',xref:'paper',yref:'y',x0:0,x1:1,y0:-6,y1:-6,line:{color:'#999',width:2},layer:'above'};
     /* La ligne zéro existante reste la séparation Langues / Coaching. */
     const mentorAlready=existingAnnotations.some(a=>String(a.text||'').startsWith('Mentorat'));
@@ -5863,11 +5863,7 @@ window.addEventListener('click',function(e){
     const annotations=(gd.layout.annotations||[])
       .map(item=>({...item}))
       .filter(item=>!String(item.text||'').startsWith('Mentorat'));
-    const mentorAnnotations=mentorTicks.map(t=>({
-      xref:'paper',yref:'y',x:-0.035,y:t.y,text:t.label,showarrow:false,
-      xanchor:'center',yanchor:'middle',font:{size:9,color:'#000',family:'Segoe UI,Arial'},
-      bgcolor:'rgba(255,255,255,0)',borderwidth:0
-    }));
+    const mentorAnnotations=[]; // Mentorat labels removed from vertical axis
     const yearTraceIndex=(gd.data||[]).findIndex(trace=>
       Array.isArray(trace.customdata)&&trace.customdata.some(item=>Array.isArray(item)&&item[0]==='year-filter')
     );
@@ -6011,6 +6007,44 @@ window.addEventListener('click',function(e){
       'yaxis.zeroline':false,
       'annotations':keepAnnotations
     });
+  };
+})();
+</script>
+
+
+<!-- V63 - Verrou final axe Y Estimated Revenue uniquement -->
+<script>
+(function(){
+  const PRODUCT_AXIS_LABEL_V63=/^(Langues|Coaching|Mentorat|Interculturel)(\b|\s|:|–|-)/i;
+  function cleanRevenueAxisV63(){
+    if(!window.Plotly||!window.plotlyReady)return;
+    const gd=document.getElementById('chart');
+    if(!gd||!gd.layout)return;
+    const annotations=(gd.layout.annotations||[]).filter(a=>{
+      const text=String(a.text||'').replace(/<[^>]*>/g,'').replace(/&nbsp;/gi,' ').trim();
+      return !PRODUCT_AXIS_LABEL_V63.test(text);
+    });
+    const labels=(window.Y_BANDS_UNIFIED_V60||[]).map(b=>b.label);
+    const values=(window.Y_BANDS_UNIFIED_V60||[]).map(b=>b.y);
+    if(!labels.length)return;
+    return Plotly.relayout(gd,{
+      'yaxis.range':[0.35,12.65],
+      'yaxis.tickmode':'array',
+      'yaxis.tickvals':values,
+      'yaxis.ticktext':labels,
+      'yaxis.showticklabels':true,
+      'yaxis.zeroline':false,
+      'annotations':annotations
+    });
+  }
+  const previousUpdateChartV63=window.updateChart;
+  window.updateChart=function(){
+    const result=previousUpdateChartV63.apply(this,arguments);
+    Promise.resolve(result).then(()=>cleanRevenueAxisV63());
+    requestAnimationFrame(()=>cleanRevenueAxisV63());
+    setTimeout(cleanRevenueAxisV63,0);
+    setTimeout(cleanRevenueAxisV63,80);
+    return result;
   };
 })();
 </script>
