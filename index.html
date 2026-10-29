@@ -5968,6 +5968,52 @@ window.addEventListener('click',function(e){
 })();
 </script>
 
-\n<!-- V61 - Axe Y exclusivement Estimated Revenue -->\n<script>\n(function(){\n  window.Y_BANDS_UNIFIED_V60=[\n    {max:5000,y:1,label:'0–5k€'},\n    {max:10000,y:2,label:'5–10k€'},\n    {max:20000,y:3,label:'10–20k€'},\n    {max:30000,y:4,label:'20–30k€'},\n    {max:50000,y:5,label:'30–50k€'},\n    {max:75000,y:6,label:'50–75k€'},\n    {max:100000,y:7,label:'75–100k€'},\n    {max:150000,y:8,label:'100–150k€'},\n    {max:200000,y:9,label:'150–200k€'},\n    {max:300000,y:10,label:'200–300k€'},\n    {max:500000,y:11,label:'300–500k€'},\n    {max:Infinity,y:12,label:'> 500k€'}\n  ];\n  window.computeYFromRevenue=function(revenue){\n    const value=Number.isFinite(Number(revenue))?Number(revenue):0;\n    return (Y_BANDS_UNIFIED_V60.find(b=>value<=b.max)||Y_BANDS_UNIFIED_V60[Y_BANDS_UNIFIED_V60.length-1]).y;\n  };\n  const beforeV61=window.updateChart;\n  window.updateChart=function(){\n    beforeV61();\n    if(!window.Plotly||!plotlyReady)return;\n    const gd=document.getElementById('chart'); if(!gd||!gd.layout)return;\n    const clean=(gd.layout.annotations||[]).filter(a=>{\n      const t=String(a.text||'');\n      return !/^(Langues|Coaching|Mentorat)/i.test(t) && !/^(≤|\\d+–|> )/.test(t);\n    });\n    const revenue=Y_BANDS_UNIFIED_V60.map(b=>({xref:'paper',yref:'y',x:-0.035,y:b.y,text:b.label,showarrow:false,xanchor:'center',yanchor:'middle',font:{size:9,color:'#000',family:'Segoe UI,Arial'},bgcolor:'rgba(255,255,255,0)',borderwidth:0}));\n    Plotly.relayout(gd,{\n      'yaxis.range':[0.35,12.65],\n      'yaxis.tickmode':'array',\n      'yaxis.tickvals':Y_BANDS_UNIFIED_V60.map(b=>b.y),\n      'yaxis.ticktext':Y_BANDS_UNIFIED_V60.map(()=>''),\n      'yaxis.zeroline':false,\n      'annotations':[...clean,...revenue]\n    });\n  };\n})();\n</script>\n
+
+<!-- V62 - Axe vertical: uniquement Estimated Revenue -->
+<script>
+(function(){
+  const REVENUE_BANDS_V62=[
+    {max:5000,y:1,label:'0–5k€'},
+    {max:10000,y:2,label:'5–10k€'},
+    {max:20000,y:3,label:'10–20k€'},
+    {max:30000,y:4,label:'20–30k€'},
+    {max:50000,y:5,label:'30–50k€'},
+    {max:75000,y:6,label:'50–75k€'},
+    {max:100000,y:7,label:'75–100k€'},
+    {max:150000,y:8,label:'100–150k€'},
+    {max:200000,y:9,label:'150–200k€'},
+    {max:300000,y:10,label:'200–300k€'},
+    {max:500000,y:11,label:'300–500k€'},
+    {max:Infinity,y:12,label:'> 500k€'}
+  ];
+  window.Y_BANDS_UNIFIED_V60=REVENUE_BANDS_V62;
+  window.computeYFromRevenue=function(revenue){
+    const value=Number.isFinite(Number(revenue))?Number(revenue):0;
+    return (REVENUE_BANDS_V62.find(b=>value<=b.max)||REVENUE_BANDS_V62[REVENUE_BANDS_V62.length-1]).y;
+  };
+  const prevUpdateChartV62=window.updateChart;
+  window.updateChart=function(){
+    prevUpdateChartV62();
+    if(!window.Plotly||!window.plotlyReady)return;
+    const gd=document.getElementById('chart'); if(!gd||!gd.layout)return;
+    const keepAnnotations=(gd.layout.annotations||[]).filter(a=>{
+      const t=String(a.text||'').replace(/<[^>]*>/g,'').replace(/&nbsp;/gi,' ').trim();
+      if(/^(Langues|Coaching|Mentorat|Interculturel)(\b|\s|:|–|-)/i.test(t)) return false;
+      if(/^(≤|<|>|\d+\s*[–-]\s*\d+|\d+\s*k?€)/i.test(t)) return false;
+      return true;
+    });
+    Plotly.relayout(gd,{
+      'yaxis.range':[0.35,12.65],
+      'yaxis.tickmode':'array',
+      'yaxis.tickvals':REVENUE_BANDS_V62.map(b=>b.y),
+      'yaxis.ticktext':REVENUE_BANDS_V62.map(b=>b.label),
+      'yaxis.showticklabels':true,
+      'yaxis.zeroline':false,
+      'annotations':keepAnnotations
+    });
+  };
+})();
+</script>
+
 </body>
 </html>
