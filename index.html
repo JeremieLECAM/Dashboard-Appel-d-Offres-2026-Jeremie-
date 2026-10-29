@@ -24,9 +24,7 @@
         });
       });
     }
-  
-/* V18 applied */
-/* V19 cumulative dashboard filters + fixed popup scroll */
+
 </script>
   <style>
     :root{
@@ -121,8 +119,7 @@
     .envwarn.error{background:#fff0f0;border-color:rgba(229,57,53,.30);}
     .closebtn{float:right;cursor:pointer;padding:0 6px;border-radius:10px;border:1px solid rgba(0,0,0,.12);background:#fff;margin-left:10px;}
     @media(max-width:1150px){.dashboard-grid{grid-template-columns:220px 1fr}.list-page{grid-template-columns:1fr}.list-side{min-height:280px}}
-  
-/* V6 - Filtres avancés onglet 2 + checklists éditeur */
+
 .company-table th{position:sticky;top:0;overflow:visible;}
 .th-inner{display:flex;align-items:center;gap:4px;position:relative;}
 .filter-trigger{border:1px solid var(--orange);background:var(--black);color:var(--orange);border-radius:7px;font-size:9px;font-weight:900;padding:1px 5px;cursor:pointer;line-height:1.2;}
@@ -142,12 +139,8 @@
 .choice-list{max-height:130px;overflow:auto;border:1px solid #ddd;border-radius:9px;padding:6px;background:#fff;}
 .choice-list label{display:block;font-size:10px;margin:3px 0;color:#000;}
 
-
-/* V8 - Dashboard popup editor beside selected company */
 #companyEditor.company-popup{position:absolute;left:215px;top:0;width:340px;z-index:5000;box-shadow:0 18px 40px rgba(0,0,0,.25);background:#fffaf5;}
 
-
-/* V10 Popup externe + A surveiller */
 .panel{position:relative;overflow:auto!important;}
 #companyEditor{position:fixed!important;display:none;z-index:15000;width:360px;max-height:82vh;overflow:auto;}
 #companyEditor.open{display:block!important;}
@@ -157,7 +150,6 @@
 #watchModal.open{display:block;}
 #watchCard{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(900px,90vw);max-height:80vh;overflow:auto;background:#fff;border-radius:16px;padding:15px;}
 
-/* V11 stable - popup indépendant + boutons A surveiller visibles */
 #companyEditor.company-popup{display:none!important;} /* l'ancien conteneur dashboard ne sert plus à afficher la fiche */
 .floating-company-popup{
   position:fixed;
@@ -205,9 +197,6 @@
 .watch-table td{border-bottom:1px solid #eee;padding:7px;vertical-align:top;}
 .watch-year{font-weight:900;color:#000;background:#fff6ee;}
 
-
-
-/* V13 - rollback graphique + popup indépendant */
 #companyEditor.company-popup{display:none!important;width:0!important;height:0!important;overflow:hidden!important;padding:0!important;border:0!important;box-shadow:none!important;}
 .floating-company-popup{position:fixed!important;z-index:30000!important;}
 .watch-table .th-inner{position:relative;display:flex;align-items:center;gap:4px;}
@@ -215,7 +204,6 @@
 
 .watch-check-cell{ text-align:center; white-space:nowrap; }
 .watch-toggle{ width:16px; height:16px; accent-color:var(--orange); cursor:pointer; }
-
 
 /* UX cockpit update - recommandations appliquees sans changer le modele de donnees */
 .topbar{align-items:center;padding:7px 12px 0;gap:8px;}
@@ -238,7 +226,7 @@
 .section.open .section-count{background:rgba(0,0,0,.10);border-color:rgba(0,0,0,.10);}
 .summary-strip{position:sticky;top:0;z-index:15;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.96);backdrop-filter:blur(5px);font-size:12px;font-weight:900;box-shadow:0 5px 16px rgba(0,0,0,.05);}
 .summary-strip .summary-main,.summary-strip .summary-secondary{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.summary-pill{border:1px solid #e8e8e8;background:#fff;border-radius:999px;padding:4px 8px;white-space:nowrap;cursor:pointer;} .summary-pill.active{background:#FF7900;color:#000;border-color:#FF7900;box-shadow:0 0 0 2px rgba(255,121,0,.15);} 
+.summary-pill{border:1px solid #e8e8e8;background:#fff;border-radius:999px;padding:4px 8px;white-space:nowrap;cursor:pointer;} .summary-pill.active{background:#FF7900;color:#000;border-color:#FF7900;box-shadow:0 0 0 2px rgba(255,121,0,.15);}
 .summary-pill.orange{border-color:rgba(255,121,0,.45);background:#fff6ee;}
 .summary-pill.green{border-color:rgba(67,160,71,.30);background:#f1fbf3;}
 .summary-pill.yellow{border-color:rgba(255,193,7,.35);background:#fff9e6;}
@@ -289,8 +277,6 @@
 .company-table .watch-check-cell{font-size:18px;}
 @media(max-width:1150px){.dashboard-grid{grid-template-columns:235px 1fr}.summary-strip{align-items:flex-start;flex-direction:column}.topbar-watch-badge{display:none}}
 
-
-/* V15 - Catégories enrichies depuis Excel + suppression légende Plotly */
 .b-dynamic{background:#777;}
 #chartWrap{flex:1.06;min-height:0;}
 #portfolioSummary{padding-top:7px;padding-bottom:7px;}
@@ -299,7 +285,6 @@
 .summary-pill:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.10);}
 .summary-pill.active{box-shadow:0 0 0 2px rgba(255,121,0,.22),0 4px 12px rgba(255,121,0,.20)!important;}
 
-/* V16 - Mini timeline AO par année/statut sous le graphique principal */
 .chart-panel{
   overflow-y:auto!important;
   overflow-x:hidden!important;
@@ -341,8 +326,6 @@
 .timeline-empty{padding:16px;border:1px dashed #ddd;border-radius:12px;color:#666;font-size:12px;font-weight:800;background:#fafafa;}
 @media(max-width:1150px){.timeline-head{flex-direction:column;align-items:flex-start}.timeline-legend{justify-content:flex-start}.timeline-row{grid-template-columns:52px minmax(160px,1fr) 46px}}
 
-
-/* V18 - Couleurs catégories dans les boutons + contours de bulles par statut */
 .summary-pill.cat-pill{font-weight:950;border-width:2px;background:#fff;color:#111;}
 .summary-pill.cat-pill-cac{border-color:#E53935;background:#fff5f5;color:#9b1111;}
 .summary-pill.cat-pill-sbf{border-color:#8E24AA;background:#faf0ff;color:#5e1672;}
@@ -376,8 +359,6 @@
 .timeline-segment.status-lost{background:#000!important;color:#fff!important;}
 .timeline-segment.status-empty{background:#fff!important;color:#555!important;box-shadow:inset 0 0 0 1px #e5e5e5;}
 
-
-/* V19 - Popup fiche entreprise scrollable + boutons visibles */
 .floating-company-popup{
   max-height:min(82vh,720px)!important;
   overflow:hidden!important;
@@ -411,13 +392,9 @@
   box-shadow:0 -8px 18px rgba(0,0,0,.08)!important;
 }
 
-
-/* V21 - patch final anti-régression */
 .cat-filter-label{display:flex!important;align-items:center;gap:6px;color:#000!important;font-weight:800;}
 .cat-filter-label .cat-filter-text{line-height:1.2;}
 
-
-/* V22 - Boutons de statut sélectionnés : remplissage avec leur couleur */
 #portfolioSummary .summary-pill.status-progress-pill.active{
   background:#FF9800!important;
   border-color:#FF9800!important;
@@ -449,11 +426,6 @@
   box-shadow:0 0 0 2px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.12)!important;
 }
 
-/* V23 - Timeline et années du graphique cliquables */
-/* V24 - Repères produit taille 9 + années uniques cliquables + encadrement pointillé */
-/* V25 - Sidebar compacte + watchlist dynamique avec override manuel */
-/* V26 - Suppression BCL/Alstom + KPI dynamiques + axes sans titres */
-/* V27 - Repères produit centrés dans la marge gauche */
 .timeline-year,.timeline-segment,.chart-year-click-target{
   cursor:pointer;
   transition:transform .14s ease, box-shadow .14s ease, filter .14s ease;
@@ -479,8 +451,6 @@
   font-weight:800;
 }
 
-
-/* V25 - Colonne gauche compacte + nouvelle logique A surveiller */
 .dashboard-grid{grid-template-columns:200px 1fr!important;gap:10px!important;padding:10px!important;}
 .panel{padding:8px!important;}
 .panel-logo{max-width:62px!important;margin-bottom:6px!important;border-radius:14px!important;}
@@ -501,7 +471,6 @@
 .watch-table tr[data-id]:hover{background:#fff6ee;}
 @media(max-width:1150px){.dashboard-grid{grid-template-columns:200px 1fr!important;}}
 
-/* V28 - Statut Gagne + owner multi-select + detail A surveiller */
 .status-won{background:#E9FFE9!important;border-color:#39FF14!important;color:#006B00!important;}
 .summary-pill.status-won-pill{border-color:#39FF14!important;background:#E9FFE9!important;color:#006B00!important;}
 #portfolioSummary .summary-pill.status-won-pill.active{background:#39FF14!important;border-color:#39FF14!important;color:#000!important;box-shadow:0 0 0 2px rgba(57,255,20,.25),0 4px 12px rgba(57,255,20,.25)!important;}
@@ -513,12 +482,9 @@
 .owner-picker-list label{display:block;font-size:10px;margin:3px 0;color:#000;}
 .owner-picker-create{width:100%;border:1px solid #000;background:#fff;color:#000;border-radius:8px;padding:5px 6px;font-size:9px;font-weight:800;cursor:pointer;margin-top:6px;}
 .owner-picker-limit{font-size:9px;color:#666;font-weight:800;margin-top:5px;line-height:1.2;}
-#watchDetail{margin-top:12px;border:2px solid var(--orange);border-radius:14px;background:#fffaf5;padding:10px;box-shadow:0 10px 24px rgba(0,0,0,.12);} 
+#watchDetail{margin-top:12px;border:2px solid var(--orange);border-radius:14px;background:#fffaf5;padding:10px;box-shadow:0 10px 24px rgba(0,0,0,.12);}
 #watchDetail h3{margin:0 0 8px;font-size:14px;}
 
-
-/* V29 - Watchlist side editor + click outside close + Gagne hidden by default */
-/* V30 - Bouton AO Tout selectionner / Tout deselectionner */
 #watchModal.open{display:flex!important;align-items:center;justify-content:center;gap:14px;padding:18px;}
 #watchCard{position:static!important;top:auto!important;left:auto!important;transform:none!important;width:min(900px,62vw)!important;max-height:82vh!important;overflow:auto!important;background:#fff;border-radius:16px;padding:15px;box-shadow:var(--shadow);}
 #watchCard > button{display:none!important;}
@@ -3112,7 +3078,6 @@ const SEED_DATA = [
   }
 ];
 
-
 let data = [];
 let years = [];
 let plotlyReady = false;
@@ -3230,29 +3195,29 @@ function syncTableFiltersToDashboard(){
   if(watchIncluded) dashboardKpiFilters.add('watch'); else dashboardKpiFilters.delete('watch');
   if(Array.isArray(tableFilters.year)){dashboardYearFilters=new Set(tableFilters.year.map(Number));}
 }
-function selectedDashboardCategoryValues(){  
-  const map = DASHBOARD_CATEGORY_TABLE_PRESETS;  
-  return [...dashboardCategoryFilters].flatMap(k => map[k] || []);  
-}  
-function selectedDashboardStatusValues(){  
-  const out = [];  
-  if(dashboardKpiFilters.has('status-en-cours')) out.push('En cours');  
-  if(dashboardKpiFilters.has('status-ao-confirm')) out.push('AO à confirmer');  
-  if(dashboardKpiFilters.has('status-docs')) out.push('Docs à venir');  
+function selectedDashboardCategoryValues(){
+  const map = DASHBOARD_CATEGORY_TABLE_PRESETS;
+  return [...dashboardCategoryFilters].flatMap(k => map[k] || []);
+}
+function selectedDashboardStatusValues(){
+  const out = [];
+  if(dashboardKpiFilters.has('status-en-cours')) out.push('En cours');
+  if(dashboardKpiFilters.has('status-ao-confirm')) out.push('AO à confirmer');
+  if(dashboardKpiFilters.has('status-docs')) out.push('Docs à venir');
   if(dashboardKpiFilters.has('status-perdu')) out.push('Perdu');
-  if(dashboardKpiFilters.has('status-gagne')) out.push('Gagné');  
-  if(dashboardKpiFilters.has('status-empty')) out.push('Sans statut');  
-  return out;  
-}  
-function syncDashboardButtonFiltersToTable(){  
-  const cats = selectedDashboardCategoryValues();  
-  const statuses = selectedDashboardStatusValues();  
-  const selectedYears = selectedDashboardYears().map(String);  
-  tableFilters.cat = cats.length ? cats : null;  
-  tableFilters.status = statuses.length ? statuses : null;  
-  tableFilters.year = selectedYears.length ? selectedYears : null;  
-  tableFilters.watch = dashboardKpiFilters.has('watch') ? null : ['NON'];  
-}  
+  if(dashboardKpiFilters.has('status-gagne')) out.push('Gagné');
+  if(dashboardKpiFilters.has('status-empty')) out.push('Sans statut');
+  return out;
+}
+function syncDashboardButtonFiltersToTable(){
+  const cats = selectedDashboardCategoryValues();
+  const statuses = selectedDashboardStatusValues();
+  const selectedYears = selectedDashboardYears().map(String);
+  tableFilters.cat = cats.length ? cats : null;
+  tableFilters.status = statuses.length ? statuses : null;
+  tableFilters.year = selectedYears.length ? selectedYears : null;
+  tableFilters.watch = dashboardKpiFilters.has('watch') ? null : ['NON'];
+}
 function clearDashboardButtonFilters(){
   dashboardKpiFilters.clear();
   dashboardCategoryFilters.clear();
@@ -3299,17 +3264,17 @@ function toggleDashboardKpiFilter(key){
   syncDashboardButtonFiltersToTable();
   syncStatusSidebarFromDashboard();
 }
-function toggleDashboardCategoryFilter(key){  
-  if(dashboardCategoryFilters.has(key)) dashboardCategoryFilters.delete(key);  
-  else dashboardCategoryFilters.add(key);  
-  dashboardCategoryFilter = dashboardCategoryFilters.size === 1 ? [...dashboardCategoryFilters][0] : null;  
-  syncDashboardButtonFiltersToTable();  
-}  
-function applyDashboardFilterToTable(kind, key, active){  
-  // Compatibilité avec les anciennes fonctions : on redirige vers le nouveau mode cumulable.  
-  if(key === 'all') clearDashboardButtonFilters();  
-  else syncDashboardButtonFiltersToTable();  
-}  
+function toggleDashboardCategoryFilter(key){
+  if(dashboardCategoryFilters.has(key)) dashboardCategoryFilters.delete(key);
+  else dashboardCategoryFilters.add(key);
+  dashboardCategoryFilter = dashboardCategoryFilters.size === 1 ? [...dashboardCategoryFilters][0] : null;
+  syncDashboardButtonFiltersToTable();
+}
+function applyDashboardFilterToTable(kind, key, active){
+  // Compatibilité avec les anciennes fonctions : on redirige vers le nouveau mode cumulable.
+  if(key === 'all') clearDashboardButtonFilters();
+  else syncDashboardButtonFiltersToTable();
+}
 const CATEGORY_BY_ID = {"1": "Public / Semi-Public", "2": "SBF 120", "3": "CAC 40", "4": "CAC 40", "5": "Entreprise privée hors CAC 40/SBF 120", "6": "Entreprise privée hors CAC 40/SBF 120", "7": "Public / Semi-Public", "8": "CAC 40", "9": "CAC 40", "10": "Entreprise privée hors CAC 40/SBF 120", "11": "CAC 40", "12": "Entreprise privée hors CAC 40/SBF 120", "13": "SBF 120", "14": "CAC 40", "15": "Entreprise privée hors CAC 40/SBF 120", "16": "CAC 40", "17": "Entreprise privée hors CAC 40/SBF 120", "18": "Entreprise privée hors CAC 40/SBF 120", "19": "Entreprise privée hors CAC 40/SBF 120", "20": "Entreprise privée hors CAC 40/SBF 120", "21": "Entreprise privée hors CAC 40/SBF 120", "22": "Entreprise privée hors CAC 40/SBF 120", "23": "Entreprise privée hors CAC 40/SBF 120", "24": "CAC 40", "25": "CAC 40", "26": "Entreprise privée hors CAC 40/SBF 120", "27": "Entreprise privée hors CAC 40/SBF 120", "28": "Public / Semi-Public", "29": "Écoles", "30": "Écoles", "31": "CAC 40", "32": "Entreprise privée hors CAC 40/SBF 120", "33": "Entreprise privée hors CAC 40/SBF 120", "34": "Entreprise privée hors CAC 40/SBF 120", "35": "Entreprise privée hors CAC 40/SBF 120", "36": "Entreprise privée hors CAC 40/SBF 120", "37": "Public / Semi-Public", "38": "SBF 120", "39": "Entreprise privée hors CAC 40/SBF 120", "40": "Entreprise privée hors CAC 40/SBF 120", "41": "Entreprise privée hors CAC 40/SBF 120", "42": "Entreprise privée hors CAC 40/SBF 120", "43": "Entreprise privée hors CAC 40/SBF 120", "44": "SBF 120", "45": "Public / Semi-Public", "46": "Public / Semi-Public", "47": "Public / Semi-Public", "48": "SBF 120", "49": "SBF 120", "50": "Écoles", "51": "CAC 40", "52": "Entreprise privée hors CAC 40/SBF 120", "53": "Entreprise privée hors CAC 40/SBF 120", "54": "CAC 40", "55": "CAC 40", "56": "Entreprise privée hors CAC 40/SBF 120", "57": "Entreprise privée hors CAC 40/SBF 120", "58": "Entreprise privée hors CAC 40/SBF 120", "59": "Entreprise privée hors CAC 40/SBF 120", "60": "Entreprise privée hors CAC 40/SBF 120", "61": "Écoles", "62": "SBF 120", "63": "SBF 120", "64": "CAC 40", "65": "Entreprise privée hors CAC 40/SBF 120", "66": "Public / Semi-Public", "67": "CAC 40", "68": "CAC 40", "69": "CAC 40", "70": "Public / Semi-Public", "71": "CAC 40", "72": "Entreprise privée hors CAC 40/SBF 120", "73": "Entreprise privée hors CAC 40/SBF 120", "74": "Entreprise privée hors CAC 40/SBF 120", "75": "SBF 120", "76": "SBF 120", "77": "SBF 120", "78": "SBF 120", "79": "CAC 40", "80": "Entreprise privée hors CAC 40/SBF 120", "81": "CAC 40", "82": "Entreprise privée hors CAC 40/SBF 120", "83": "Entreprise privée hors CAC 40/SBF 120", "84": "Entreprise privée hors CAC 40/SBF 120", "85": "CAC 40", "86": "Entreprise privée hors CAC 40/SBF 120", "87": "CAC 40", "88": "CAC 40", "89": "Entreprise privée hors CAC 40/SBF 120", "90": "Public / Semi-Public", "91": "CAC 40", "92": "CAC 40", "93": "CAC 40", "94": "Entreprise privée hors CAC 40/SBF 120", "95": "CAC 40", "96": "Public / Semi-Public", "97": "Public / Semi-Public", "98": "CAC 40", "99": "Entreprise privée hors CAC 40/SBF 120", "100": "Public / Semi-Public", "101": "Public / Semi-Public", "102": "CAC 40", "103": "CAC 40", "104": "Entreprise privée hors CAC 40/SBF 120", "105": "Public / Semi-Public", "106": "CAC 40", "107": "CAC 40", "108": "CAC 40", "109": "CAC 40", "110": "CAC 40", "111": "CAC 40", "112": "CAC 40", "113": "CAC 40", "114": "SBF 120", "115": "SBF 120", "116": "SBF 120"};
 const Y_BANDS_LANGUES = [
   {max:10000,y:1,label:'Langues ≤ 10k€'}, {max:50000,y:2,label:'Langues 10–50k€'}, {max:100000,y:3,label:'Langues 50–100k€'}, {max:200000,y:4,label:'Langues 100–200k€'}, {max:1000000,y:5,label:'Langues > 200k€'}
@@ -3328,9 +3293,8 @@ function ownerNames(d){ if(!d || !d.owner || String(d.owner).trim()==='') return
 function ownerFilterPass(d, selectedOwners){ if(!Array.isArray(selectedOwners) || !selectedOwners.length) return true; const names=ownerNames(d); return selectedOwners.some(o=>names.includes(o)); }
 function ownerTableFilterPass(d){ const selected=tableFilters.owner; if(!Array.isArray(selected)) return true; return ownerFilterPass(d, selected); }
 
-
 function ownerLabel(d){ return ownerNames(d).join(', '); }
-function catBadge(cat){ return 'b-dynamic'; }  
+function catBadge(cat){ return 'b-dynamic'; }
 function catColor(cat){ return colorForCategory(cat); }
 function categoryIcon(cat){ return `<span class="cat-dot" style="background:${catColor(cat)}"></span>`; }
 function normalizeStatusLabel(status){
@@ -3432,28 +3396,28 @@ function categoryMetrics(rows=data){
     eco: rows.filter(d=>d.cat==='Écoles').length
   };
 }
-function updateCockpitMetrics(){  
+function updateCockpitMetrics(){
   const visibleRows=filteredData();
-  const m=cockpitMetrics(visibleRows), c=categoryMetrics(visibleRows);  
-  const k=document.getElementById('cockpitKpis');  
-  if(k){ k.innerHTML=`  
-    <div class="kpi-card accent"><div class="kpi-value">${m.total}</div><div class="kpi-label">AO recensés</div></div>  
-    <div class="kpi-card"><div class="kpi-value">${m.statusCounts['En cours']}</div><div class="kpi-label">En cours</div></div>  
-    <div class="kpi-card"><div class="kpi-value">${m.statusCounts['AO à confirmer']}</div><div class="kpi-label">AO à confirmer</div></div>  
-    <div class="kpi-card"><div class="kpi-value">${m.statusCounts['Docs à venir']}</div><div class="kpi-label">Docs à venir</div></div>`; }  
-  const s=document.getElementById('portfolioSummary');  
-  const aoActive = isAoAllSelected();  
-  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${aoActive?'active':''}" data-kpi="all" role="button" tabindex="0" title="Tout sélectionner / Tout désélectionner" aria-label="Tout sélectionner ou tout désélectionner">${m.total} AO</span><span class="summary-pill cat-pill cat-pill-cac kpi-filter ${dashboardCategoryFilters.has('cac')?'active':''}" data-cat="cac">${c.cac} CAC40</span><span class="summary-pill cat-pill cat-pill-sbf kpi-filter ${dashboardCategoryFilters.has('sbf')?'active':''}" data-cat="sbf">${c.sbf} SBF120</span><span class="summary-pill cat-pill cat-pill-priv kpi-filter ${dashboardCategoryFilters.has('priv')?'active':''}" data-cat="priv">${c.priv} Privé</span><span class="summary-pill cat-pill cat-pill-pub kpi-filter ${dashboardCategoryFilters.has('pub')?'active':''}" data-cat="pub">${c.pub} Public</span><span class="summary-pill cat-pill cat-pill-eco kpi-filter ${dashboardCategoryFilters.has('eco')?'active':''}" data-cat="eco">${c.eco} Écoles</span></div><div class="summary-secondary"><span class="summary-pill status-progress-pill kpi-filter ${dashboardKpiFilters.has('status-en-cours')?'active':''}" data-kpi="status-en-cours">${m.statusCounts['En cours']} En cours</span><span class="summary-pill status-confirm-pill kpi-filter ${dashboardKpiFilters.has('status-ao-confirm')?'active':''}" data-kpi="status-ao-confirm">${m.statusCounts['AO à confirmer']} AO à confirmer</span><span class="summary-pill status-docs-pill kpi-filter ${dashboardKpiFilters.has('status-docs')?'active':''}" data-kpi="status-docs">${m.statusCounts['Docs à venir']} Docs à venir</span><span class="summary-pill status-lost-pill kpi-filter ${dashboardKpiFilters.has('status-perdu')?'active':''}" data-kpi="status-perdu">${m.statusCounts['Perdu']} Perdu</span><span class="summary-pill status-won-pill kpi-filter ${dashboardKpiFilters.has('status-gagne')?'active':''}" data-kpi="status-gagne">${m.statusCounts['Gagné']} Gagné</span><span class="summary-pill status-empty-pill kpi-filter ${dashboardKpiFilters.has('status-empty')?'active':''}" data-kpi="status-empty">${m.statusCounts['Sans statut']} Sans statut</span><span class="summary-pill kpi-filter ${dashboardKpiFilters.has('watch')?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`; 
+  const m=cockpitMetrics(visibleRows), c=categoryMetrics(visibleRows);
+  const k=document.getElementById('cockpitKpis');
+  if(k){ k.innerHTML=`
+    <div class="kpi-card accent"><div class="kpi-value">${m.total}</div><div class="kpi-label">AO recensés</div></div>
+    <div class="kpi-card"><div class="kpi-value">${m.statusCounts['En cours']}</div><div class="kpi-label">En cours</div></div>
+    <div class="kpi-card"><div class="kpi-value">${m.statusCounts['AO à confirmer']}</div><div class="kpi-label">AO à confirmer</div></div>
+    <div class="kpi-card"><div class="kpi-value">${m.statusCounts['Docs à venir']}</div><div class="kpi-label">Docs à venir</div></div>`; }
+  const s=document.getElementById('portfolioSummary');
+  const aoActive = isAoAllSelected();
+  if(s){ s.innerHTML=`<div class="summary-main"><span class="summary-pill orange kpi-filter ${aoActive?'active':''}" data-kpi="all" role="button" tabindex="0" title="Tout sélectionner / Tout désélectionner" aria-label="Tout sélectionner ou tout désélectionner">${m.total} AO</span><span class="summary-pill cat-pill cat-pill-cac kpi-filter ${dashboardCategoryFilters.has('cac')?'active':''}" data-cat="cac">${c.cac} CAC40</span><span class="summary-pill cat-pill cat-pill-sbf kpi-filter ${dashboardCategoryFilters.has('sbf')?'active':''}" data-cat="sbf">${c.sbf} SBF120</span><span class="summary-pill cat-pill cat-pill-priv kpi-filter ${dashboardCategoryFilters.has('priv')?'active':''}" data-cat="priv">${c.priv} Privé</span><span class="summary-pill cat-pill cat-pill-pub kpi-filter ${dashboardCategoryFilters.has('pub')?'active':''}" data-cat="pub">${c.pub} Public</span><span class="summary-pill cat-pill cat-pill-eco kpi-filter ${dashboardCategoryFilters.has('eco')?'active':''}" data-cat="eco">${c.eco} Écoles</span></div><div class="summary-secondary"><span class="summary-pill status-progress-pill kpi-filter ${dashboardKpiFilters.has('status-en-cours')?'active':''}" data-kpi="status-en-cours">${m.statusCounts['En cours']} En cours</span><span class="summary-pill status-confirm-pill kpi-filter ${dashboardKpiFilters.has('status-ao-confirm')?'active':''}" data-kpi="status-ao-confirm">${m.statusCounts['AO à confirmer']} AO à confirmer</span><span class="summary-pill status-docs-pill kpi-filter ${dashboardKpiFilters.has('status-docs')?'active':''}" data-kpi="status-docs">${m.statusCounts['Docs à venir']} Docs à venir</span><span class="summary-pill status-lost-pill kpi-filter ${dashboardKpiFilters.has('status-perdu')?'active':''}" data-kpi="status-perdu">${m.statusCounts['Perdu']} Perdu</span><span class="summary-pill status-won-pill kpi-filter ${dashboardKpiFilters.has('status-gagne')?'active':''}" data-kpi="status-gagne">${m.statusCounts['Gagné']} Gagné</span><span class="summary-pill status-empty-pill kpi-filter ${dashboardKpiFilters.has('status-empty')?'active':''}" data-kpi="status-empty">${m.statusCounts['Sans statut']} Sans statut</span><span class="summary-pill kpi-filter ${dashboardKpiFilters.has('watch')?'active':''}" data-kpi="watch">⭐ ${m.watch} à surveiller</span></div>`;
     s.querySelectorAll('.kpi-filter[data-kpi]').forEach(btn=>{
       btn.onclick=()=>{ toggleDashboardKpiFilter(btn.dataset.kpi); updateAll();};
       if(btn.dataset.kpi==='all') btn.onkeydown=e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); btn.click(); } };
-    }); 
-    s.querySelectorAll('.kpi-filter[data-cat]').forEach(btn=>btn.onclick=()=>{ toggleDashboardCategoryFilter(btn.dataset.cat); updateAll();}); 
-  }  
-  document.getElementById('watchTopCount') && (document.getElementById('watchTopCount').textContent=m.watch);  
-  document.getElementById('watchBtn1') && document.getElementById('watchBtn1').setAttribute('data-count',m.watch);  
-  document.getElementById('watchBtn2') && document.getElementById('watchBtn2').setAttribute('data-count',m.watch);  
-}  
+    });
+    s.querySelectorAll('.kpi-filter[data-cat]').forEach(btn=>btn.onclick=()=>{ toggleDashboardCategoryFilter(btn.dataset.cat); updateAll();});
+  }
+  document.getElementById('watchTopCount') && (document.getElementById('watchTopCount').textContent=m.watch);
+  document.getElementById('watchBtn1') && document.getElementById('watchBtn1').setAttribute('data-count',m.watch);
+  document.getElementById('watchBtn2') && document.getElementById('watchBtn2').setAttribute('data-count',m.watch);
+}
 function updateFilterCounters(){
   const cats=document.querySelectorAll('.f-cat:checked').length;
   const prods=document.querySelectorAll('.f-prod:checked').length;
@@ -3560,33 +3524,33 @@ function switchTab(tab){
 }
 function resizeChart(){ if(window.Plotly) try{Plotly.Plots.resize('chart');}catch(e){} }
 function getFilterState(){ const q=document.getElementById('search').value.trim().toLowerCase(); const cats=[...document.querySelectorAll('.f-cat:checked')].map(e=>e.value); const prods=[...document.querySelectorAll('.f-prod:checked')].map(e=>e.value); const owners=[...document.querySelectorAll('.f-owner:checked')].map(e=>e.value); let yMin=parseInt(document.getElementById('yearMin').value,10), yMax=parseInt(document.getElementById('yearMax').value,10); if(Number.isNaN(yMin)) yMin=Math.min(...years); if(Number.isNaN(yMax)) yMax=Math.max(...years); if(yMin>yMax){const t=yMin;yMin=yMax;yMax=t;} return {q,cats,prods,owners,yMin,yMax}; }
-function filteredData(){ 
-  const f=getFilterState(); 
+function filteredData(){
+  const f=getFilterState();
   let rows=data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && ownerFilterPass(d, f.owners) && d.year>=f.yMin && d.year<=f.yMax);
-  rows = excludeWonUnlessSelected(rows); 
-  const activeCats = selectedDashboardCategoryValues(); 
-  const activeStatuses = selectedDashboardStatusValues(); 
-  const activeYears = selectedDashboardYears(); 
+  rows = excludeWonUnlessSelected(rows);
+  const activeCats = selectedDashboardCategoryValues();
+  const activeStatuses = selectedDashboardStatusValues();
+  const activeYears = selectedDashboardYears();
   if(dashboardCategoryFilters.size===0 || activeCats.length===0) return [];
   rows=rows.filter(d=>activeCats.includes(d.cat));
   const statusFilterCount=[...dashboardKpiFilters].filter(k=>k.startsWith('status-')).length;
   if(statusFilterCount===0 || activeStatuses.length===0) return [];
-  rows=rows.filter(d=>activeStatuses.includes(statusForCompany(d).label)); 
-  if(activeYears.length) rows=rows.filter(d=>activeYears.includes(Number(d.year))); 
-  if(!dashboardKpiFilters.has('watch')) rows=rows.filter(d=>!isWatch(d)); 
-  return rows; 
-}  
+  rows=rows.filter(d=>activeStatuses.includes(statusForCompany(d).label));
+  if(activeYears.length) rows=rows.filter(d=>activeYears.includes(Number(d.year)));
+  if(!dashboardKpiFilters.has('watch')) rows=rows.filter(d=>!isWatch(d));
+  return rows;
+}
 function baseFilteredDataForTable(){ const f=getFilterState(); return excludeWonUnlessSelected(data.filter(d=>(!f.q||d.name.toLowerCase().includes(f.q)) && f.cats.includes(d.cat) && f.prods.includes(d.product) && ownerFilterPass(d, f.owners) && d.year>=f.yMin && d.year<=f.yMax)); }
 function renderOwners(){ const current=new Set([...document.querySelectorAll('.f-owner:checked')].map(e=>e.value)); const owners=[...new Set(data.flatMap(ownerNames))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'})); document.getElementById('ownerFilters').innerHTML=owners.map(o=>`<label><input type="checkbox" class="f-owner" value="${escapeHtml(o)}" ${current.size===0||current.has(o)?'checked':''}> ${escapeHtml(o)}</label>`).join(''); document.querySelectorAll('.f-owner').forEach(el=>el.addEventListener('change', updateAll)); updateFilterCounters(); }
 
-function statusTimelineSourceRows(){  
-  let rows = baseFilteredDataForTable().filter(d => Number(d.year) >= 2021);  
-  const activeCats = selectedDashboardCategoryValues();  
-  const activeYears = selectedDashboardYears();  
-  if(activeCats.length) rows=rows.filter(d=>activeCats.includes(d.cat));  
-  if(activeYears.length) rows=rows.filter(d=>activeYears.includes(Number(d.year)));  
-  return rows;  
-}  
+function statusTimelineSourceRows(){
+  let rows = baseFilteredDataForTable().filter(d => Number(d.year) >= 2021);
+  const activeCats = selectedDashboardCategoryValues();
+  const activeYears = selectedDashboardYears();
+  if(activeCats.length) rows=rows.filter(d=>activeCats.includes(d.cat));
+  if(activeYears.length) rows=rows.filter(d=>activeYears.includes(Number(d.year)));
+  return rows;
+}
 function renderStatusTimeline(){
   const body=document.getElementById('statusTimelineBody');
   const legend=document.getElementById('statusTimelineLegend');
@@ -4053,8 +4017,6 @@ function saveEditor(prefix,id){
 function addCompanyFromForm(e){ e.preventDefault(); const d=normalizePoint({id:nextDataId(),name:document.getElementById('newCompanyName').value,year:document.getElementById('newCompanyYear').value,revenue:document.getElementById('newCompanyRevenue').value,product:document.getElementById('newCompanyProduct').value,cat:document.getElementById('newCompanyCat').value,owner:selectedOwnerValues('newCompanyOwnerChoice', null),status:document.getElementById('newCompanyStatusManual').value,notes:document.getElementById('newCompanyNotes').value,businessScope:activeBusinessScope}); if(!d.name)return; data.push(d); e.target.reset(); document.getElementById('newCompanyYear').value=new Date().getFullYear(); document.getElementById('newCompanyStatusManual').value='Sans statut'; renderNewCompanyOwnerSelector(); document.getElementById('newCompanyStatus').textContent='Entreprise ajoutée : '+d.name; renderOwners(); updateAll(); selectCompany(d.id); }
 function downloadTextFile(filename,text,mime='text/plain;charset=utf-8'){ const blob=new Blob([text],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
 
-
-
 function isDashboardActive(){
   const tab = document.getElementById('tabDashboard');
   return !!(tab && tab.classList.contains('active'));
@@ -4120,30 +4082,29 @@ function renderDashboardFloatingPopup(){
   document.getElementById(`${prefix}EditClose`).onclick=()=>{selectedCompanyId=null;renderList();syncTableFiltersToDashboard(); renderCompanyTable();closeFloatingCompanyPopup();};
   syncFloatingPopupPosition();
 }
-function saveFloatingEditor(id){  
-  const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return;  
-  const prefix='float';  
-  d.name=document.getElementById(`${prefix}EditName`).value.trim();  
-  d.year=Number(document.getElementById(`${prefix}EditYear`).value)||new Date().getFullYear();  
-  d.revenue=Number(document.getElementById(`${prefix}EditRevenue`).value||0);  
-  d.product=selectedGroupValue(`${prefix}EditProductChoice`, d.product);  
-  d.cat=document.getElementById(`${prefix}EditCat`).value;  
-  d.color=colorForCategory(d.cat);  
-  d.owner=selectedOwnerValues(`${prefix}EditOwnerChoice`, ownerLabel(d));  
-  if(d.owner === 'Owner / BDR manquant') d.owner = null;  
-  d.owner_missing=!d.owner;  
-  d.status=document.getElementById(`${prefix}EditStatus`).value;  
-  d.notes=document.getElementById(`${prefix}EditNotes`).value;  
-  d.y=computeYFromRevenue(d.revenue,d.product);  
-  renderOwners();  
-  updateAll();  
-  selectedCompanyId=null;  
-  renderList();  
-  syncTableFiltersToDashboard(); renderCompanyTable();  
-  closeFloatingCompanyPopup();  
-  updateChart();  
+function saveFloatingEditor(id){
+  const d=data.find(x=>Number(x.id)===Number(id)); if(!d)return;
+  const prefix='float';
+  d.name=document.getElementById(`${prefix}EditName`).value.trim();
+  d.year=Number(document.getElementById(`${prefix}EditYear`).value)||new Date().getFullYear();
+  d.revenue=Number(document.getElementById(`${prefix}EditRevenue`).value||0);
+  d.product=selectedGroupValue(`${prefix}EditProductChoice`, d.product);
+  d.cat=document.getElementById(`${prefix}EditCat`).value;
+  d.color=colorForCategory(d.cat);
+  d.owner=selectedOwnerValues(`${prefix}EditOwnerChoice`, ownerLabel(d));
+  if(d.owner === 'Owner / BDR manquant') d.owner = null;
+  d.owner_missing=!d.owner;
+  d.status=document.getElementById(`${prefix}EditStatus`).value;
+  d.notes=document.getElementById(`${prefix}EditNotes`).value;
+  d.y=computeYFromRevenue(d.revenue,d.product);
+  renderOwners();
+  updateAll();
+  selectedCompanyId=null;
+  renderList();
+  syncTableFiltersToDashboard(); renderCompanyTable();
+  closeFloatingCompanyPopup();
+  updateChart();
 }
-
 
 function getWatchYears(){ return []; }
 function getWatchBaseRows(){ return excludeWonUnlessSelected(data.filter(d=>isWatch(d))); }
@@ -4309,14 +4270,14 @@ function importCsv(e){ const file=e.target.files&&e.target.files[0]; if(!file)re
 <div id="floatingCompanyPopup" class="floating-company-popup"></div>
 <div id="watchModal"><div id="watchCard"><div id="watchContent"></div></div><div id="watchSideEditor"></div></div>
 <style>
-/* V35 - Deux dashboards independants New Biz / Existing, sans tags Business Type */
+
 .bulk-toolbar{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:8px 0;padding:8px;border:1px solid #ddd;border-radius:12px;background:#fafafa}
 .bulk-toolbar select,.bulk-toolbar input{width:auto!important;min-width:120px}
 .bulk-toolbar .btn{width:auto;margin:0;padding:6px 9px}.bulk-count{font-weight:900;font-size:10px}
 .bulk-select{width:16px;height:16px;accent-color:var(--orange)}
 </style>
 <script>
-/* V35 - navigation principale par jeu de donnees + conservation stricte des fonctions existantes */
+
 let activeBusinessScope='New Biz';
 let bulkSelectedIds=new Set();
 function rowScope(d){return String(d&&d.businessScope||'New Biz').trim().toLowerCase()==='existing'?'Existing':'New Biz';}
@@ -4329,6 +4290,7 @@ function refreshMainTabs(){
 }
 function switchBusinessScope(scope){
   activeBusinessScope=scope==='Existing'?'Existing':'New Biz';
+  if(typeof window.resetChartDefaultViewport==='function') window.resetChartDefaultViewport();
   selectedCompanyId=null; hoveredCompanyId=null; bulkSelectedIds.clear();
   closeFloatingCompanyPopup(); closeWatchModal();
   dashboardYearFilters.clear();
@@ -4403,7 +4365,7 @@ switchTab=function(tab){_switchTabV35(tab);document.getElementById('tabDashboard
 </script>
 
 <style>
-/* V37 - Résumé consolidé */
+
 #watchBtn1.watch-filter-active{background:#000!important;color:#fff!important;border-color:#FF7900!important;box-shadow:0 0 0 3px rgba(255,121,0,.25)!important}
 .summary-page{overflow-y:auto!important;background:#f4f4f4!important}
 .summary-shell{padding:16px;max-width:1800px;margin:auto}.summary-hero{background:linear-gradient(135deg,#050505,#282828);border-bottom:4px solid var(--orange);border-radius:18px;padding:20px 22px;color:#fff;display:flex;justify-content:space-between;gap:16px;align-items:center;box-shadow:var(--shadow)}
@@ -4418,7 +4380,7 @@ switchTab=function(tab){_switchTabV35(tab);document.getElementById('tabDashboard
 @media(max-width:1200px){.summary-kpi-grid{grid-template-columns:repeat(3,1fr)}.summary-three-cols{grid-template-columns:1fr}.summary-filterbar{grid-template-columns:repeat(3,1fr)}.summary-two-cols{grid-template-columns:1fr}}
 </style>
 <script>
-/* V37 - filtre A surveiller et onglet Résumé */
+
 let summaryMode=false;
 function showSummary(){
   summaryMode=true; closeFloatingCompanyPopup(); closeWatchModal();
@@ -4443,7 +4405,7 @@ document.addEventListener('DOMContentLoaded',()=>{const w=document.getElementByI
 </script>
 
 <style>
-/* V38 - Resume avance : statuts, KPIs N/N+1 et tableaux filtrables */
+
 .summary-kpi-grid{grid-template-columns:repeat(8,minmax(130px,1fr))!important}
 .summary-mini-kpis{grid-template-columns:repeat(7,minmax(105px,1fr))!important}
 .summary-kpi.orange,.summary-mini.orange{border-top:4px solid #FF9800;background:#FFF8EF}
@@ -4459,7 +4421,7 @@ document.addEventListener('DOMContentLoaded',()=>{const w=document.getElementByI
 @media(max-width:1400px){.summary-kpi-grid{grid-template-columns:repeat(4,1fr)!important}.summary-mini-kpis{grid-template-columns:repeat(4,1fr)!important}}
 </style>
 <script>
-/* V38 - extension non destructive de l'onglet Resume */
+
 const SUMMARY_PRIORITY_STATUSES=['En cours','Docs à venir','AO à confirmer'];
 const summaryTableState={new:{sort:{col:'count',dir:'desc'},filters:{}},existing:{sort:{col:'count',dir:'desc'},filters:{}},all:{sort:{col:'count',dir:'desc'},filters:{}}};
 function summaryNWindow(rows){const n=currentYearNumber();return rows.filter(d=>Number(d.year)===n||Number(d.year)===n+1);}
@@ -4484,7 +4446,7 @@ document.addEventListener('click',()=>document.querySelectorAll('.summary-filter
 </script>
 
 <style>
-/* V39 - Fenetres de filtre stables et KPI Pipe N/N+1 */
+
 .filter-menu,.summary-filter-menu{min-width:250px!important;min-height:190px!important;max-height:min(72vh,520px)!important;overflow:auto!important}
 .fm-checks,.summary-filter-menu .checks{min-height:112px!important;max-height:230px!important;overflow:auto!important;display:block!important}
 .fm-bulk,.summary-filter-menu .bulk{min-height:30px!important;display:flex!important;gap:5px!important;visibility:visible!important}
@@ -4494,7 +4456,7 @@ document.addEventListener('click',()=>document.querySelectorAll('.summary-filter
 @media(max-width:1200px){.summary-kpi-grid{grid-template-columns:repeat(3,minmax(145px,1fr))!important}}
 </style>
 <script>
-/* V39 - le menu actif survit a chaque rerendu, meme avec zero choix selectionne */
+
 let summaryOpenFilterV39=null;
 function reopenSummaryFilterV39(){
   if(!summaryOpenFilterV39)return;
@@ -4550,7 +4512,7 @@ document.addEventListener('click',e=>{if(!e.target.closest('.summary-filter-menu
 </script>
 
 <script>
-/* V40 - Etats de filtres strictement independants pour New Biz et Existing */
+
 const businessScopeFilterStatesV40 = Object.create(null);
 
 function cloneFilterValueV40(value){
@@ -4636,7 +4598,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 
 <style>
-/* V41 - Taille stable des menus de filtres apres Tout deselectionner */
+
 .company-table .filter-menu,
 .watch-table .filter-menu,
 .summary-table .summary-filter-menu{
@@ -4690,7 +4652,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 </style>
 
 <script>
-/* V42 - Registre persistant des owners, separe entre New Biz et Existing */
+
 const OWNER_REGISTRY_STORAGE_V42='ao_dashboard_owner_registry_v42';
 const EXISTING_OWNER_SEEDS_V42=['Julie Pirroni','Karen Bernard','Thierry Le Boeuf'];
 
@@ -4775,7 +4737,7 @@ bindOwnerMultiSelectors=function(scope=document){
 </script>
 
 <script>
-/* V43 - Synchronisation du formulaire de creation et apparition immediate des bulles */
+
 function checkOwnerFiltersV43(ownerValue){
   const wanted=new Set(splitOwners(ownerValue).map(normText));
   if(!wanted.size)return;
@@ -4820,7 +4782,6 @@ switchBusinessScope=function(scope){
 };
 </script>
 
-<!-- V43 FIX -->
 <style id="v43-filter-fix">
 .summary-table .summary-filter-menu,
 .company-table .filter-menu,
@@ -4854,8 +4815,6 @@ switchBusinessScope=function(scope){
 })();
 </script>
 
-
-<!-- V44 REAL FIX -->
 <script>
 (function(){
 const oldSwitchTab=window.switchTab;
@@ -4886,7 +4845,6 @@ window.addEventListener('click',function(e){
 })();
 </script>
 
-<!-- V45 - Filtres du resume toujours accessibles + sortie fiable du resume -->
 <style id="v45-summary-stability">
 /* Le conteneur ne se replie plus sur la seule ligne d'en-tete lorsque le filtre ne renvoie aucune entreprise. */
 .summary-three-cols .summary-table-wrap{
@@ -4957,7 +4915,6 @@ window.addEventListener('click',function(e){
 })();
 </script>
 
-<!-- V46 - Reset synchronise Liste / Dashboard pour New Biz et Existing -->
 <style id="v46-list-reset-style">
 #listResetBtn{
   flex:0 0 auto;
@@ -5043,7 +5000,7 @@ window.addEventListener('click',function(e){
   };
 })();
 </script>
-<!-- V47 - Types d'entreprise, KPIs regroupes et compteurs de listes -->
+
 <style id="v47-kpi-list-style">
   .summary-filterbar{grid-template-columns:1.15fr 1fr 1.25fr 1fr .7fr .7fr 1.25fr auto!important}
   .v47-kpi-sections{display:grid;gap:9px}
@@ -5158,7 +5115,7 @@ window.addEventListener('click',function(e){
   document.addEventListener('DOMContentLoaded',ensureCompanyTypeFilterV47);
 })();
 </script>
-<!-- V48 - KPIs annuels du Resume comptes en nombre total de lignes / entreprises -->
+
 <style id="v48-summary-annual-kpis-style">
   .summary-kpi-grid{grid-template-columns:repeat(7,minmax(145px,1fr))!important}
   .summary-kpi.result-year{border-top-color:#111!important;background:#f4f4f4!important}
@@ -5203,7 +5160,7 @@ window.addEventListener('click',function(e){
   };
 })();
 </script>
-<!-- V49 - Migration New Biz / Existing et suppression limitee aux onglets Liste -->
+
 <style id="v49-scope-delete-style">
   .business-scope-tags{display:flex;gap:8px;margin:2px 0 10px}
   .business-scope-tags label{cursor:pointer}
@@ -5333,7 +5290,6 @@ window.addEventListener('click',function(e){
 })();
 </script>
 
-<!-- V50 - Win rate N / historique, compteurs Gagne-Perdu et UI KPI clarifiee -->
 <style id="v50-win-rate-summary-style">
   .v50-kpi-dashboard{display:grid;gap:12px}
   .v50-kpi-group{border:1px solid #dedede;border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 5px 14px rgba(0,0,0,.05)}
@@ -5405,7 +5361,6 @@ window.addEventListener('click',function(e){
 })();
 </script>
 
-<!-- V51 - Restauration complete des informations dans les 3 blocs KPI -->
 <style id="v51-summary-kpi-complete-style">
   .v51-kpi-dashboard{display:grid;gap:12px}
   .v51-kpi-section{border:1px solid #dedede;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 5px 14px rgba(0,0,0,.05)}
@@ -5459,17 +5414,12 @@ window.addEventListener('click',function(e){
 })();
 </script>
 
-<!-- V52 - Win rate calcule sur le nombre total de lignes / entreprises, doublons inclus -->
-
-<!-- V53 - Correction recommandee filtres Resume -->
 <style id="v53-summary-table-spacing">
 .summary-three-cols .summary-table-wrap{padding-top:8px!important;}
 .summary-three-cols .summary-table thead th{top:0!important;}
 .summary-three-cols .summary-table tbody tr:first-child td{padding-top:14px!important;}
 </style>
 
-
-<!-- V54 - Filtres multi-selection en haut de l'onglet Resume -->
 <style id="v54-summary-multiselect-style">
   .summary-multi{position:relative;min-width:0}
   .summary-multi-button{width:100%;height:34px;border:1px solid #d8d8d8!important;border-radius:9px!important;background:#fff!important;color:#000!important;padding:6px 9px!important;font-size:10px!important;font-weight:800!important;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;white-space:nowrap;overflow:hidden}
@@ -5569,8 +5519,6 @@ window.addEventListener('click',function(e){
 })();
 </script>
 
-
-<!-- V55 - Bouton Reset pour les filtres du bloc de gauche des Dashboards -->
 <style id="v55-dashboard-filter-reset-style">
   #filtersTitle{gap:8px}
   #filtersTitle > span:first-child{flex:1}
@@ -5649,8 +5597,6 @@ window.addEventListener('click',function(e){
 })();
 </script>
 
-
-<!-- V56 - Edition et suppression en masse des lignes selectionnees -->
 <style id="v56-bulk-edit-delete-style">
   #bulkDelete{border-color:#b31313!important;color:#b31313!important;background:#fff!important}
   #bulkDelete:hover{background:#b31313!important;color:#fff!important}
@@ -5735,408 +5681,6 @@ window.addEventListener('click',function(e){
 })();
 </script>
 
-
-<!-- V57 - 3e section verticale Mentorat sous Coaching -->
-<script>
-(function(){
-  /* Même jalonnement de revenu que Coaching, placé sous la zone Coaching. */
-  window.Y_BANDS_MENTORAT = [
-    {max:10000,y:-11,label:'Mentorat ≤ 10k€'},
-    {max:30000,y:-10,label:'Mentorat 10–30k€'},
-    {max:50000,y:-9,label:'Mentorat 30–50k€'},
-    {max:100000,y:-8,label:'Mentorat 50–100k€'},
-    {max:1000000,y:-7,label:'Mentorat > 100k€'}
-  ];
-
-  const previousComputeYV57=window.computeYFromRevenue;
-  window.computeYFromRevenue=function(revenue,product){
-    const v=Number.isFinite(Number(revenue))?Number(revenue):0;
-    const key=String(product||'').trim().toLowerCase();
-    if(key==='mentorat') return (Y_BANDS_MENTORAT.find(b=>v<=b.max)||Y_BANDS_MENTORAT[Y_BANDS_MENTORAT.length-1]).y;
-    return previousComputeYV57(revenue,product);
-  };
-
-  const previousUpdateChartV57=window.updateChart;
-  window.updateChart=function(){
-    /* Le rendu historique crée Langues + Coaching. On le laisse faire, puis on étend
-       uniquement l'axe Y, les jalons Mentorat et la ligne de séparation Coaching/Mentorat. */
-    previousUpdateChartV57();
-    if(!window.Plotly||!plotlyReady)return;
-    const gd=document.getElementById('chart');
-    if(!gd||!gd.layout)return;
-    const f=getFilterState();
-    const today=currentDecimalYear();
-    const existingShapes=(gd.layout.shapes||[]).map(x=>({...x}));
-    const existingAnnotations=(gd.layout.annotations||[]).map(x=>({...x}));
-    const mentorAnnotations=[]; // Mentorat labels removed from vertical axis
-    const separator={type:'line',xref:'paper',yref:'y',x0:0,x1:1,y0:-6,y1:-6,line:{color:'#999',width:2},layer:'above'};
-    /* La ligne zéro existante reste la séparation Langues / Coaching. */
-    const mentorAlready=existingAnnotations.some(a=>String(a.text||'').startsWith('Mentorat'));
-    const separatorAlready=existingShapes.some(sh=>sh.yref==='y'&&Number(sh.y0)===-6&&Number(sh.y1)===-6);
-    Plotly.relayout(gd,{
-      'yaxis.range':[-11.95,5.95],
-      'yaxis.zeroline':true,
-      'yaxis.zerolinecolor':'#999',
-      'yaxis.zerolinewidth':2,
-      'shapes':separatorAlready?existingShapes:[...existingShapes,separator],
-      'annotations':mentorAlready?existingAnnotations:[...existingAnnotations,...mentorAnnotations]
-    });
-  };
-})();
-</script>
-
-
-<!-- V58 - Graphique principal plus haut pour ameliorer la lisibilite -->
-<style id="v58-chart-height">
-/* Le graphique occupe désormais davantage de hauteur avant les blocs situés dessous. */
-#tabDashboard .chart-main{
-  flex:0 0 auto!important;
-  min-height:1120px!important;
-  height:1120px!important;
-}
-#tabDashboard #chartWrap{
-  flex:1 1 auto!important;
-  min-height:960px!important;
-}
-#tabDashboard #chart{
-  min-height:960px!important;
-}
-/* La timeline reste sous le graphique et descend naturellement avec lui. */
-#tabDashboard .status-timeline-panel{
-  margin-top:14px!important;
-}
-@media (max-height:850px){
-  #tabDashboard .chart-main{min-height:980px!important;height:980px!important;}
-  #tabDashboard #chartWrap,#tabDashboard #chart{min-height:820px!important;}
-}
-</style>
-
-
-<!-- V59 - Axe des annees en haut et sous Mentorat + lignes Mentorat dynamiques -->
-<script>
-(function(){
-  const mentorRevenueBandsV59 = [
-    {max:10000,label:'Mentorat ≤ 10k€'},
-    {max:30000,label:'Mentorat 10–30k€'},
-    {max:50000,label:'Mentorat 30–50k€'},
-    {max:100000,label:'Mentorat 50–100k€'},
-    {max:1000000,label:'Mentorat > 100k€'}
-  ];
-  function mentorBandIndexV59(revenue){
-    const value=Number.isFinite(Number(revenue))?Number(revenue):0;
-    const index=mentorRevenueBandsV59.findIndex(b=>value<=b.max);
-    return index<0?mentorRevenueBandsV59.length-1:index;
-  }
-  function mentorRowsForLayoutV59(){
-    const rows=(typeof scopeRows==='function'&&typeof data!=='undefined')?scopeRows(data):(typeof data!=='undefined'?data:[]);
-    return rows.filter(row=>String(row.product||'').trim().toLowerCase()==='mentorat');
-  }
-  function activeMentorBandIndexesV59(){
-    const indexes=[...new Set(mentorRowsForLayoutV59().map(row=>mentorBandIndexV59(row.revenue)))].sort((a,b)=>a-b);
-    return indexes.length?indexes:[0];
-  }
-  function mentorBandYV59(index){
-    const active=activeMentorBandIndexesV59();
-    const rank=active.indexOf(index);
-    return -7-(rank<0?0:rank);
-  }
-  const computeYBeforeV59=window.computeYFromRevenue;
-  window.computeYFromRevenue=function(revenue,product){
-    if(String(product||'').trim().toLowerCase()==='mentorat'){
-      return mentorBandYV59(mentorBandIndexV59(revenue));
-    }
-    return computeYBeforeV59(revenue,product);
-  };
-  const updateChartBeforeV59=window.updateChart;
-  window.updateChart=function(){
-    updateChartBeforeV59();
-    if(!window.Plotly||!plotlyReady)return;
-    const gd=document.getElementById('chart');
-    if(!gd||!gd.layout)return;
-    const activeIndexes=activeMentorBandIndexesV59();
-    const mentorTicks=activeIndexes.map((bandIndex,rank)=>({
-      y:-7-rank,
-      label:mentorRevenueBandsV59[bandIndex].label
-    }));
-    const bottomYearY=Math.min(...mentorTicks.map(t=>t.y))-0.78;
-    const topYearY=6.62;
-    const annotations=(gd.layout.annotations||[])
-      .map(item=>({...item}))
-      .filter(item=>!String(item.text||'').startsWith('Mentorat'));
-    const mentorAnnotations=[]; // Mentorat labels removed from vertical axis
-    const yearTraceIndex=(gd.data||[]).findIndex(trace=>
-      Array.isArray(trace.customdata)&&trace.customdata.some(item=>Array.isArray(item)&&item[0]==='year-filter')
-    );
-    const operations=[];
-    if(yearTraceIndex>=0){
-      const source=gd.data[yearTraceIndex];
-      operations.push(Plotly.restyle(gd,{
-        y:[source.x.map(()=>bottomYearY)],
-        textposition:'middle center'
-      },[yearTraceIndex]));
-      const topTrace={...source,
-        y:source.x.map(()=>topYearY),
-        marker:{...(source.marker||{})},
-        textfont:{...(source.textfont||{})},
-        customdata:(source.customdata||[]).map(item=>Array.isArray(item)?item.slice():item),
-        showlegend:false,
-        hoverinfo:'none',
-        cliponaxis:false
-      };
-      operations.push(Plotly.addTraces(gd,topTrace));
-    }
-    Promise.all(operations).then(()=>Plotly.relayout(gd,{
-      'yaxis.range':[bottomYearY-0.48,topYearY+0.42],
-      'annotations':[...annotations,...mentorAnnotations]
-    }));
-  };
-})();
-</script>
-<style id="v59-mentorat-dynamic-style">
-/* Un peu d'air pour les deux rangees d'annees, sans recréer de lignes Mentorat inutiles. */
-#tabDashboard #chartWrap{padding-top:2px!important;padding-bottom:2px!important;}
-</style>
-
-
-<!-- V60 - Graphique unifie par revenue + formes par produit + legende simplifiee -->
-<style id="v60-unified-chart-style">
-  #productShapeLegend{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;padding:7px 10px;border-top:1px solid var(--line);background:#fff;font-size:10px;font-weight:850;color:#333}
-  .v60-shape-item{display:inline-flex;align-items:center;gap:6px}
-  .v60-shape{display:inline-block;width:13px;height:13px;background:#777;border:2px solid #222;box-sizing:border-box}
-  .v60-circle{border-radius:50%}.v60-square{border-radius:1px}.v60-triangle{width:0;height:0;background:transparent;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:13px solid #777;border-top:0}.v60-diamond{width:11px;height:11px;transform:rotate(45deg)}
-</style>
-<script>
-(function(){
-  window.Y_BANDS_UNIFIED_V60=[
-    {max:10000,y:1,label:'≤ 10k€'},
-    {max:30000,y:2,label:'10–30k€'},
-    {max:50000,y:3,label:'30–50k€'},
-    {max:100000,y:4,label:'50–100k€'},
-    {max:200000,y:5,label:'100–200k€'},
-    {max:Infinity,y:6,label:'> 200k€'}
-  ];
-  window.computeYFromRevenue=function(revenue,product){
-    const value=Number.isFinite(Number(revenue))?Number(revenue):0;
-    return (Y_BANDS_UNIFIED_V60.find(b=>value<=b.max)||Y_BANDS_UNIFIED_V60[Y_BANDS_UNIFIED_V60.length-1]).y;
-  };
-  window.productMarkerSymbolV60=function(product){
-    const key=String(product||'').trim().toLowerCase();
-    if(key==='coaching')return 'square';
-    if(key==='mentorat')return 'triangle-up';
-    if(key==='interculturel')return 'diamond';
-    return 'circle';
-  };
-  function ensureLegendV60(){
-    if(document.getElementById('productShapeLegend'))return;
-    const bottom=document.getElementById('bottomBar');
-    if(!bottom)return;
-    bottom.insertAdjacentHTML('beforebegin','<div id="productShapeLegend"><span class="v60-shape-item"><i class="v60-shape v60-circle"></i>Langues</span><span class="v60-shape-item"><i class="v60-shape v60-square"></i>Coaching</span><span class="v60-shape-item"><i class="v60-shape v60-triangle"></i>Mentorat</span><span class="v60-shape-item"><i class="v60-shape v60-diamond"></i>Interculturel</span></div>');
-  }
-  function removeExplanatoryTextV60(){
-    document.querySelectorAll('.mini-note,.timeline-subtitle,.timeline-reset-note').forEach(el=>el.remove());
-  }
-  const previousUpdateChartV60=window.updateChart;
-  window.updateChart=function(){
-    previousUpdateChartV60();
-    if(!window.Plotly||!plotlyReady)return;
-    const gd=document.getElementById('chart'); if(!gd||!gd.data)return;
-    const pointTraceIndexes=[];
-    gd.data.forEach((trace,index)=>{
-      if(Array.isArray(trace.customdata) && trace.customdata.some(cd=>Array.isArray(cd)&&typeof cd[0]==='number')) pointTraceIndexes.push(index);
-    });
-    pointTraceIndexes.forEach(index=>{
-      const trace=gd.data[index];
-      const symbols=(trace.customdata||[]).map(cd=>productMarkerSymbolV60(cd&&cd[1]));
-      Plotly.restyle(gd,{'marker.symbol':[symbols]},[index]);
-    });
-    const annotations=(gd.layout.annotations||[]).filter(a=>{
-      const t=String(a.text||'');
-      return !t.startsWith('Langues')&&!t.startsWith('Coaching')&&!t.startsWith('Mentorat');
-    });
-    const revenueAnnotations=Y_BANDS_UNIFIED_V60.map(b=>({xref:'paper',yref:'y',x:-0.035,y:b.y,text:b.label,showarrow:false,xanchor:'center',yanchor:'middle',font:{size:9,color:'#000',family:'Segoe UI,Arial'},bgcolor:'rgba(255,255,255,0)',borderwidth:0}));
-    const shapes=(gd.layout.shapes||[]).filter(sh=>!(sh.yref==='y' && Number(sh.y0)===-6 && Number(sh.y1)===-6));
-    Plotly.relayout(gd,{'yaxis.range':[0.35,6.75],'yaxis.zeroline':false,'annotations':[...annotations,...revenueAnnotations],'shapes':shapes});
-    ensureLegendV60(); removeExplanatoryTextV60();
-  };
-  const previousInitAppV60=window.initApp;
-  window.initApp=function(){const r=previousInitAppV60.apply(this,arguments);ensureLegendV60();removeExplanatoryTextV60();return r;};
-  document.addEventListener('DOMContentLoaded',()=>{ensureLegendV60();removeExplanatoryTextV60();});
-})();
-</script>
-
-
-<!-- V62 - Axe vertical: uniquement Estimated Revenue -->
-<script>
-(function(){
-  const REVENUE_BANDS_V62=[
-    {max:5000,y:1,label:'0–5k€'},
-    {max:10000,y:2,label:'5–10k€'},
-    {max:20000,y:3,label:'10–20k€'},
-    {max:30000,y:4,label:'20–30k€'},
-    {max:50000,y:5,label:'30–50k€'},
-    {max:75000,y:6,label:'50–75k€'},
-    {max:100000,y:7,label:'75–100k€'},
-    {max:150000,y:8,label:'100–150k€'},
-    {max:200000,y:9,label:'150–200k€'},
-    {max:300000,y:10,label:'200–300k€'},
-    {max:500000,y:11,label:'300–500k€'},
-    {max:Infinity,y:12,label:'> 500k€'}
-  ];
-  window.Y_BANDS_UNIFIED_V60=REVENUE_BANDS_V62;
-  window.computeYFromRevenue=function(revenue){
-    const value=Number.isFinite(Number(revenue))?Number(revenue):0;
-    return (REVENUE_BANDS_V62.find(b=>value<=b.max)||REVENUE_BANDS_V62[REVENUE_BANDS_V62.length-1]).y;
-  };
-  const prevUpdateChartV62=window.updateChart;
-  window.updateChart=function(){
-    prevUpdateChartV62();
-    if(!window.Plotly||!plotlyReady)return;
-    const gd=document.getElementById('chart'); if(!gd||!gd.layout)return;
-    const keepAnnotations=(gd.layout.annotations||[]).filter(a=>{
-      const t=String(a.text||'').replace(/<[^>]*>/g,'').replace(/&nbsp;/gi,' ').trim();
-      if(/^(Langues|Coaching|Mentorat|Interculturel)(\b|\s|:|–|-)/i.test(t)) return false;
-      if(/^(≤|<|>|\d+\s*[–-]\s*\d+|\d+\s*k?€)/i.test(t)) return false;
-      return true;
-    });
-    Plotly.relayout(gd,{
-      'yaxis.range':[0.35,12.65],
-      'yaxis.tickmode':'array',
-      'yaxis.tickvals':REVENUE_BANDS_V62.map(b=>b.y),
-      'yaxis.ticktext':REVENUE_BANDS_V62.map(b=>b.label),
-      'yaxis.showticklabels':true,
-      'yaxis.zeroline':false,
-      'annotations':keepAnnotations
-    });
-  };
-})();
-</script>
-
-
-<!-- V63 - Verrou final axe Y Estimated Revenue uniquement -->
-<script>
-(function(){
-  const PRODUCT_AXIS_LABEL_V63=/^(Langues|Coaching|Mentorat|Interculturel)(\b|\s|:|–|-)/i;
-  function cleanRevenueAxisV63(){
-    if(!window.Plotly||!plotlyReady)return;
-    const gd=document.getElementById('chart');
-    if(!gd||!gd.layout)return;
-    const annotations=(gd.layout.annotations||[]).filter(a=>{
-      const text=String(a.text||'').replace(/<[^>]*>/g,'').replace(/&nbsp;/gi,' ').trim();
-      return !PRODUCT_AXIS_LABEL_V63.test(text);
-    });
-    const labels=(window.Y_BANDS_UNIFIED_V60||[]).map(b=>b.label);
-    const values=(window.Y_BANDS_UNIFIED_V60||[]).map(b=>b.y);
-    if(!labels.length)return;
-    return Plotly.relayout(gd,{
-      'yaxis.range':[0.35,12.65],
-      'yaxis.tickmode':'array',
-      'yaxis.tickvals':values,
-      'yaxis.ticktext':labels,
-      'yaxis.showticklabels':true,
-      'yaxis.zeroline':false,
-      'annotations':annotations
-    });
-  }
-  const previousUpdateChartV63=window.updateChart;
-  window.updateChart=function(){
-    const result=previousUpdateChartV63.apply(this,arguments);
-    Promise.resolve(result).then(()=>cleanRevenueAxisV63());
-    requestAnimationFrame(()=>cleanRevenueAxisV63());
-    setTimeout(cleanRevenueAxisV63,0);
-    setTimeout(cleanRevenueAxisV63,80);
-    return result;
-  };
-})();
-</script>
-
-
-<!-- V64 - Axes classiques lisibles : années en bas, Estimated Revenue à gauche -->
-<style id="v64-classic-axis-style">
-#tabDashboard #chartWrap{padding-bottom:8px!important;}
-</style>
-<script>
-(function(){
-  function applyClassicAxesV64(){
-    if(!window.Plotly || !plotlyReady) return;
-    const gd=document.getElementById('chart');
-    if(!gd || !gd.layout) return;
-    const f=getFilterState();
-    const yearTicks=[];
-    for(let year=f.yMin; year<=f.yMax; year++) yearTicks.push(year);
-    const bands=window.Y_BANDS_UNIFIED_V60 || [];
-    if(!bands.length) return;
-
-    // Les anciennes rangées d'années ajoutées comme traces rendaient l'axe ambigu.
-    // On les masque et on utilise uniquement l'axe X natif de Plotly, positionné en bas.
-    const yearTraceIndexes=[];
-    (gd.data || []).forEach((trace,index)=>{
-      if(Array.isArray(trace.customdata) && trace.customdata.some(item=>Array.isArray(item) && item[0]==='year-filter')){
-        yearTraceIndexes.push(index);
-      }
-    });
-    if(yearTraceIndexes.length){
-      Plotly.restyle(gd,{visible:false},yearTraceIndexes);
-    }
-
-    const annotations=(gd.layout.annotations || []).filter(annotation=>{
-      const text=String(annotation.text || '').replace(/<[^>]*>/g,'').trim();
-      return !/^(Langues|Coaching|Mentorat|Interculturel)(\b|\s|:|–|-)/i.test(text);
-    });
-
-    Plotly.relayout(gd,{
-      'margin.l':118,
-      'margin.b':64,
-      'xaxis.side':'bottom',
-      'xaxis.anchor':'y',
-      'xaxis.tickmode':'array',
-      'xaxis.tickvals':yearTicks,
-      'xaxis.ticktext':yearTicks.map(String),
-      'xaxis.showticklabels':true,
-      'xaxis.ticks':'outside',
-      'xaxis.ticklen':6,
-      'xaxis.tickwidth':1,
-      'xaxis.tickcolor':'#333',
-      'xaxis.tickfont':{size:11,color:'#222',family:'Segoe UI,Arial'},
-      'xaxis.showline':true,
-      'xaxis.linecolor':'#333',
-      'xaxis.linewidth':1,
-      'xaxis.mirror':false,
-      'xaxis.automargin':true,
-      'xaxis.range':[f.yMin-0.35,f.yMax+0.35],
-      'yaxis.side':'left',
-      'yaxis.tickmode':'array',
-      'yaxis.tickvals':bands.map(b=>b.y),
-      'yaxis.ticktext':bands.map(b=>b.label),
-      'yaxis.showticklabels':true,
-      'yaxis.ticks':'outside',
-      'yaxis.ticklen':6,
-      'yaxis.tickwidth':1,
-      'yaxis.tickcolor':'#333',
-      'yaxis.tickfont':{size:10,color:'#222',family:'Segoe UI,Arial'},
-      'yaxis.showline':true,
-      'yaxis.linecolor':'#333',
-      'yaxis.linewidth':1,
-      'yaxis.automargin':true,
-      'yaxis.range':[0.35,12.65],
-      'yaxis.zeroline':false,
-      'annotations':annotations
-    });
-  }
-
-  const updateChartBeforeV64=window.updateChart;
-  window.updateChart=function(){
-    const result=updateChartBeforeV64.apply(this,arguments);
-    Promise.resolve(result).then(applyClassicAxesV64);
-    requestAnimationFrame(applyClassicAxesV64);
-    setTimeout(applyClassicAxesV64,100);
-    setTimeout(applyClassicAxesV64,300);
-    return result;
-  };
-})();
-</script>
-
-
-<!-- V64 - Remplacement definitif du graphique par des axes orthonormes classiques -->
 <style id="v64-classic-chart-style">
 #tabDashboard .chart-main{flex:0 0 auto!important;min-height:720px!important;height:720px!important;}
 #tabDashboard #chartWrap{flex:1 1 auto!important;min-height:560px!important;height:auto!important;padding:0!important;}
@@ -6145,6 +5689,7 @@ window.addEventListener('click',function(e){
 </style>
 <script>
 (function(){
+  let chartViewportInitialized=false;
   const REVENUE_BANDS_V64=[
     {max:5000,y:1,label:'0–5k€'},
     {max:10000,y:2,label:'5–10k€'},
@@ -6174,6 +5719,9 @@ window.addEventListener('click',function(e){
     return 'circle';
   }
 
+  window.resetChartDefaultViewport=function(){
+    chartViewportInitialized=false;
+  };
   window.updateChart=function(){
     if(!window.Plotly || !plotlyReady) return;
     const chartElement=document.getElementById('chart');
@@ -6239,8 +5787,14 @@ window.addEventListener('click',function(e){
       pts.forEach(p=>annotations.push({xref:'x',yref:'y',x:p.plotYear,y:p.plotY,text:escapeHtml(p.name),showarrow:false,yshift:16,font:{size:10,color:'#000'},bgcolor:'rgba(255,255,255,.86)',bordercolor:'rgba(0,0,0,.12)',borderwidth:1,borderpad:2}));
     }
 
+    const currentYear=currentYearNumber();
+    const defaultRange=[currentYear-5-0.45,currentYear+2+0.45];
+    const existingRange=chartViewportInitialized && chartElement.layout && Array.isArray(chartElement.layout.xaxis?.range)
+      ? chartElement.layout.xaxis.range.slice()
+      : defaultRange;
+
     const layout={
-      uirevision:'classic-axis-v64',
+      uirevision:'classic-axis-v65',
       autosize:true,
       margin:{l:118,r:24,t:34,b:66},
       paper_bgcolor:'#fff',plot_bgcolor:'#fff',
@@ -6250,7 +5804,7 @@ window.addEventListener('click',function(e){
         side:'bottom',anchor:'y',tickmode:'array',tickvals:visibleYears,ticktext:visibleYears.map(String),
         showticklabels:true,ticks:'outside',ticklen:6,tickwidth:1,tickcolor:'#333',
         tickfont:{size:11,color:'#222'},showline:true,linecolor:'#333',linewidth:1,
-        mirror:false,automargin:true,range:[f.yMin-0.45,f.yMax+0.45],
+        mirror:false,automargin:true,range:existingRange,
         gridcolor:'rgba(0,0,0,.08)',fixedrange:false,zeroline:false
       },
       yaxis:{
@@ -6264,7 +5818,8 @@ window.addEventListener('click',function(e){
       showlegend:false,font:{family:'Segoe UI,Arial',color:'#000'},hovermode:'closest'
     };
 
-    Plotly.react('chart',traces,layout,{displaylogo:false,responsive:true,scrollZoom:true});
+    Plotly.react('chart',traces,layout,{displaylogo:false,responsive:true,scrollZoom:true,modeBarButtonsToAdd:['autoScale2d','resetScale2d']});
+    chartViewportInitialized=true;
     const gd=document.getElementById('chart');
     gd.removeAllListeners&&gd.removeAllListeners('plotly_click');
     gd.on&&gd.on('plotly_click',ev=>{
