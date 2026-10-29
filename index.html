@@ -464,9 +464,7 @@
 .item-name{font-size:9.5px!important;}
 .item-meta{font-size:9px!important;}
 .watch-source-badge{display:inline-flex;align-items:center;border-radius:999px;padding:2px 6px;font-size:9px;font-weight:900;border:1px solid #e5e5e5;background:#fafafa;color:#555;white-space:nowrap;}
-.watch-source-badge.auto{background:#fff6ee;border-color:rgba(255,121,0,.35);color:#9a4b00;}
 .watch-source-badge.manual-add{background:#eef8ef;border-color:#bfe4c6;color:#176b2c;}
-.watch-source-badge.manual-remove{background:#fff0f0;border-color:#ffc4c4;color:#a20f0f;}
 .watch-table tr[data-id]{cursor:pointer;}
 .watch-table tr[data-id]:hover{background:#fff6ee;}
 @media(max-width:1150px){.dashboard-grid{grid-template-columns:200px 1fr!important;}}
@@ -3354,30 +3352,14 @@ function parseWatchOverride(value){
   if(['false','0','non','no','remove','suppression','exclude'].includes(raw)) return false;
   return null;
 }
-function isAutoWatch(d){
-  const st=statusForCompany(d).label;
-  const y=Number(d && d.year);
-  const current=currentYearNumber();
-  const renewalWindow=Number.isFinite(y) && y>=current-5 && y<=current-2;
-  return ['En cours','AO à confirmer','Docs à venir'].includes(st) || renewalWindow;
-}
 function isWatch(d){
-  if(!d) return false;
-  if(d.watchOverride === true) return true;
-  if(d.watchOverride === false) return false;
-  return isAutoWatch(d);
+  return !!(d && d.watchOverride === true);
 }
 function watchSourceLabel(d){
-  if(d.watchOverride === true) return 'Ajout manuel';
-  if(d.watchOverride === false) return 'Retrait manuel';
-  if(['En cours','AO à confirmer','Docs à venir'].includes(statusForCompany(d).label)) return 'Statut prioritaire';
-  if(isAutoWatch(d)) return 'N-5 à N-2';
-  return 'Hors règle';
+  return isWatch(d) ? 'Ajout manuel' : 'Non ajouté';
 }
 function watchSourceClass(d){
-  if(d.watchOverride === true) return 'manual-add';
-  if(d.watchOverride === false) return 'manual-remove';
-  return isAutoWatch(d) ? 'auto' : '';
+  return isWatch(d) ? 'manual-add' : '';
 }
 function cockpitMetrics(rows=data){
   const cy=currentYearNumber();
@@ -3470,7 +3452,22 @@ function normalizePoint(row){
 }
 function normalizeAllData(){ data = data.map(normalizePoint).filter(d=>d.name); years = [...new Set(data.map(d=>Number(d.year)).filter(Number.isFinite))].sort((a,b)=>a-b); syncYearInputs(); }
 function saveData(){ try{localStorage.setItem(STORAGE_KEY, JSON.stringify(data));}catch(e){} }
-function loadData(){ try{ const raw=localStorage.getItem(STORAGE_KEY); const source = raw ? JSON.parse(raw) : SEED_DATA; data = removeDeletedCompaniesAndReindex(source).map(normalizePoint); }catch(e){ data = removeDeletedCompaniesAndReindex(SEED_DATA).map(normalizePoint); } normalizeAllData(); }
+function loadData(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    const source=raw?JSON.parse(raw):SEED_DATA;
+    data=removeDeletedCompaniesAndReindex(source).map(normalizePoint);
+  }catch(e){
+    data=removeDeletedCompaniesAndReindex(SEED_DATA).map(normalizePoint);
+  }
+  const migrationKey=STORAGE_KEY+'_manual_watch_v1';
+  if(localStorage.getItem(migrationKey)!=='done'){
+    data.forEach(d=>{ d.watchOverride=null; d.watch_override=null; d.watch=false; });
+    localStorage.setItem(migrationKey,'done');
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  }
+  normalizeAllData();
+}
 function syncYearInputs(){ const min=document.getElementById('yearMin'), max=document.getElementById('yearMax'); if(!min||!max||!years.length)return; const minYear=Math.min(...years); const maxYear=Math.max(...years); if(!min.value) min.value=minYear; if(!max.value) max.value=maxYear; min.min=minYear; min.max=maxYear; max.min=minYear; max.max=maxYear; }
 
 function initApp(){
@@ -4232,7 +4229,7 @@ function renderWatchTable(){
     ${watchTh('Owner / BDR','owner',watchCheckboxFilterMenu('owner','Owner / BDR'))}
     <th>Statut</th><th>Source</th><th>Manuel</th>
   </tr></thead><tbody>${rows.map(d=>`<tr data-id="${d.id}" title="Cliquer pour modifier la fiche entreprise"><td class="watch-year">${d.year}</td><td><b>${escapeHtml(d.name)}</b></td><td><span class="cat-dot" style="background:${colorForCategory(d.cat)}"></span> ${escapeHtml(shortCatLabel(d.cat))}</td><td>${escapeHtml(d.product)}</td><td>${escapeHtml(ownerLabel(d))}</td><td>${statusBadgeHtmlForCompany(d)}</td><td><span class="watch-source-badge ${watchSourceClass(d)}">${escapeHtml(watchSourceLabel(d))}</span></td><td class="watch-check-cell"><button type="button" class="watch-star ${isWatch(d)?'':'off'}" data-watch-id="${d.id}" title="Basculer l'ajout/retrait manuel">${isWatch(d)?'★':'☆'}</button></td></tr>`).join('')}</tbody></table>` : '<p>Aucune entreprise dans la liste “À surveiller” pour le moment.</p>';
-  document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">⭐ A surveiller (${rows.length})</h2><div class="mini-note">Liste dynamique : statuts En cours / AO à confirmer / Docs à venir, ou années N-5 à N-2. Ton ajout ou retrait manuel prévaut toujours sur la règle par défaut. Clique sur une ligne pour modifier la fiche entreprise.</div>${body}`;
+  document.getElementById('watchContent').innerHTML=`<h2 style="margin:0 0 6px 0;">⭐ A surveiller (${rows.length})</h2><div class="mini-note">Liste 100 % manuelle : utilise l’étoile dans la liste des entreprises pour ajouter ou retirer une entreprise. Clique sur une ligne pour modifier la fiche entreprise.</div>${body}`;
   bindWatchFilterEvents();
   document.querySelectorAll('#watchModal tr[data-id]').forEach(tr=>tr.addEventListener('click',()=>{ selectedCompanyId=Number(tr.dataset.id); renderList(); syncTableFiltersToDashboard(); renderCompanyTable(); renderWatchCompanyPanel(); }));
   document.querySelectorAll('#watchModal .watch-star').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); const d=data.find(x=>Number(x.id)===Number(btn.dataset.watchId)); toggleWatch(btn.dataset.watchId, !(d&&isWatch(d))); }));
@@ -5686,6 +5683,16 @@ window.addEventListener('click',function(e){
 #tabDashboard #chartWrap{flex:1 1 auto!important;min-height:560px!important;height:auto!important;padding:0!important;}
 #tabDashboard #chart{min-height:560px!important;height:100%!important;}
 @media(max-height:850px){#tabDashboard .chart-main{min-height:650px!important;height:650px!important;}#tabDashboard #chartWrap,#tabDashboard #chart{min-height:500px!important;}}
+
+.product-shape-legend{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:4px 8px;border:1px solid #e8e8e8;border-radius:12px;background:#fafafa;font-size:10px;font-weight:850}
+.product-shape-title{font-weight:950;color:#333;margin-right:2px}
+.product-shape-item{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.product-shape-icon{display:inline-block;width:12px;height:12px;background:#555;flex:0 0 auto}
+.product-shape-icon.circle{border-radius:50%}
+.product-shape-icon.square{border-radius:1px}
+.product-shape-icon.diamond{transform:rotate(45deg);width:10px;height:10px;margin:1px}
+.product-shape-icon.triangle{width:0;height:0;background:transparent;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:12px solid #555}
+
 </style>
 <script>
 (function(){
@@ -5730,6 +5737,25 @@ window.addEventListener('click',function(e){
     const f=getFilterState();
     const visibleYears=Array.from({length:Math.max(0,f.yMax-f.yMin+1)},(_,i)=>f.yMin+i);
     const activeYears=selectedDashboardYears();
+    const productLegend=[
+      {product:'Langues',cls:'circle'},
+      {product:'Coaching',cls:'square'},
+      {product:'Mentorat',cls:'triangle'},
+      {product:'Interculturel',cls:'diamond'}
+    ];
+    let shapeLegend=document.getElementById('productShapeLegend');
+    if(!shapeLegend){
+      shapeLegend=document.createElement('div');
+      shapeLegend.id='productShapeLegend';
+      shapeLegend.className='product-shape-legend';
+      document.getElementById('portfolioSummary')?.appendChild(shapeLegend);
+    }
+    if(shapeLegend){
+      shapeLegend.innerHTML='<span class="product-shape-title">Formes :</span>'+productLegend.map(item=>{
+        const count=pts.filter(p=>String(p.product||'').trim()===item.product).length;
+        return `<span class="product-shape-item"><i class="product-shape-icon ${item.cls}"></i>${item.product} (${count})</span>`;
+      }).join('');
+    }
 
     const offsets=[
       {x:0,y:0},{x:-0.16,y:0.18},{x:0.16,y:0.18},{x:-0.16,y:-0.18},
