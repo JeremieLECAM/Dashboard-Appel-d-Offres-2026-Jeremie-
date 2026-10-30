@@ -6107,5 +6107,91 @@ window.addEventListener('load',function(){
 })();
 </script>
 
+
+<style id="v68-clickable-revenue-milestones">
+#chart .yaxislayer-above .ytick,
+#chart .yaxislayer-above .ytick text{
+  pointer-events:all!important;
+  cursor:pointer!important;
+  user-select:none!important;
+}
+#chart .yaxislayer-above .ytick text{transition:fill .12s ease,font-weight .12s ease}
+#chart .yaxislayer-above .ytick:hover text{fill:#FF7900!important;font-weight:900!important}
+#chart .yaxislayer-above .ytick.revenue-selected text{
+  fill:#FF7900!important;
+  font-weight:950!important;
+  text-decoration:underline;
+}
+</style>
+<script>
+(function(){
+  let dashboardRevenueFiltersV68=new Set();
+  function revenueBandFromTickV68(tick){
+    const label=String(tick?.querySelector('text')?.textContent||tick?.textContent||'').trim();
+    const bands=window.Y_BANDS_UNIFIED_V60||[];
+    const index=bands.findIndex(b=>String(b.label).trim()===label);
+    return index>=0?{index,label,band:bands[index]}:null;
+  }
+  function revenueBandIndexForRowV68(row){
+    const bands=window.Y_BANDS_UNIFIED_V60||[];
+    const value=Number(row?.revenue||0);
+    return bands.findIndex(b=>value<=b.max);
+  }
+  function paintRevenueTicksV68(){
+    const chart=document.getElementById('chart');
+    if(!chart)return;
+    chart.querySelectorAll('.yaxislayer-above .ytick').forEach(tick=>{
+      const info=revenueBandFromTickV68(tick);
+      if(!info)return;
+      const active=dashboardRevenueFiltersV68.has(info.index);
+      tick.classList.toggle('revenue-selected',active);
+      tick.setAttribute('role','button');
+      tick.setAttribute('tabindex','0');
+      tick.setAttribute('aria-pressed',String(active));
+      tick.setAttribute('aria-label','Filtrer sur le revenu estime '+info.label);
+    });
+  }
+  function toggleRevenueBandV68(index){
+    if(dashboardRevenueFiltersV68.has(index))dashboardRevenueFiltersV68.delete(index);
+    else dashboardRevenueFiltersV68.add(index);
+    if(typeof updateAll==='function')updateAll();
+  }
+  const previousFilteredDataV68=window.filteredData;
+  window.filteredData=function(){
+    const rows=previousFilteredDataV68.apply(this,arguments);
+    if(!dashboardRevenueFiltersV68.size)return rows;
+    return rows.filter(row=>dashboardRevenueFiltersV68.has(revenueBandIndexForRowV68(row)));
+  };
+  document.addEventListener('click',event=>{
+    const tick=event.target.closest?.('#chart .yaxislayer-above .ytick');
+    if(!tick)return;
+    const info=revenueBandFromTickV68(tick);
+    if(!info)return;
+    event.preventDefault();event.stopPropagation();
+    toggleRevenueBandV68(info.index);
+  },true);
+  document.addEventListener('keydown',event=>{
+    if(event.key!=='Enter'&&event.key!==' ')return;
+    const tick=event.target.closest?.('#chart .yaxislayer-above .ytick');
+    if(!tick)return;
+    const info=revenueBandFromTickV68(tick);
+    if(!info)return;
+    event.preventDefault();event.stopPropagation();
+    toggleRevenueBandV68(info.index);
+  },true);
+  const previousUpdateChartV68=window.updateChart;
+  window.updateChart=function(){
+    const result=previousUpdateChartV68.apply(this,arguments);
+    requestAnimationFrame(()=>requestAnimationFrame(paintRevenueTicksV68));
+    return result;
+  };
+  const previousResetDashboardV68=window.resetDashboardLeftFiltersV55;
+  if(typeof previousResetDashboardV68==='function'){
+    window.resetDashboardLeftFiltersV55=function(){dashboardRevenueFiltersV68.clear();return previousResetDashboardV68.apply(this,arguments);};
+  }
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(paintRevenueTicksV68,250));
+})();
+</script>
+
 </body>
 </html>
