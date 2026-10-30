@@ -3877,7 +3877,7 @@ const hoverPoint = hoveredCompanyId == null ? null : pts.find(p=>Number(p.id)===
     traces.push({
       type:'scatter',mode:'markers',showlegend:false,hoverinfo:'skip',
       x:[hoverPoint.plotYear],y:[hoverPoint.plotY],
-      marker:{size:[bubbleSizeByCat(hoverPoint.cat)+14],color:['rgba(255,255,255,0)'],line:{color:'#FFD400',width:5}}
+      marker:{size:[bubbleSizeByCat(hoverPoint.cat)*1.15],color:['rgba(255,255,255,0)'],line:{color:'#FFD400',width:5}}
     });
   }
 
@@ -5801,7 +5801,7 @@ window.addEventListener('click',function(e){
 
     const hoverPoint=hoveredCompanyId==null?null:pts.find(p=>Number(p.id)===Number(hoveredCompanyId));
     if(hoverPoint){
-      traces.push({type:'scatter',mode:'markers',showlegend:false,hoverinfo:'skip',x:[hoverPoint.plotYear],y:[hoverPoint.plotY],marker:{size:[bubbleSizeByCat(hoverPoint.cat)+14],color:['rgba(255,255,255,0)'],symbol:[markerSymbolV64(hoverPoint.product)],line:{color:'#FFD400',width:5}}});
+      traces.push({type:'scatter',mode:'markers',showlegend:false,hoverinfo:'skip',x:[hoverPoint.plotYear],y:[hoverPoint.plotY],marker:{size:[bubbleSizeByCat(hoverPoint.cat)*1.15],color:['rgba(255,255,255,0)'],symbol:[markerSymbolV64(hoverPoint.product)],line:{color:'#FFD400',width:5}}});
     }
 
     const yearShapes=visibleYears.map((year,i)=>({type:'rect',xref:'x',yref:'paper',x0:year-0.5,x1:year+0.5,y0:0,y1:1,fillcolor:i%2===0?'rgba(0,0,0,0.025)':'rgba(255,121,0,0.025)',line:{width:0},layer:'below'}));
@@ -6190,6 +6190,154 @@ window.addEventListener('load',function(){
     window.resetDashboardLeftFiltersV55=function(){dashboardRevenueFiltersV68.clear();return previousResetDashboardV68.apply(this,arguments);};
   }
   document.addEventListener('DOMContentLoaded',()=>setTimeout(paintRevenueTicksV68,250));
+})();
+</script>
+
+
+<style id="v70-selected-ux-improvements">
+:root{--status-progress-amber:#D96B00;}
+/* 1-3. Bandeau global, KPIs superieurs et barre persistante de filtres actifs */
+#v70GlobalBar{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid #dedede;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.05);position:relative;z-index:80}
+#v70GlobalBar .v70-global-title{font-size:10px;font-weight:950;text-transform:uppercase;color:#555;margin-right:2px}
+#v70GlobalBar button{border:1px solid #111;background:#fff;color:#111;border-radius:9px;padding:6px 10px;font-size:10px;font-weight:900;cursor:pointer}
+#v70GlobalBar .primary{background:#FF7900;border-color:#FF7900;color:#000}
+#v70GlobalBar .v70-kpis{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+.v70-top-kpi{border:1px solid #e4e4e4;border-radius:9px;background:#fafafa;padding:4px 8px;min-width:82px}
+.v70-top-kpi b{display:block;font-size:14px;line-height:1}.v70-top-kpi span{display:block;font-size:8px;color:#666;font-weight:850;margin-top:2px}
+#v70DataMenu{position:relative}.v70-menu{display:none;position:absolute;top:34px;left:0;z-index:1000;min-width:190px;padding:7px;border:1px solid #ccc;border-radius:10px;background:#fff;box-shadow:0 12px 28px rgba(0,0,0,.18)}
+#v70DataMenu.open .v70-menu{display:grid;gap:5px}.v70-menu button{width:100%;text-align:left}
+#newCompanySection,#dataToolsSection,#cockpitKpis{display:none!important}
+#v70ActiveFilters{display:flex;align-items:flex-start;gap:7px;flex-wrap:wrap;padding:6px 8px;border-bottom:1px solid #e5e5e5;background:#fff;position:sticky;top:0;z-index:16;min-height:36px}
+.v70-filter-title{font-size:9px;font-weight:950;text-transform:uppercase;color:#555;padding-top:5px}.v70-filter-chip{border:1px solid #d2d2d2;background:#f8f8f8;border-radius:999px;padding:4px 7px;font-size:8px;font-weight:900;cursor:pointer}.v70-filter-chip:hover{border-color:#FF7900}.v70-filter-reset{margin-left:auto;border:1px solid #000;background:#000;color:#fff;border-radius:8px;padding:5px 8px;font-size:8px;font-weight:900;cursor:pointer}
+/* 2. Trois blocs de legende clairement separes */
+#portfolioSummary{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(260px,.7fr)!important;grid-template-areas:"fill shape" "outline outline"!important;gap:6px 10px!important;padding:7px 9px!important;align-items:start!important}
+#portfolioSummary .summary-main{grid-area:fill;border:1px solid #e1e1e1;border-radius:10px;padding:6px!important;gap:4px!important}
+#portfolioSummary .summary-main:before{content:'Remplissage · Type d’entreprise';flex:0 0 100%;font-size:8px;font-weight:950;color:#444;text-transform:uppercase;margin-bottom:1px}
+#portfolioSummary .product-shape-legend{grid-area:shape;max-width:none!important;margin:0!important;border:1px solid #e1e1e1!important;border-radius:10px!important;padding:6px!important;background:#fff!important}
+#portfolioSummary .product-shape-title{flex:0 0 100%;font-size:8px!important;text-transform:uppercase;color:#444!important}.product-shape-title::after{content:' · Produit'}
+#portfolioSummary .summary-secondary{grid-area:outline;border:1px solid #e1e1e1;border-radius:10px;padding:6px!important;gap:4px!important}
+#portfolioSummary .summary-secondary:before{content:'Contour · Statut';flex:0 0 100%;font-size:8px;font-weight:950;color:#444;text-transform:uppercase;margin-bottom:1px}
+#portfolioSummary .summary-pill,#portfolioSummary .product-shape-item{font-size:8px!important;padding:3px 6px!important}
+/* 4. Panneau gauche reductible */
+.dashboard-grid{grid-template-columns:230px minmax(0,1fr)!important;transition:grid-template-columns .2s ease}
+.dashboard-grid.v70-sidebar-collapsed{grid-template-columns:48px minmax(0,1fr)!important}
+#v70SidebarToggle{position:sticky;top:0;z-index:90;width:100%;border:1px solid #000;background:#000;color:#fff;border-radius:9px;padding:6px 4px;font-weight:950;cursor:pointer;margin-bottom:6px}
+.dashboard-grid.v70-sidebar-collapsed .panel{padding:6px!important;overflow:hidden!important}
+.dashboard-grid.v70-sidebar-collapsed .panel>*:not(#v70SidebarToggle):not(.panel-logo){display:none!important}
+.dashboard-grid.v70-sidebar-collapsed .panel-logo{width:30px!important;max-width:30px!important;margin:3px auto!important}
+/* 5. Barre bulk contextuelle, colonne entreprise figee, compte de resultats */
+#bulkToolbar{display:none!important}.v70-bulk-context{display:none;align-items:center;gap:7px;flex-wrap:wrap;margin:7px 0;padding:8px;border:1px solid #FF7900;border-radius:11px;background:#fff7ef;position:sticky;top:0;z-index:20}
+.v70-bulk-context.visible{display:flex}.v70-bulk-context .bulk-count{margin-right:auto}.v70-bulk-context select,.v70-bulk-context button{width:auto!important;margin:0!important;min-height:29px}
+.v70-result-count{font-size:10px;font-weight:900;color:#333;margin:4px 0 7px}.v70-result-count strong{font-size:13px;color:#000}
+#companyTableWrap{overflow:auto;max-height:calc(100vh - 205px)}
+.company-table thead th{position:sticky!important;top:0!important;z-index:8!important}
+.company-table th:nth-child(2),.company-table td:nth-child(2){position:sticky;left:34px;z-index:4;background:#fff;box-shadow:5px 0 8px rgba(0,0,0,.05)}
+.company-table thead th:nth-child(2){z-index:10;background:#000!important}
+.company-table tr.selected td{background:#ffead6!important}.company-table tr.selected td:nth-child(2){background:#ffead6!important}
+/* 6. En cours : ambre plus sombre */
+.status-progress,.summary-pill.status-progress-pill,.filter-menu label.status-filter-choice.status-progress{border-color:var(--status-progress-amber)!important}
+.status-progress{background:#FFF1E5!important;color:#7B3900!important}.summary-pill.status-progress-pill{background:#FFF1E5!important;color:#7B3900!important}
+#portfolioSummary .summary-pill.status-progress-pill.active{background:var(--status-progress-amber)!important;border-color:var(--status-progress-amber)!important;color:#fff!important}
+.timeline-segment.status-progress,.sum-status-segment.status-progress{background:var(--status-progress-amber)!important;color:#fff!important}
+/* 7. Selection commune et mise au premier plan */
+#chart .v70-selected-point{pointer-events:none}.item.selected{border:2px solid #FF7900!important;background:#fff0df!important;transform:scale(1.01)}
+.summary-table tr.v70-company-selected td{background:#fff0df!important;box-shadow:inset 0 2px #FF7900,inset 0 -2px #FF7900}
+@media(max-width:1200px){#portfolioSummary{grid-template-columns:1fr!important;grid-template-areas:"fill" "shape" "outline"!important}.dashboard-grid{grid-template-columns:220px minmax(0,1fr)!important}}
+</style>
+<script>
+(function(){
+  function v70Escape(value){return typeof escapeHtml==='function'?escapeHtml(value):String(value||'');}
+  function v70MetricRows(){try{return filteredData();}catch(e){return [];}}
+  function installGlobalBarV70(){
+    if(document.getElementById('v70GlobalBar'))return;
+    const subbar=document.querySelector('.subbar');if(!subbar)return;
+    const bar=document.createElement('div');bar.id='v70GlobalBar';
+    bar.innerHTML=`<span class="v70-global-title">Actions</span><button type="button" id="v70NewCompany" class="primary">+ Nouvelle entreprise</button><div id="v70DataMenu"><button type="button" id="v70DataMenuBtn">Données et exports ▾</button><div class="v70-menu"><button type="button" data-proxy="exportConstDataBtn">Exporter const_data</button><button type="button" data-proxy="exportCsvBtn">Exporter CSV</button><button type="button" data-proxy="importCsvBtn">Importer CSV</button></div></div><div class="v70-kpis" id="v70TopKpis"></div>`;
+    subbar.insertAdjacentElement('afterend',bar);
+    document.getElementById('v70NewCompany').onclick=()=>{const sec=document.getElementById('newCompanySection');sec.style.setProperty('display','block','important');sec.classList.add('open');sec.querySelector('.section-body').style.display='block';sec.scrollIntoView({behavior:'smooth',block:'start'});};
+    document.getElementById('v70DataMenuBtn').onclick=e=>{e.stopPropagation();document.getElementById('v70DataMenu').classList.toggle('open');};
+    bar.querySelectorAll('[data-proxy]').forEach(btn=>btn.onclick=()=>document.getElementById(btn.dataset.proxy)?.click());
+    document.addEventListener('click',e=>{if(!e.target.closest('#v70DataMenu'))document.getElementById('v70DataMenu')?.classList.remove('open');});
+  }
+  function updateTopKpisV70(){
+    const holder=document.getElementById('v70TopKpis');if(!holder)return;
+    const rows=v70MetricRows();const unique=new Set(rows.map(d=>normText(d.name))).size;const watch=rows.filter(d=>isWatch(d)).length;const revenue=rows.reduce((sum,d)=>sum+Number(d.revenue||0),0);
+    holder.innerHTML=`<div class="v70-top-kpi"><b>${rows.length}</b><span>AO affichés</span></div><div class="v70-top-kpi"><b>${unique}</b><span>Entreprises</span></div><div class="v70-top-kpi"><b>${Math.round(revenue).toLocaleString('fr-FR')} €</b><span>Estimated Revenue</span></div><div class="v70-top-kpi"><b>${watch}</b><span>À surveiller</span></div>`;
+  }
+  function installActiveFiltersV70(){
+    if(document.getElementById('v70ActiveFilters'))return;
+    const legend=document.getElementById('portfolioSummary');if(!legend)return;
+    const bar=document.createElement('div');bar.id='v70ActiveFilters';legend.insertAdjacentElement('afterend',bar);
+  }
+  function selectedRevenueLabelsV70(){
+    const out=[];document.querySelectorAll('#chart .yaxislayer-above .ytick.revenue-selected text').forEach(t=>out.push(t.textContent.trim()));return [...new Set(out)];
+  }
+  function updateActiveFiltersV70(){
+    installActiveFiltersV70();const bar=document.getElementById('v70ActiveFilters');if(!bar)return;
+    const chips=[];
+    selectedDashboardYears().forEach(y=>chips.push({label:'Année : '+y,type:'year',value:y}));
+    selectedRevenueLabelsV70().forEach(v=>chips.push({label:'Revenue : '+v,type:'revenue',value:v}));
+    const selectedProducts=[...document.querySelectorAll('.f-prod:checked')].map(x=>x.value);const allProducts=[...document.querySelectorAll('.f-prod')].map(x=>x.value);
+    if(selectedProducts.length!==allProducts.length)selectedProducts.forEach(v=>chips.push({label:'Produit : '+v,type:'product',value:v}));
+    bar.innerHTML=`<span class="v70-filter-title">Filtres actifs</span>${chips.length?chips.map((c,i)=>`<button class="v70-filter-chip" data-chip-index="${i}">${v70Escape(c.label)} ×</button>`).join(''):'<span class="mini-note">Aucun filtre d’axe ou de produit</span>'}<button class="v70-filter-reset" type="button">Tout réinitialiser</button>`;
+    bar.querySelectorAll('[data-chip-index]').forEach(btn=>btn.onclick=()=>{const c=chips[Number(btn.dataset.chipIndex)];if(c.type==='year'){dashboardYearFilters.delete(Number(c.value));syncDashboardButtonFiltersToTable();updateAll();}else if(c.type==='product'){const cb=[...document.querySelectorAll('.f-prod')].find(x=>x.value===c.value);if(cb){cb.checked=false;updateAll();}}else{const tick=[...document.querySelectorAll('#chart .yaxislayer-above .ytick')].find(x=>x.querySelector('text')?.textContent.trim()===c.value);tick?.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
+    bar.querySelector('.v70-filter-reset').onclick=()=>{
+      const revenueLabels=selectedRevenueLabelsV70();
+      document.getElementById('dashboardFiltersResetBtn')?.click();
+      const clearNext=()=>{
+        const label=revenueLabels.shift();
+        if(!label)return;
+        const tick=[...document.querySelectorAll('#chart .yaxislayer-above .ytick')].find(x=>x.querySelector('text')?.textContent.trim()===label);
+        if(tick)tick.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+        setTimeout(clearNext,35);
+      };
+      setTimeout(clearNext,35);
+    };
+  }
+  function installSidebarToggleV70(){
+    const panel=document.querySelector('#tabDashboard .panel');if(!panel||document.getElementById('v70SidebarToggle'))return;
+    const btn=document.createElement('button');btn.id='v70SidebarToggle';btn.type='button';btn.textContent='‹ Réduire';panel.insertBefore(btn,panel.firstChild);
+    btn.onclick=()=>{const grid=panel.closest('.dashboard-grid');const collapsed=grid.classList.toggle('v70-sidebar-collapsed');btn.textContent=collapsed?'›':'‹ Réduire';setTimeout(()=>{if(typeof resizeChart==='function')resizeChart();},230);};
+  }
+  function installBulkContextV70(){
+    const old=document.getElementById('bulkToolbar');if(!old||document.getElementById('v70BulkContext'))return;
+    const bar=document.createElement('div');bar.id='v70BulkContext';bar.className='v70-bulk-context';
+    bar.innerHTML=`<span class="bulk-count"><span id="v70BulkCount">0</span> sélectionnée(s)</span><select id="v70BulkField"></select><select id="v70BulkValue"></select><button type="button" id="v70BulkApply" class="btn">Appliquer</button><button type="button" id="v70BulkClear" class="btn secondary">Vider la sélection</button><button type="button" id="v70BulkDelete" class="btn secondary" style="border-color:#b31313;color:#b31313">Supprimer</button>`;
+    old.insertAdjacentElement('afterend',bar);
+    const srcField=document.getElementById('bulkField');document.getElementById('v70BulkField').innerHTML=srcField?.innerHTML||'';
+    const sync=()=>{if(srcField)srcField.value=document.getElementById('v70BulkField').value;srcField?.dispatchEvent(new Event('change'));setTimeout(()=>{const source=document.getElementById('bulkValue'),target=document.getElementById('v70BulkValue');if(source&&target)target.innerHTML=source.innerHTML;},0);};
+    document.getElementById('v70BulkField').onchange=sync;sync();
+    document.getElementById('v70BulkValue').onchange=()=>{const source=document.getElementById('bulkValue');if(source)source.value=document.getElementById('v70BulkValue').value;};
+    document.getElementById('v70BulkApply').onclick=()=>{const source=document.getElementById('bulkValue');if(source)source.value=document.getElementById('v70BulkValue').value;document.getElementById('bulkApply')?.click();};
+    document.getElementById('v70BulkClear').onclick=()=>document.getElementById('bulkClear')?.click();
+    document.getElementById('v70BulkDelete').onclick=()=>document.getElementById('bulkDelete')?.click();
+  }
+  function updateBulkContextV70(){installBulkContextV70();const bar=document.getElementById('v70BulkContext');if(!bar)return;const n=bulkSelectedIds.size;bar.classList.toggle('visible',n>0);document.getElementById('v70BulkCount').textContent=n;}
+  function updateResultCountV70(){
+    const wrap=document.getElementById('companyTableWrap'),table=wrap?.querySelector('table');if(!wrap||!table)return;
+    wrap.querySelector(':scope > .v70-result-count')?.remove();const n=table.querySelectorAll('tbody tr[data-id]').length;table.insertAdjacentHTML('beforebegin',`<div class="v70-result-count"><strong>${n}</strong> résultat(s) filtré(s)</div>`);
+  }
+  function selectedCompanyV70(){return data.find(d=>Number(d.id)===Number(selectedCompanyId));}
+  function addSelectedPointOverlayV70(){
+    const d=selectedCompanyV70();const gd=document.getElementById('chart');if(!d||!gd||!window.Plotly||!filteredData().some(x=>Number(x.id)===Number(d.id)))return;
+    const symbol=String(d.product).toLowerCase()==='coaching'?'square':String(d.product).toLowerCase()==='mentorat'?'triangle-up':String(d.product).toLowerCase()==='interculturel'?'diamond':'circle';
+    const trace={type:'scatter',mode:'markers',showlegend:false,hoverinfo:'skip',x:[d.plotYear??d.year],y:[d.plotY??computeYFromRevenue(d.revenue)],marker:{size:[bubbleSizeByCat(d.cat)*1.15],color:[d.color],symbol:[symbol],opacity:1,line:{width:[statusBorderWidth(d)],color:[statusBorderColor(d)]}},meta:'v70-selected-overlay'};
+    Plotly.addTraces(gd,trace).then(()=>{const groups=gd.querySelectorAll('.scatterlayer .trace');groups[groups.length-1]?.classList.add('v70-selected-point');});
+  }
+  function syncSelectedAcrossViewsV70(){
+    const d=selectedCompanyV70();
+    document.querySelectorAll('#companyTableWrap tr[data-id],#watchModal tr[data-id]').forEach(row=>row.classList.toggle('selected',Number(row.dataset.id)===Number(selectedCompanyId)));
+    document.querySelectorAll('.summary-table tbody tr').forEach(row=>row.classList.toggle('v70-company-selected',!!d&&normText(row.cells?.[0]?.textContent)===normText(d.name)));
+  }
+  function refreshV70(){installGlobalBarV70();installActiveFiltersV70();installSidebarToggleV70();installBulkContextV70();updateTopKpisV70();updateActiveFiltersV70();updateBulkContextV70();updateResultCountV70();syncSelectedAcrossViewsV70();}
+  const previousUpdateAllV70=window.updateAll;window.updateAll=function(){const r=previousUpdateAllV70.apply(this,arguments);setTimeout(refreshV70,0);return r;};
+  const previousRenderCompanyTableV70=window.renderCompanyTable;window.renderCompanyTable=function(){const r=previousRenderCompanyTableV70.apply(this,arguments);setTimeout(()=>{updateBulkContextV70();updateResultCountV70();syncSelectedAcrossViewsV70();},0);return r;};
+  const previousUpdateChartV70=window.updateChart;window.updateChart=function(){const r=previousUpdateChartV70.apply(this,arguments);setTimeout(()=>{addSelectedPointOverlayV70();updateActiveFiltersV70();},40);return r;};
+  const previousRenderSummaryV70=window.renderSummary;window.renderSummary=function(){const r=previousRenderSummaryV70.apply(this,arguments);setTimeout(syncSelectedAcrossViewsV70,0);return r;};
+  const previousSelectCompanyV70=window.selectCompany;window.selectCompany=function(id){const same=Number(selectedCompanyId)===Number(id);const r=previousSelectCompanyV70.apply(this,arguments);if(!same&&selectedCompanyId!=null)setTimeout(()=>{updateChart();syncSelectedAcrossViewsV70();},0);return r;};
+  document.addEventListener('change',e=>{if(e.target.matches('.bulk-select'))setTimeout(updateBulkContextV70,0);});
+  document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(selectedCompanyId!=null){selectedCompanyId=null;closeFloatingCompanyPopup();renderList();renderCompanyTable();renderEditors();updateChart();}if(document.getElementById('watchModal')?.classList.contains('open'))closeWatchModal();});
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(refreshV70,0));window.addEventListener('load',()=>setTimeout(refreshV70,250));
 })();
 </script>
 
