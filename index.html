@@ -3785,7 +3785,7 @@ function renderCompanyTable(){
 }
 function highlightCompanyFromList(id){ hoveredCompanyId = Number(id); updateChart(); }
 function clearCompanyHighlight(){ hoveredCompanyId = null; updateChart(); }
-function toggleWatch(id, checked){ const d=data.find(x=>Number(x.id)===Number(id)); if(!d) return; d.watchOverride=!!checked; d.watch_override=d.watchOverride; saveData(); syncTableFiltersToDashboard(); renderCompanyTable(); renderList(); updateCockpitMetrics(); updateChart(); if(document.getElementById('watchModal')?.classList.contains('open')) renderWatchTable(); }
+function toggleWatch(id, checked){ window.__lastOpenFilter=null; if(typeof closeFilterMenus==='function') closeFilterMenus(); const d=data.find(x=>Number(x.id)===Number(id)); if(!d) return; d.watchOverride=!!checked; d.watch_override=d.watchOverride; saveData(); syncTableFiltersToDashboard(); renderCompanyTable(); renderList(); updateCockpitMetrics(); updateChart(); if(document.getElementById('watchModal')?.classList.contains('open')) renderWatchTable(); }
 function updateChart(){
   if(!window.Plotly || !plotlyReady) return;
   const pts=filteredData();
