@@ -6261,7 +6261,7 @@ window.addEventListener('load',function(){
   }
   function updateTopKpisV70(){
     const holder=document.getElementById('v70TopKpis');if(!holder)return;
-    const rows=v70MetricRows();const unique=new Set(rows.map(d=>normText(d.name))).size;const watch=rows.filter(d=>isWatch(d)).length;const n=currentYearNumber();const forecastCompanies=new Set(rows.filter(d=>{const year=Number(d.year),status=statusForCompany(d).label;return (year===n||year===n+1)&&(status==='En cours'||status==='AO à confirmer');}).map(d=>normText(d.name)).filter(Boolean)).size;
+    const rows=v70MetricRows();const unique=new Set(rows.map(d=>normText(d.name))).size;const watch=rows.filter(d=>isWatch(d)).length;const n=currentYearNumber();const forecastCompanies=new Set(rows.filter(d=>{const year=Number(d.year),status=statusForCompany(d).label;return (year===n||year===n+1)&&(status==='Docs à venir'||status==='AO à confirmer');}).map(d=>normText(d.name)).filter(Boolean)).size;
     holder.innerHTML=`<div class="v70-top-kpi"><b>${rows.length}</b><span>AO affichés</span></div><div class="v70-top-kpi"><b>${unique}</b><span>Entreprises</span></div><div class="v70-top-kpi"><b>${forecastCompanies}</b><span>Forecast N et N+1</span></div><div class="v70-top-kpi"><b>${watch}</b><span>À surveiller</span></div>`;
   }
   function installActiveFiltersV70(){
