@@ -6031,5 +6031,37 @@ window.addEventListener('load',function(){
 })();
 </script>
 
+<style id="v66-clickable-year-milestones">
+#chart .xtick text{cursor:pointer!important;user-select:none;transition:fill .12s ease,font-weight .12s ease}
+#chart .xtick text:hover{fill:#FF7900!important;font-weight:900!important}
+</style>
+<script>
+(function(){
+  function bindClickableYearMilestonesV66(){
+    const chart=document.getElementById('chart');
+    if(!chart)return;
+    chart.querySelectorAll('.xaxislayer-above .xtick text').forEach(label=>{
+      const year=Number(String(label.textContent||'').trim());
+      if(!Number.isFinite(year))return;
+      label.style.cursor='pointer';
+      label.onclick=function(event){
+        event.stopPropagation();
+        if(dashboardYearFilters.has(year)) dashboardYearFilters.delete(year);
+        else dashboardYearFilters.add(year);
+        if(typeof syncDashboardButtonFiltersToTable==='function')syncDashboardButtonFiltersToTable();
+        if(typeof updateAll==='function')updateAll();
+      };
+    });
+  }
+  const previousUpdateChartV66=window.updateChart;
+  window.updateChart=function(){
+    const result=previousUpdateChartV66.apply(this,arguments);
+    requestAnimationFrame(bindClickableYearMilestonesV66);
+    return result;
+  };
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(bindClickableYearMilestonesV66,200));
+})();
+</script>
+
 </body>
 </html>
