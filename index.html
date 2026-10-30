@@ -6031,35 +6031,79 @@ window.addEventListener('load',function(){
 })();
 </script>
 
-<style id="v66-clickable-year-milestones">
-#chart .xtick text{cursor:pointer!important;user-select:none;transition:fill .12s ease,font-weight .12s ease}
-#chart .xtick text:hover{fill:#FF7900!important;font-weight:900!important}
+
+<style id="v67-clickable-year-milestones-fix">
+#chart .xaxislayer-above .xtick,
+#chart .xaxislayer-above .xtick text{
+  pointer-events:all!important;
+  cursor:pointer!important;
+  user-select:none!important;
+}
+#chart .xaxislayer-above .xtick text{
+  transition:fill .12s ease,font-weight .12s ease,filter .12s ease;
+}
+#chart .xaxislayer-above .xtick:hover text{
+  fill:#FF7900!important;
+  font-weight:900!important;
+}
+#chart .xaxislayer-above .xtick.year-selected text{
+  fill:#FF7900!important;
+  font-weight:950!important;
+  text-decoration:underline;
+}
 </style>
 <script>
 (function(){
-  function bindClickableYearMilestonesV66(){
+  function yearFromTickV67(tick){
+    const text=tick?.querySelector('text')?.textContent || tick?.textContent || '';
+    const year=Number(String(text).trim());
+    return Number.isInteger(year) && year>=1900 && year<=2200 ? year : null;
+  }
+  function paintYearTicksV67(){
     const chart=document.getElementById('chart');
     if(!chart)return;
-    chart.querySelectorAll('.xaxislayer-above .xtick text').forEach(label=>{
-      const year=Number(String(label.textContent||'').trim());
-      if(!Number.isFinite(year))return;
-      label.style.cursor='pointer';
-      label.onclick=function(event){
-        event.stopPropagation();
-        if(dashboardYearFilters.has(year)) dashboardYearFilters.delete(year);
-        else dashboardYearFilters.add(year);
-        if(typeof syncDashboardButtonFiltersToTable==='function')syncDashboardButtonFiltersToTable();
-        if(typeof updateAll==='function')updateAll();
-      };
+    chart.querySelectorAll('.xaxislayer-above .xtick').forEach(tick=>{
+      const year=yearFromTickV67(tick);
+      if(year===null)return;
+      tick.classList.toggle('year-selected',dashboardYearFilters.has(year));
+      tick.setAttribute('role','button');
+      tick.setAttribute('tabindex','0');
+      tick.setAttribute('aria-pressed',String(dashboardYearFilters.has(year)));
+      tick.setAttribute('aria-label','Filtrer sur l annee '+year);
     });
   }
-  const previousUpdateChartV66=window.updateChart;
+  function toggleYearV67(year){
+    if(dashboardYearFilters.has(year))dashboardYearFilters.delete(year);
+    else dashboardYearFilters.add(year);
+    if(typeof syncDashboardButtonFiltersToTable==='function')syncDashboardButtonFiltersToTable();
+    if(typeof updateAll==='function')updateAll();
+  }
+  document.addEventListener('click',event=>{
+    const tick=event.target.closest?.('#chart .xaxislayer-above .xtick');
+    if(!tick)return;
+    const year=yearFromTickV67(tick);
+    if(year===null)return;
+    event.preventDefault();
+    event.stopPropagation();
+    toggleYearV67(year);
+  },true);
+  document.addEventListener('keydown',event=>{
+    if(event.key!=='Enter' && event.key!==' ')return;
+    const tick=event.target.closest?.('#chart .xaxislayer-above .xtick');
+    if(!tick)return;
+    const year=yearFromTickV67(tick);
+    if(year===null)return;
+    event.preventDefault();
+    event.stopPropagation();
+    toggleYearV67(year);
+  },true);
+  const previousUpdateChartV67=window.updateChart;
   window.updateChart=function(){
-    const result=previousUpdateChartV66.apply(this,arguments);
-    requestAnimationFrame(bindClickableYearMilestonesV66);
+    const result=previousUpdateChartV67.apply(this,arguments);
+    requestAnimationFrame(()=>requestAnimationFrame(paintYearTicksV67));
     return result;
   };
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(bindClickableYearMilestonesV66,200));
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(paintYearTicksV67,250));
 })();
 </script>
 
