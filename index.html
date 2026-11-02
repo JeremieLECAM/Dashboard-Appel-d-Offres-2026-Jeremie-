@@ -6201,7 +6201,24 @@ window.addEventListener('click',function(e){
       showlegend:false,font:{family:'Segoe UI,Arial',color:'#000'},hovermode:'closest'
     };
 
-    Plotly.react('chart',traces,layout,{displaylogo:false,responsive:true,scrollZoom:true,dragmode:'pan',modeBarButtonsToAdd:['autoScale2d','resetScale2d']});
+    const fullscreenModebarButton={
+      name:'Plein ecran',
+      title:'Plein ecran',
+      icon:{width:1000,height:1000,path:'M80 380V80h300v80H160v220H80zm540-220V80h300v300h-80V160H620zM160 620v220h220v80H80V620h80zm680 0h80v300H620v-80h220V620z'},
+      click:function(){
+        const panel=document.getElementById('chartPanel');
+        if(document.fullscreenElement){document.exitFullscreen();}
+        else if(panel&&panel.requestFullscreen){panel.requestFullscreen();}
+      }
+    };
+    layout.dragmode='pan';
+    Plotly.react('chart',traces,layout,{
+      displaylogo:false,
+      responsive:true,
+      scrollZoom:true,
+      modeBarButtonsToRemove:['lasso2d','zoomIn2d','zoomOut2d'],
+      modeBarButtonsToAdd:[fullscreenModebarButton,'autoScale2d','resetScale2d']
+    });
     chartViewportInitialized=true;
     const gd=document.getElementById('chart');
     gd.removeAllListeners&&gd.removeAllListeners('plotly_click');
