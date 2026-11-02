@@ -6201,7 +6201,7 @@ window.addEventListener('click',function(e){
       showlegend:false,font:{family:'Segoe UI,Arial',color:'#000'},hovermode:'closest'
     };
 
-    Plotly.react('chart',traces,layout,{displaylogo:false,responsive:true,scrollZoom:true,modeBarButtonsToAdd:['autoScale2d','resetScale2d']});
+    Plotly.react('chart',traces,layout,{displaylogo:false,responsive:true,scrollZoom:true,dragmode:'pan',modeBarButtonsToAdd:['autoScale2d','resetScale2d']});
     chartViewportInitialized=true;
     const gd=document.getElementById('chart');
     gd.removeAllListeners&&gd.removeAllListeners('plotly_click');
