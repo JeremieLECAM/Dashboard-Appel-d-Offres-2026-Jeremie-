@@ -6342,24 +6342,23 @@ window.addEventListener('load',function(){
 </script>
 
 
-<!-- PATCH V71 - Suppression isolee du perimetre Existing. Aucun changement au graphique New Biz. -->
-<style id="v71-remove-existing-style">
+<!-- PATCH V72 - Suppression Existing sans casser l'initialisation du dashboard. -->
+<style id="v72-remove-existing-style">
   #mainExistingBtn{display:none!important}
   label:has(input[name="newCompanyScope"][value="Existing"]),
   label:has(input[name$="EditBusinessScopeChoice"][value="Existing"]){display:none!important}
 </style>
-<script id="v71-remove-existing-data">
+<script id="v72-remove-existing-data">
 (function(){
-  function isExistingV71(row){
+  function isExistingV72(row){
     return String(row && (row.businessScope || row.bizType || row.biz_type || row.businessType) || '')
       .trim().toLowerCase() === 'existing';
   }
-  function removeExistingV71(){
+  function cleanExistingV72(){
     activeBusinessScope='New Biz';
     if(Array.isArray(data)){
-      data=data.filter(function(row){return !isExistingV71(row);});
+      data=data.filter(function(row){return !isExistingV72(row);});
       data.forEach(function(row){row.businessScope='New Biz';});
-      if(typeof saveData==='function')saveData();
     }
     var existingButton=document.getElementById('mainExistingBtn');
     if(existingButton)existingButton.remove();
@@ -6377,29 +6376,25 @@ window.addEventListener('load',function(){
       }
     });
   }
-  var previousLoadDataV71=window.loadData;
+  var previousLoadDataV72=window.loadData;
   window.loadData=function(){
-    var result=previousLoadDataV71 ? previousLoadDataV71.apply(this,arguments) : undefined;
+    var result=previousLoadDataV72 ? previousLoadDataV72.apply(this,arguments) : undefined;
     if(Array.isArray(data)){
-      data=data.filter(function(row){return !isExistingV71(row);});
+      data=data.filter(function(row){return !isExistingV72(row);});
       data.forEach(function(row){row.businessScope='New Biz';});
     }
     return result;
   };
-  var previousInitAppV71=window.initApp;
+  var previousInitAppV72=window.initApp;
   window.initApp=function(){
-    var result=previousInitAppV71 ? previousInitAppV71.apply(this,arguments) : undefined;
-    removeExistingV71();
-    if(typeof updateAll==='function')updateAll();
+    // L'ancien bouton doit encore exister pendant installTwoDashboardNavigation().
+    var result=previousInitAppV72 ? previousInitAppV72.apply(this,arguments) : undefined;
+    cleanExistingV72();
+    if(typeof saveData==='function')saveData();
+    if(typeof refreshMainTabs==='function')refreshMainTabs();
     return result;
   };
-  document.addEventListener('DOMContentLoaded',function(){
-    removeExistingV71();
-    var observer=new MutationObserver(function(){removeExistingV71();});
-    observer.observe(document.body,{childList:true,subtree:true});
-  });
 })();
 </script>
-
 </body>
 </html>
