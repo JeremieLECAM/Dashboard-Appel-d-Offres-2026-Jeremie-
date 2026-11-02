@@ -535,7 +535,7 @@
   <div id="envWarning" class="envwarn"><span class="closebtn" onclick="document.getElementById('envWarning').style.display='none'">✕</span><span id="envWarningText"></span></div>
   <div class="topbar main-tabs">
     <button type="button" id="mainNewBizBtn" class="tab-btn active">AO New Biz</button>
-    <button type="button" id="mainExistingBtn" class="tab-btn">AO Existing</button>
+    
     <button type="button" id="mainSummaryBtn" class="tab-btn">Résumé</button>
     <button type="button" id="watchTopBadge" class="topbar-watch-badge">⭐ A surveiller <strong id="watchTopCount">0</strong></button>
   </div>
@@ -4711,7 +4711,7 @@ function switchBusinessScope(scope){
 function installTwoDashboardNavigation(){
   refreshMainTabs();
   document.getElementById('mainNewBizBtn').onclick=()=>switchBusinessScope('New Biz');
-  document.getElementById('mainExistingBtn').onclick=()=>switchBusinessScope('Existing');
+  const existingTab=document.getElementById('mainExistingBtn'); if(existingTab) existingTab.onclick=()=>switchBusinessScope('Existing');
   installBulkUi();
 }
 function installBulkUi(){
@@ -4782,7 +4782,7 @@ function showSummary(){
   summaryMode=true; closeFloatingCompanyPopup(); closeWatchModal();
   document.getElementById('tabDashboard').classList.remove('active');document.getElementById('tabList').classList.remove('active');document.getElementById('tabSummary').classList.add('active');
   document.getElementById('subbar')?.classList.add('summary-hidden');document.querySelector('.subbar').style.display='none';
-  document.getElementById('mainNewBizBtn').classList.remove('active');document.getElementById('mainExistingBtn').classList.remove('active');document.getElementById('mainSummaryBtn').classList.add('active');renderSummary();
+  document.getElementById('mainNewBizBtn').classList.remove('active');document.getElementById('mainExistingBtn')?.classList.remove('active');document.getElementById('mainSummaryBtn').classList.add('active');renderSummary();
 }
 function leaveSummary(){summaryMode=false;document.getElementById('tabSummary').classList.remove('active');document.querySelector('.subbar').style.display='flex';document.getElementById('mainSummaryBtn').classList.remove('active');}
 function toggleWatchChart(){if(dashboardKpiFilters.has('watch'))dashboardKpiFilters.delete('watch');else dashboardKpiFilters.add('watch');syncDashboardButtonFiltersToTable();document.getElementById('watchBtn1').classList.toggle('watch-filter-active',dashboardKpiFilters.has('watch'));updateAll();}
