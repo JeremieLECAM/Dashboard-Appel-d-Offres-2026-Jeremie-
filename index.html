@@ -6341,5 +6341,65 @@ window.addEventListener('load',function(){
 })();
 </script>
 
+
+<!-- PATCH V71 - Suppression isolee du perimetre Existing. Aucun changement au graphique New Biz. -->
+<style id="v71-remove-existing-style">
+  #mainExistingBtn{display:none!important}
+  label:has(input[name="newCompanyScope"][value="Existing"]),
+  label:has(input[name$="EditBusinessScopeChoice"][value="Existing"]){display:none!important}
+</style>
+<script id="v71-remove-existing-data">
+(function(){
+  function isExistingV71(row){
+    return String(row && (row.businessScope || row.bizType || row.biz_type || row.businessType) || '')
+      .trim().toLowerCase() === 'existing';
+  }
+  function removeExistingV71(){
+    activeBusinessScope='New Biz';
+    if(Array.isArray(data)){
+      data=data.filter(function(row){return !isExistingV71(row);});
+      data.forEach(function(row){row.businessScope='New Biz';});
+      if(typeof saveData==='function')saveData();
+    }
+    var existingButton=document.getElementById('mainExistingBtn');
+    if(existingButton)existingButton.remove();
+    document.querySelectorAll('input[value="Existing"], option[value="Existing"]').forEach(function(input){
+      var label=input.closest('label');
+      if(label)label.remove(); else input.remove();
+    });
+    document.querySelectorAll('[data-business-scope-tags]').forEach(function(group){
+      var newBiz=group.querySelector('input[value="New Biz"]');
+      if(newBiz)newBiz.checked=true;
+      if(group.querySelectorAll('label').length<=1){
+        var fieldLabel=group.previousElementSibling;
+        if(fieldLabel && fieldLabel.classList.contains('field-label'))fieldLabel.remove();
+        group.remove();
+      }
+    });
+  }
+  var previousLoadDataV71=window.loadData;
+  window.loadData=function(){
+    var result=previousLoadDataV71 ? previousLoadDataV71.apply(this,arguments) : undefined;
+    if(Array.isArray(data)){
+      data=data.filter(function(row){return !isExistingV71(row);});
+      data.forEach(function(row){row.businessScope='New Biz';});
+    }
+    return result;
+  };
+  var previousInitAppV71=window.initApp;
+  window.initApp=function(){
+    var result=previousInitAppV71 ? previousInitAppV71.apply(this,arguments) : undefined;
+    removeExistingV71();
+    if(typeof updateAll==='function')updateAll();
+    return result;
+  };
+  document.addEventListener('DOMContentLoaded',function(){
+    removeExistingV71();
+    var observer=new MutationObserver(function(){removeExistingV71();});
+    observer.observe(document.body,{childList:true,subtree:true});
+  });
+})();
+</script>
+
 </body>
 </html>
